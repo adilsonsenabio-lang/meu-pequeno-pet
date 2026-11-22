@@ -1,0 +1,13 @@
+# Conteúdo distribuído a partir da pasta web/
+node_modules/
+dist/
+.cache/
+__pycache__/
+*.pyc
+*.log
+*.zip
+*.bak
+.DS_Store
+Thumbs.db
+.env
+.env.*
