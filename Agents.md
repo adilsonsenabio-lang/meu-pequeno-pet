@@ -20,6 +20,12 @@ Jogo de bichinho virtual infantil em pixel art, pensado para criança pequena, c
 - Halloween: ajustar os períodos de aparição/desaparição do fantasma conforme o requisito da versão-base (15 segundos).
 - Não substituir, recriar ou mudar artes já aprovadas sem pedido explícito.
 
+## Correções V84.24 (aguardando importação inicial dos assets)
+- Cozinha: usar o relógio `kitchen__clock` na parede central (x=131, y=48 no cenário 320×320), jamais sobre a bancada direita. Restaurar bancada a partir de `assets-src/v63/cenarios/kitchen_fundo.png` antes de redesenhar o relógio.
+- Visualização: `#scene-art .v64-scene-stage` e `#create-scene-art .v64-scene-stage` ocupam toda a altura/largura interna, sem faixa extra no Quarto/Cozinha. A imagem do cenário usa nearest-neighbor; pet fica em camada própria.
+- Aplicar `python3 scripts/ajustar_v84_24.py` uma vez após importar a base V84.23; reconstruir cache com `python3 scripts/update_sw.py`. Não apagar saves.
+- A implementação dos gráficos está preparada localmente; o repositório ainda não inclui os 13 cenários completos enquanto não ocorrer a importação inicial.
+
 ## Qualidade e publicação
 1. Inspecionar a versão real antes de modificar.
 2. Realizar uma alteração focal, guardar reversibilidade e verificar o que mudou.
