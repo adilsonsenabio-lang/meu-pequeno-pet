@@ -1,0 +1,46 @@
+/* Meu Pequeno Pet V84.28 — correção compatível com service workers antigos.
+   Este arquivo NOVO não existe no índice de arquivos da V84.26, então o
+   navegador precisa consultá-lo na rede mesmo que o SW antigo ainda esteja ativo.
+   Não altera sprites, mecânicas, cena de jogo nem saves. */
+
+/* Trenó do Natal percorre a cena da CRIAÇÃO imediatamente e depois retorna
+   espelhado. O jogo continua usando a animação original de 60 segundos. */
+#create-scene-art .v844-sleigh {
+  display:block;
+  animation:v8428-christmas-creator 18s linear infinite;
+  animation-delay:-.8s;
+  will-change:left,opacity,transform;
+}
+@keyframes v8428-christmas-creator {
+  0% {left:-17%;top:9%;opacity:1;transform:scaleX(1)}
+  42% {left:100%;top:9%;opacity:1;transform:scaleX(1)}
+  45%,52% {left:116%;top:9%;opacity:0;transform:scaleX(1)}
+  53% {left:108%;top:9%;opacity:1;transform:scaleX(-1)}
+  94% {left:-13%;top:8%;opacity:1;transform:scaleX(-1)}
+  97%,100% {left:-24%;top:8%;opacity:0;transform:scaleX(-1)}
+}
+
+/* Sombra de contato: perto dos pés com a escala quadrada responsiva. */
+#create-screen .create-preview::after {
+  content:"";
+  position:absolute;
+  inset:auto;
+  left:50%;
+  bottom:calc(7% + 2px);
+  width:clamp(50px,21%,82px);
+  height:6px;
+  border-radius:50%;
+  transform:translateX(-50%);
+  background:rgba(23,61,61,.40);
+  box-shadow:none;
+  filter:blur(1px);
+  z-index:1;
+  pointer-events:none;
+}
+@media (prefers-reduced-motion:reduce) {
+  #create-scene-art .v844-sleigh {
+    animation:none;
+    left:65%;top:9%;opacity:1;transform:scaleX(-1);
+    will-change:auto;
+  }
+}

@@ -49,3 +49,12 @@ Jogo de bichinho virtual em português para criança de 4 anos, acessível mesmo
 - No modo de movimento reduzido, exibir o trenó parado; não deixá-lo invisível.
 - A sombra do pet na criação fica imediatamente sob os pés, referenciada à posição real do pet (bottom 7%) e não à antiga variável `--pet-floor:12%`.
 - A sombra da criação é ajustada no arquivo `web/v84-26-layout.css`, sem alterar spritesheets, animações, mecânicas ou saves.
+
+## V84.28 — correção da atualização no navegador do computador
+- Diagnóstico: o service worker antigo armazenava CSS por caminho e ignorava o parâmetro de versão da URL; um CSS antigo podia continuar visível depois do deploy.
+- A correção do trenó e da sombra da criação está em arquivo NOVO: `web/v84-28-fix.css`, inserido no fim do HTML, para funcionar até com o worker antigo.
+- O trenó natalino cruza o cenário na criação em dois sentidos a cada 18 s. A animação de Natal do jogo continua em 60 s. Em movimento reduzido fica parado e visível.
+- A sombra da criação usa base do pet 7% + 2 px, encostada visualmente aos pés, sem modificar sprite nem mecânicas.
+- `scripts/update_sw.py` e `web/sw.js`: HTML, CSS e JavaScript usam rede primeiro quando conectados, com fallback no cache offline; imagens, GIFs e sprites mantêm o cache incremental.
+- `web/pwa.js` solicita verificação de atualização sem recarregar à força e sem apagar dados salvos. Não voltar ao cache-first para CSS e JavaScript.
+- Cada atualização que precisar vencer o worker legado pode usar arquivo CSS com nome novo; não confiar somente em query `?v=...` para CSS que o worker antigo já conhece.

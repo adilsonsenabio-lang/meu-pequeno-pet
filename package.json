@@ -1,9 +1,9 @@
 {
   "name": "meu-pequeno-pet-github-pwa",
-  "version": "84.27.0",
+  "version": "84.28.0",
   "private": true,
   "type": "module",
-  "description": "Meu Pequeno Pet V84.27 — trenó natalino na criação e sombra próxima dos pés do pet.",
+  "description": "Meu Pequeno Pet V84.28 — cache PWA corrigido, trenó natalino visível e sombra próxima aos pés.",
   "scripts": {
     "dev": "node scripts/serve.mjs",
     "build": "node scripts/build.mjs",

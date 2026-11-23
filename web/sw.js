@@ -46,7 +46,10 @@ self.addEventListener('fetch',event=>{
     const cache=await caches.open(CACHE);
     const index=URLS.get(new URL('./index.html',self.registration.scope).pathname);
     const destination=URLS.get(url.pathname) || (event.request.mode==='navigate'?index:null);
-    if(event.request.mode==='navigate'){
+    // Rede primeiro para HTML, CSS e JavaScript: o hash do cache é só fallback
+    // offline. O navegador jamais deve mostrar CSS antigo após uma publicação.
+    const codeAsset=/\.(?:css|m?js)$/i.test(url.pathname);
+    if(event.request.mode==='navigate' || codeAsset){
       try{
         const response=await fetch(event.request,{cache:'no-store'});
         if(response.ok && destination) await cache.put(destination.key,response.clone());

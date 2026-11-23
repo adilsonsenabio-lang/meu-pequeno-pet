@@ -36,6 +36,17 @@ assert '#create-screen .create-preview::after' in layout_css
 assert 'bottom:calc(7% + 10px)' in layout_css
 assert 'id="v844-sleigh"' in html
 assert 'SLEIGH_NODES' in (web/'scene-v63-player.js').read_text(encoding='utf-8')
+# V84.28: o arquivo novo supera o cache de CSS legado sem apagar saves.
+hotfix_css=(web/'v84-28-fix.css').read_text(encoding='utf-8')
+sw=(web/'sw.js').read_text(encoding='utf-8')
+pwa=(web/'pwa.js').read_text(encoding='utf-8')
+assert 'v84-28-fix.css?v=84.28' in html
+assert 'V84.28' in html
+assert 'v8428-christmas-creator 18s' in hotfix_css
+assert '#create-scene-art .v844-sleigh' in hotfix_css
+assert 'bottom:calc(7% + 2px)' in hotfix_css
+assert 'const codeAsset=' in sw and 'codeAsset' in sw
+assert 'updateViaCache' in pwa and 'registration.update()' in pwa
 for f in ('v55-mobile.css','v58-ajustes.css'):
  css=(web/f).read_text(encoding='utf-8')
  assert '#world.world{height:clamp(' not in css
