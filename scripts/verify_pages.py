@@ -26,7 +26,16 @@ assert '#world.world,' in layout_css and '#create-screen .create-preview' in lay
 assert 'aspect-ratio:1 / 1' in layout_css
 assert '#world #pet-wrap.pet-wrap' in layout_css and 'width:47%' in layout_css
 assert '#create-screen #create-art.create-art' in layout_css and 'width:61%' in layout_css
-assert 'v84-26-layout.css?v=84.26' in html and 'scene-v64.css?v=84.26' in html
+assert 'v84-26-layout.css?v=84.27' in html and 'scene-v64.css?v=84.27' in html
+# V84.27: trenó da criação e sombra de contato próxima aos pés.
+assert '#create-scene-art .v844-sleigh' in scene_css
+assert 'v8427-sleigh-in-creator 18s' in scene_css
+assert 'v844-sleigh-trip 60s' in scene_css, 'Preservar a animação antiga do jogo'
+assert 'prefers-reduced-motion:reduce' in scene_css
+assert '#create-screen .create-preview::after' in layout_css
+assert 'bottom:calc(7% + 10px)' in layout_css
+assert 'id="v844-sleigh"' in html
+assert 'SLEIGH_NODES' in (web/'scene-v63-player.js').read_text(encoding='utf-8')
 for f in ('v55-mobile.css','v58-ajustes.css'):
  css=(web/f).read_text(encoding='utf-8')
  assert '#world.world{height:clamp(' not in css

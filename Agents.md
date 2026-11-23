@@ -42,3 +42,10 @@ Jogo de bichinho virtual em português para criança de 4 anos, acessível mesmo
 - `scene-v64.css` conserva a escala e os marcadores no palco 1:1; retirados o zoom V84.25 e os dois backfills bitmap deformados dos cômodos.
 - Miniaturas, coruja, flores, formiga, pássaros, luminárias e efeitos continuam usando coordenadas relativas ao cenário; saves e mecânicas permanecem intactos.
 - Validar visualmente os 13 cenários em criação e jogo em 320, 390 e 430 px, incluindo alturas menores e a posição correta do relógio na Cozinha.
+
+## V84.27 — trenó natalino e sombra
+- Na criação do pet, o trenó natalino percorre a cena a cada 18 segundos, nos dois sentidos, com retorno espelhado e início perceptível logo após selecionar Natal.
+- No jogo, conservar o ciclo original de 60 segundos do trenó.
+- No modo de movimento reduzido, exibir o trenó parado; não deixá-lo invisível.
+- A sombra do pet na criação fica imediatamente sob os pés, referenciada à posição real do pet (bottom 7%) e não à antiga variável `--pet-floor:12%`.
+- A sombra da criação é ajustada no arquivo `web/v84-26-layout.css`, sem alterar spritesheets, animações, mecânicas ou saves.

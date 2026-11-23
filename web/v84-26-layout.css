@@ -29,3 +29,22 @@
   aspect-ratio:222 / 236;
   transform:translateX(-50%);
 }
+
+/* V84.27 — sombra próxima da sola do pet durante a criação.
+   Antes, --pet-floor:12% seguia a escala antiga; pet atual usa bottom:7%. */
+#create-screen .create-preview::after {
+  content:"";
+  position:absolute;
+  inset:auto;
+  left:50%;
+  bottom:calc(7% + 10px);
+  width:clamp(54px,22%,86px);
+  height:7px;
+  transform:translateX(-50%);
+  border-radius:50%;
+  background:rgba(23,61,61,.34);
+  box-shadow:none;
+  filter:blur(1px);
+  z-index:1;
+  pointer-events:none;
+}
