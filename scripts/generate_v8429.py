@@ -37,6 +37,25 @@ def lantern(kind):
 def restore(frame,bg,box):
     frame.paste(bg.crop(box),box[:2])
 
+def clean_lamp(frame,kind,bg,have_original):
+    box=(0,205,101,309) if kind=='night' else (220,205,320,310)
+    if have_original:
+        restore(frame,bg,box)
+        return frame
+    # GitHub import contains the 13 finished scenes, but not assets-src.
+    # Recover only the grass strip from the adjacent area of the SAME frame.
+    # Blend the safe edge to avoid a hard rectangular patch or repeated sky.
+    raw=frame.copy()
+    shift=101 if kind=='night' else -116
+    for y in range(box[1],box[3]):
+        for x in range(box[0],box[2]):
+            edge=1 if (kind=='night' and x<=81) or (kind=='sunset' and x>=240) else (
+                max(0,min(1,(99-x)/18)) if kind=='night' else max(0,min(1,(x-222)/18)))
+            source=raw.getpixel((max(0,min(319,x+shift)),y))
+            old=raw.getpixel((x,y))
+            frame.putpixel((x,y),tuple(round(old[c]*(1-edge)+source[c]*edge) for c in range(4)))
+    return frame
+
 def contact_shadow(frame,x,y,rx,fill):
     shadow=Image.new('RGBA',(320,320))
     ImageDraw.Draw(shadow).ellipse((int(x-rx),y-3,int(x+rx),y+3),fill=fill)
@@ -82,16 +101,23 @@ def object_x(frame,bg,kind):
 
 def scene(name):
     im=Image.open(SC/f'{name}-gif.gif')
-    bg=Image.open(BACK/f'{name}_fundo.png').convert('RGBA')
+    path=BACK/f'{name}_fundo.png'
+    have_original=path.is_file()
+    bg=Image.open(path if have_original else SC/f'{name}-still.png').convert('RGBA')
+    im.seek(0);owl_left=im.convert('RGBA')
+    im.seek(20);owl_right=im.convert('RGBA')
     images=[];times=[]
     assert im.n_frames==40 and im.size==(320,320),(name,im.n_frames,im.size)
     for i in range(40):
         im.seek(i);f=im.convert('RGBA')
         if name=='night':
-            restore(f,bg,(0,205,101,309))
-            f=mirrored_owl(f,bg,i)
+            clean_lamp(f,name,bg,have_original)
+            if i>20:
+                q=max(0,min(1,(40-i)/20));center=57.5+220*q*q*(3-2*q)
+                ref=bg if have_original else (owl_left if center>100 else owl_right)
+                f=mirrored_owl(f,ref,i)
         elif name=='sunset':
-            restore(f,bg,(220,205,320,310))
+            clean_lamp(f,name,bg,have_original)
         elif name in ('desert','forest'):
             x=object_x(f,bg,name)
             if name=='desert':f=contact_shadow(f,x,296,12,(81,53,38,67))
