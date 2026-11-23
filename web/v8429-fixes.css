@@ -1,0 +1,53 @@
+/* Meu Pequeno Pet V84.29 — sprites transparentes e sombras corrigidas.
+   Imagens 48×48 RGBA: as luminárias agora são camadas independentes dos GIFs
+   de cenário; o poste fica imóvel, somente o pendente balança (8 quadros). */
+.v64-scene-stage .v8429-lantern{
+  position:absolute;
+  width:25%;
+  height:25%;
+  z-index:4;
+  pointer-events:none;
+  object-fit:contain;
+  image-rendering:pixelated;
+  user-select:none;
+}
+.v64-scene-stage .v8429-lantern-night{left:2.5%;top:64.4%}
+.v64-scene-stage .v8429-lantern-sunset{left:75%;top:64.1%}
+
+/* Sombra do pet: contato discreto, próximo da sola. Sem interferir em
+   animações, trocas de pose, caminhada, voo, banho ou nas camadas do fundo. */
+#create-screen .create-preview::after{
+  content:"";
+  position:absolute;
+  inset:auto;
+  left:50%;
+  bottom:calc(7% + 12px);
+  width:clamp(44px,17%,73px);
+  height:5px;
+  border-radius:50%;
+  transform:translateX(-50%);
+  background:rgba(23,48,47,.36);
+  box-shadow:none;
+  filter:blur(1.2px);
+  pointer-events:none;
+  z-index:1;
+}
+/* A sombra acompanha o pet durante caminhada; não fixa no meio do mapa. */
+#world #pet-wrap.pet-wrap::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:0;
+  width:46%;
+  height:5px;
+  transform:translateX(-50%);
+  border-radius:50%;
+  background:rgba(15,40,39,.29);
+  filter:blur(1.4px);
+  z-index:-1;
+  pointer-events:none;
+}
+/* No voo/salto, a sombra permanece no solo, reduzindo levemente a opacidade
+   em vez de pular junto com a sprite do corpo. */
+#world #pet-wrap.pet-wrap.flying::after,
+#world #pet-wrap.pet-wrap.jumping::after{opacity:.24}

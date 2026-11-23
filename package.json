@@ -1,9 +1,9 @@
 {
   "name": "meu-pequeno-pet-github-pwa",
-  "version": "84.28.0",
+  "version": "84.29.0",
   "private": true,
   "type": "module",
-  "description": "Meu Pequeno Pet V84.28 — cache PWA corrigido, trenó natalino visível e sombra próxima aos pés.",
+  "description": "Meu Pequeno Pet V84.29 — luminárias transparentes animadas, coruja orientada e sombras dos animais e pet.",
   "scripts": {
     "dev": "node scripts/serve.mjs",
     "build": "node scripts/build.mjs",

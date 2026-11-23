@@ -61,12 +61,17 @@ export function sceneMarkup(scene,animated=false){
  const nodes=isAnimated&&animated===true?V63_SCENE_META[scene].objects.map(o=>`<span class="v64-gaze-marker" data-v64-object="${o.key}" aria-hidden="true" style="left:${(o.x+o.w/2)/3.2}%;top:${(o.y+o.h/2)/3.2}%"></span>`).join(''):'';
  const overlay=(scene==='christmas'?SLEIGH_NODES:(OVERLAYS[scene]||''))+(scene==='space'?SPACE_NODES:'');
  // V84.14: luz externa sempre ativa (inclusive miniatura e tela inicial).
+ // V84.29: cada luminaria e uma camada animada RGBA real, sem retangulo
+ // branco, e o GIF base ja vem sem a antiga luminaria embutida.
+ const lanternOverlay=(scene==='night'||scene==='sunset')
+   ? `<img class="v8429-lantern v8429-lantern-${scene}" src="./assets/v8429/${scene}_animated.gif" alt="" draggable="false" aria-hidden="true" decoding="async">`
+   : '';
  const lanternHalo=scene==='sunset' ? '<span class="v8414-lantern-halo v8414-halo-sunset" aria-hidden="true"></span>' : (scene==='night' ? '<span class="v8414-lantern-halo v8414-halo-night" aria-hidden="true"></span>' : '');
  const salt=Math.floor(Math.random()*8);
  const g=halloweenGhostPosition(salt*GHOST_CYCLE_MS);
  const ghostAttrs=`class="v64-scene-overlay v64-overlay-ghost" data-ghost-cycle="0" data-ghost-salt="${salt}" data-ghost-start="${Date.now()}" style="left:${g.x/3.2}%;top:${g.y/3.2}%"`;
  const adjustedOverlay=scene==='halloween'?overlay.replace('class="v64-scene-overlay v64-overlay-ghost"',ghostAttrs):overlay;
- return `<div class="v64-scene-stage" data-v64-scene="${scene}" style="--v64-sky:${SKY[scene]}"><img class="v64-scene-frame" src="${picture}" draggable="false" alt="" decoding="async" loading="${animated==='preview'?'lazy':'eager'}">${adjustedOverlay}${lanternHalo}${nodes}</div>`;
+ return `<div class="v64-scene-stage" data-v64-scene="${scene}" style="--v64-sky:${SKY[scene]}"><img class="v64-scene-frame" src="${picture}" draggable="false" alt="" decoding="async" loading="${animated==='preview'?'lazy':'eager'}">${adjustedOverlay}${lanternHalo}${lanternOverlay}${nodes}</div>`;
 }
 export function sceneFill(scene){return SKY[normalize(scene)];}
 export function cometCycle(elapsed){

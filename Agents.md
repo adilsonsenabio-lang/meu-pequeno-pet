@@ -58,3 +58,13 @@ Jogo de bichinho virtual em português para criança de 4 anos, acessível mesmo
 - `scripts/update_sw.py` e `web/sw.js`: HTML, CSS e JavaScript usam rede primeiro quando conectados, com fallback no cache offline; imagens, GIFs e sprites mantêm o cache incremental.
 - `web/pwa.js` solicita verificação de atualização sem recarregar à força e sem apagar dados salvos. Não voltar ao cache-first para CSS e JavaScript.
 - Cada atualização que precisar vencer o worker legado pode usar arquivo CSS com nome novo; não confiar somente em query `?v=...` para CSS que o worker antigo já conhece.
+
+## V84.29 — luminárias realmente transparentes e animais
+- Fontes das luminárias aprovadas ficam em `web/assets/v8429/{night,sunset}_approved_base.png`: PNGs RGBA 48×48 sem fundo branco. Na publicação, `scripts/generate_v8429.py` cria spritesheets de 8 quadros, GIFs transparentes e PNGs isolados.
+- A luminária antiga estava embutida em cada GIF dos cenários: durante o build, substitua apenas as regiões antigas pelos trechos de `assets-src/v63/cenarios/{night,sunset}_fundo.png`. As luminárias novas são overlays no `scene-v63-player.js` com halo persistente, sem renderizar a antiga por trás.
+- O poste é fixo, apenas o pendente oscila na animação; os quadros possuem transparência RGBA e ancoragem consistente.
+- Na Noite, a coruja mantém os 40 quadros do percurso e, ao retornar, deve ser espelhada horizontalmente (nunca voar de ré).
+- No Deserto, aplicar sombra sutil sob o calango que acompanha sua posição. Na Floresta, a sombra do esquilo acompanha o animal. Preservar tronco, formiga e demais animações.
+- A sombra do pet é ajustada no `web/v8429-fixes.css`; deve ficar junto aos pés e acompanhar a posição do pet na caminhada.
+- É obrigatório rodar o gerador **antes** de `scripts/update_sw.py` e `scripts/verify_pages.py`, para que Pages, PWA e miniaturas recebam os mesmos recursos.
+- Nunca inserir novamente luminárias com fundo branco nem imagens achatadas sobre o fundo; testar 320/390/430 e versões offline, preservando saves.

@@ -54,6 +54,27 @@ for f in ('v55-mobile.css','v58-ajustes.css'):
  assert '#create-screen .create-preview{height:clamp(' not in css
  assert '#create-screen .create-preview {height:clamp(' not in css
 
+# V84.29: sprites realmente transparentes e quadros reescritos durante deploy.
+from PIL import Image
+assets_v8429=web/'assets/v8429'
+for key in ('night','sunset'):
+ base=Image.open(assets_v8429/f'{key}_approved_base.png').convert('RGBA')
+ assert base.size==(48,48) and base.getpixel((0,0))[3]==0
+ sheet=Image.open(assets_v8429/f'{key}_spritesheet_8frames.png').convert('RGBA')
+ assert sheet.size==(384,48) and sheet.getpixel((0,0))[3]==0
+ gif=Image.open(assets_v8429/f'{key}_animated.gif')
+ assert gif.n_frames==8 and gif.convert('RGBA').getpixel((0,0))[3]==0
+for key in ('night','sunset','desert','forest'):
+ big=Image.open(web/'assets/scenes'/f'{key}-gif.gif')
+ mini=Image.open(web/'assets/scenes'/f'{key}-preview.gif')
+ assert big.n_frames==40 and mini.n_frames==40,(key,big.n_frames,mini.n_frames)
+assert 'v8429-fixes.css?v=84.29' in html
+assert 'V84.29' in html
+scene_js=(web/'scene-v63-player.js').read_text(encoding='utf-8')
+gen=(web.parent/'scripts/generate_v8429.py').read_text(encoding='utf-8')
+assert 'v8429-lantern' in scene_js and 'mirrored_owl' in gen and 'contact_shadow' in gen
+assert 'scene-v63-player.js?v=84.29' in (web/'app.js').read_text(encoding='utf-8')
+
 assets=json.loads(re.search(r'const FILES=(\[.*?\]);',(web/'sw.js').read_text(encoding='utf-8'),re.S).group(1))
 assert len(assets)>=40
 for uri,digest in assets:

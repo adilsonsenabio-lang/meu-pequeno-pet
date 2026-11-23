@@ -1,5 +1,5 @@
 import {ALBUM_LABELS,albumSprite} from './album-v73.js?v=73';
-import {sceneMarkup,sceneFill,updateSceneMarkers,prioritySceneMarkers,SCENE_KEYS,SCENE_LABELS} from './scene-v63-player.js?v=84.5';
+import {sceneMarkup,sceneFill,updateSceneMarkers,prioritySceneMarkers,SCENE_KEYS,SCENE_LABELS} from './scene-v63-player.js?v=84.29';
 import {sceneTallExtension} from './scene-details-v60.js';
 import {CUSTOM_PARTS,PART_PALETTE,MIN_PART_SCALE,MAX_PART_SCALE,MIN_MOUTH_OFFSET,MAX_MOUTH_OFFSET,mouthOffset,CARE,canPlay,MIN_ENERGY_TO_PLAY,OPTIONS,DEFAULT_APPEARANCE,ROOM_OPTIONS,MOMENTS,TOYS,AREAS,ACTIVITIES,EVENTS,nextDiscovery,noteMoment,toyAvailable,activityAvailable,createSave,hatch,advance,applyCare,beginSleep,restSleep,endSleep,noteInteraction,renamePet,lowestNeed,maybeEvolve,needStatus} from './core.js?v=74';
 import {SAVE_KEY,loadSave,persist,exportBackup,importBackup,resetSave} from './storage.js?v=59';
