@@ -1,0 +1,61 @@
+/* Anatomy stays on the shared rig. Action phases are exclusive classes. */
+.walk #character{animation:none}
+.game-pet .held-fruit{transform:none;animation:none;opacity:0;transition:opacity .18s}
+.fruit-bitten,.mouth-chew{display:none}
+.food-reach .held-fruit,.food-bite .held-fruit,.food-chew .held-fruit{opacity:1}
+.food-chew .fruit-whole{display:none}.food-chew .fruit-bitten{display:inline}
+.food-reach .arm-left{transform:translate(13px,-9px) rotate(-7deg)}
+.food-bite .arm-left,.food-chew .arm-left{transform:translate(52px,-58px) rotate(-20deg)}
+.food-grip{transform-box:view-box;transform-origin:176px 294px;transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.food-reach .food-grip{transform:translate(13px,-9px) rotate(-7deg)}
+.food-bite .food-grip{transform:translate(52px,-58px) rotate(-20deg)}
+.food-chew .arm-left,.food-chew .food-grip{transform:translate(41px,-35px) rotate(-20deg)}
+.food-ready .head-part,.notice .head-part{transform:rotate(-5deg) translateY(2px)}
+.food-bite .head-part{transform:rotate(-3deg) translateY(3px)}
+.food-bite .mouth-smile,.food-chew .mouth-smile,.food-swallow .mouth-smile{opacity:0}
+.food-bite .mouth-open{opacity:1}
+.food-chew .mouth-chew,.food-swallow .mouth-chew{display:inline}
+.food-chew .mouth-chew{transform-box:view-box;transform-origin:220px 261px;animation:chew-mouth .35s ease-in-out 3}
+.food-chew .head-part{animation:chew-head .35s ease-in-out 3}
+.food-swallow .head-part{animation:swallow .45s ease-in-out}
+.satisfied .eyes-open{opacity:0}.satisfied .eyes-happy,.satisfied .blush{opacity:1}
+.satisfied .head-part{transform:rotate(3deg) translateY(-3px)}
+.satisfied .arm-left{transform:rotate(12deg) translate(8px,2px)}
+.satisfied .arm-right{transform:rotate(-12deg) translate(-8px,2px)}
+@keyframes chew-mouth{50%{transform:scale(.75,1.3) translateY(1px)}}
+@keyframes chew-head{50%{transform:translateY(2px) rotate(1deg)}}
+@keyframes swallow{50%{transform:translateY(-4px) rotate(3deg)}}
+.look .head-part{animation:curious-look 1.8s ease-in-out}
+.stretch .arm-left{animation:stretch-left 1.8s ease-in-out}.stretch .arm-right{animation:stretch-right 1.8s ease-in-out}
+.stretch .head-part{animation:stretch-head 1.8s ease-in-out}
+@keyframes curious-look{25%{transform:rotate(-7deg)}70%{transform:rotate(7deg) translateY(-2px)}}
+@keyframes stretch-left{40%,65%{transform:translateY(-10px) rotate(65deg)}}
+@keyframes stretch-right{40%,65%{transform:translateY(-10px) rotate(-65deg)}}
+@keyframes stretch-head{40%,65%{transform:translateY(-4px) rotate(-3deg)}}
+.request .head-part{animation:curious-look 1.8s ease-in-out}
+.request[data-request=food] .arm-left,.request[data-request=water] .arm-left{transform:translate(18px,8px) rotate(22deg)}
+.request[data-request=energy] .eyes-open{opacity:0}.request[data-request=energy] .eyes-closed{opacity:1}
+.request[data-request=energy] .mouth-open{opacity:1}.request[data-request=energy] .mouth-smile{opacity:0}
+.request[data-request=clean] .arm-right{transform:translate(-12px,-12px) rotate(-25deg)}
+.request[data-request=potty] .leg-left{transform:rotate(9deg)}.request[data-request=potty] .leg-right{transform:rotate(-9deg)}
+.request[data-request=affection] .arm-left,.request[data-request=fun] .arm-left{transform:rotate(-25deg)}
+.request[data-request=affection] .arm-right,.request[data-request=fun] .arm-right{transform:rotate(25deg)}
+.request[data-request=health] .head-part{transform:translateY(4px) rotate(-4deg)}
+.care-grid button{position:relative;min-height:86px;gap:3px;padding-top:6px}
+.care-grid button.needy{animation:none;background:#fff3d3;border-width:3px}
+.need-meter{display:flex;gap:4px;justify-content:center;margin:2px 0 1px}
+.need-meter i{display:block;width:12px;height:8px;border-radius:3px;border:1.5px solid #86a5bd;background:transparent}
+.need-meter i{transition:background .3s,border-color .3s}
+.need-meter i.filled{background:#59af9b;border-color:#3d8b79}
+[data-level="2"] .need-meter i.filled{background:#e5b44a;border-color:#b78625}
+[data-level="1"] .need-meter i.filled{background:#dc9c55;border-color:#ac7139}
+.need-face{position:absolute;right:3px;top:2px;width:19px;height:19px}
+.care-grid button .need-face svg{width:19px;height:19px;fill:#e5f4e9;stroke:#356e62;stroke-width:1.5;stroke-linecap:round}
+[data-level="2"] .need-face svg,[data-level="1"] .need-face svg{fill:#fff1cc!important;stroke:#956e31!important}
+.need-cue{cursor:pointer;pointer-events:auto}.need-cue.quiet{visibility:hidden}
+.need-cue{animation:none}.need-cue>svg{animation:cue-float 2s ease-in-out infinite}
+.care-grid button.care-done{animation:care-confirm .7s ease-out}
+@keyframes care-confirm{40%{box-shadow:0 0 0 5px #81c7ab77;transform:translateY(-3px)}}
+@media(max-height:650px){.world{height:42dvh;min-height:245px}.care-grid button{min-height:81px}.care-message{margin-top:7px;font-size:12px}}
+@media(max-height:650px){.pet-wrap{width:180px;height:215px;bottom:24px}.world-effect{bottom:150px}}
+@media(prefers-reduced-motion:reduce){.game-pet *{animation-duration:inherit!important}.look .head-part,.stretch .head-part,.stretch .arm-left,.stretch .arm-right,.request .head-part{animation:none}.game-pet *{transition-duration:.15s}}

@@ -1,13 +1,9 @@
-# Conteúdo distribuído a partir da pasta web/
-node_modules/
 dist/
-.cache/
+node_modules/
 __pycache__/
 *.pyc
-*.log
 *.zip
-*.bak
-.DS_Store
-Thumbs.db
+JOGAR_OFFLINE.html
+PREVIA_OFFLINE_*.html
 .env
-.env.*
+.DS_Store

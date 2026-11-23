@@ -1,0 +1,103 @@
+/* V64 — imagens dos cenários V63 sem deformação vertical ou rolagem horizontal */
+#scene-art.scene-art,#create-scene-art.create-scene-art {background:var(--v64-scene-sky,#cedfe3);overflow:hidden}
+.v64-scene-stage{position:absolute;bottom:0;left:0;width:100%;height:auto;aspect-ratio:1/1;image-rendering:pixelated;pointer-events:none}
+.v64-scene-frame{display:block;width:100%;height:100%;object-fit:contain;image-rendering:pixelated;user-select:none;pointer-events:none}
+.v64-gaze-marker{position:absolute;width:6px;height:6px;transform:translate(-50%,-50%);background:transparent;pointer-events:none;z-index:1}
+/* A parte superior das telas altas recebe céu correspondente, sem esticar o sprite. */
+#play-art[data-motion="look-target"] .atelier-head{transition:transform .16s steps(3,end);transform-origin:100px 113px}
+#play-art[data-motion="look-target"] .pixel-pupil{transition:transform .12s steps(2,end)}
+@media(prefers-reduced-motion:reduce){#play-art[data-motion="look-target"] .atelier-head{transition:none}}
+/* As miniaturas da etapa Cenário mantêm proporção quadrada e escala pixelada. */
+.choice-pet.v64-scene-choice{position:relative;display:block;overflow:hidden;background:#cde6df;aspect-ratio:1/1;min-height:0}
+.choice-pet.v64-scene-choice .v64-scene-stage{inset:auto 0 0;height:auto;width:100%}
+
+.v64-scene-overlay{position:absolute;display:block;pointer-events:none;image-rendering:pixelated;user-select:none;z-index:2}
+.v64-overlay-ghost{left:46%;top:23%;width:18.06%;height:20.19%;transform:translate(-50%,-50%);animation:v64-ghost-minute 15s ease-in-out infinite;filter:drop-shadow(0 2px 0 rgba(43,26,63,.22));}
+.v64-overlay-santa{left:115%;top:37%;width:34%;height:auto;opacity:.9;animation:v64-santa-glide 18s linear infinite;filter:drop-shadow(0 1px 0 rgba(37,49,78,.28));}
+@keyframes v64-ghost-minute{0%,12%,100%{opacity:0}20%,44%{opacity:1}56%{opacity:.9}68%,92%{opacity:0}}
+@keyframes v64-santa-glide{0%{transform:translateX(0)}100%{transform:translateX(-430%)}}
+
+/* V77: planeta e anéis são animação PNG quadro a quadro; corpo não gira. */
+.v77-orbit-planet{position:absolute;left:7.3%;top:21.8%;width:15%;height:15%;object-fit:contain;image-rendering:pixelated;pointer-events:none;z-index:2}
+.v77-orbit-comet{position:absolute;left:0;top:0;width:17%;height:19%;pointer-events:none;z-index:2;transform-origin:50% 50%;opacity:0;will-change:transform,opacity,left,top}
+.v77-orbit-comet>img{display:block;width:100%;height:100%;object-fit:contain;image-rendering:pixelated;pointer-events:none}
+.v77-orbit-comet-a{animation:v77-comet-a 60s linear infinite}
+.v77-orbit-comet-b{animation:v77-comet-b 60s linear infinite}
+.v77-orbit-comet-a>img{transform:scaleX(-1)}
+.v77-orbit-comet-b>img{transform:none}
+/* 1º cometa aparece à direita, pousa visualmente atrás das montanhas, encolhe e desaparece. */
+@keyframes v77-comet-a{
+  0%{left:84%;top:11%;transform:scale(1);opacity:0}
+  1.43%{left:84%;top:11%;transform:scale(1);opacity:1}
+  8.57%{left:79%;top:22%;transform:scale(.9);opacity:1}
+  17.86%{left:72%;top:33%;transform:scale(.73);opacity:1}
+  27.86%{left:66%;top:45%;transform:scale(.42);opacity:.86}
+  30.72%,100%{left:60.5%;top:55.2%;transform:scale(.05);opacity:0}
+}
+/* Após uma breve pausa, um segundo cometa chega do lado oposto. */
+@keyframes v77-comet-b{
+  0%,50%{left:2%;top:11%;transform:scale(1);opacity:0}
+  51.43%{left:2%;top:11%;transform:scale(1);opacity:1}
+  58.57%{left:9%;top:22%;transform:scale(.86);opacity:1}
+  67.86%{left:18%;top:33%;transform:scale(.66);opacity:1}
+  77.86%{left:29%;top:45%;transform:scale(.28);opacity:.78}
+  80.72%,100%{left:32.5%;top:55.5%;transform:scale(.05);opacity:0}
+}
+@media(prefers-reduced-motion:reduce){.v77-orbit-comet{animation-play-state:paused}}
+
+/* V79 final — elimina o recorte superior causado pela arte 320x320 numa janela mais baixa. */
+/* Cores e proporções do pet não são afetadas; os marcadores seguem a escala real da cena. */
+#scene-art.scene-art,#create-scene-art.create-scene-art {container-type:inline-size;}
+.choice-pet.v64-scene-choice {container-type:inline-size;}
+/* V84.24: no letterbox at the top of tall rooms or scenes. */
+#scene-art .v64-scene-stage,
+#create-scene-art .v64-scene-stage{inset:0;width:100%;height:100%;aspect-ratio:auto;}
+.v64-scene-stage {height:100%;aspect-ratio:auto;}
+.v64-scene-frame {object-fit:fill;}
+.choice-pet.v64-scene-choice /* V84.24: no letterbox at the top of tall rooms or scenes. */
+#scene-art .v64-scene-stage,
+#create-scene-art .v64-scene-stage{inset:0;width:100%;height:100%;aspect-ratio:auto;}
+.v64-scene-stage {height:100%;aspect-ratio:auto;}
+
+/* V84.4 – Christmas sleigh: 9s crossing, 30s fully absent, then returns. */
+.v844-sleigh{position:absolute;left:-24%;top:9%;width:16%;height:auto;object-fit:contain;image-rendering:pixelated;pointer-events:none;z-index:2;opacity:0;animation:v844-sleigh-trip 60s linear infinite;transform-origin:center center}
+@keyframes v844-sleigh-trip{
+  0%{left:-24%;top:9%;transform:scaleX(1);opacity:0}
+  1.2%{left:-20%;top:8%;transform:scaleX(1);opacity:1}
+  14%{left:99%;top:10%;transform:scaleX(1);opacity:1}
+  15%,64%{left:110%;top:9%;transform:scaleX(1);opacity:0}
+  65%{left:110%;top:9%;transform:scaleX(-1);opacity:1}
+  80%{left:-27%;top:8%;transform:scaleX(-1);opacity:1}
+  81%,100%{left:-27%;top:8%;transform:scaleX(-1);opacity:0}
+}
+@media(prefers-reduced-motion:reduce){.v844-sleigh{animation-play-state:paused}}
+
+/* V84.6 — extensão dos dois cômodos altos sem esticar sprites da cena */
+#world[data-area="bedroom"] #scene-art.scene-art{background:#c0a5e1;}
+#world[data-area="bedroom"] #scene-art.scene-art::before{content:"";position:absolute;left:0;right:0;top:0;bottom:0;background:url("data:image/png;base64,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") center center / 100% 100% no-repeat;pointer-events:none;}
+
+#world[data-area="kitchen"] #scene-art.scene-art{background:#f2c29e;}
+#world[data-area="kitchen"] #scene-art.scene-art::before{content:"";position:absolute;left:0;right:0;top:0;bottom:0;background:url("data:image/png;base64,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") center center / 100% 100% no-repeat;pointer-events:none;}
+
+/* V84.14 — Halo externo contínuo das luminárias: nunca desaparece e não
+   carrega bitmap ou fundo branco. Aplicado em criação, miniaturas e jogo. */
+.v64-scene-stage .v8414-lantern-halo{
+ position:absolute;
+ z-index:3;
+ pointer-events:none;
+ width:23%;height:23%;
+ transform:translate(-50%,-50%);
+ border-radius:50%;
+ background:radial-gradient(circle,
+  rgba(255,245,180,.56) 0%,
+  rgba(255,213,116,.36) 19%,
+  rgba(255,175,70,.16) 47%,
+  rgba(255,173,68,0) 75%);
+ mix-blend-mode:screen;
+ opacity:.91;
+ animation:v8414-halo-constant 2.7s ease-in-out infinite alternate;
+}
+.v64-scene-stage .v8414-halo-sunset{left:90.3%;top:80.6%;}
+.v64-scene-stage .v8414-halo-night{left:17.2%;top:80.6%;}
+@keyframes v8414-halo-constant{from{opacity:.78;}to{opacity:1;}}
+@media(prefers-reduced-motion:reduce){.v64-scene-stage .v8414-lantern-halo{animation:none;opacity:.91;}}

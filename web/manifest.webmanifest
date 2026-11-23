@@ -1,0 +1,26 @@
+{
+  "name": "Meu Pequeno Pet",
+  "short_name": "Pequeno Pet",
+  "description": "Crie e cuide de um pet, mesmo sem internet.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#e7f5ff",
+  "theme_color": "#e7f5ff",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "id": "./"
+}

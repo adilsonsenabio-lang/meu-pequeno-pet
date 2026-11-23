@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
-"""Meu Pequeno Pet V84.24: restaurar o balcão, mover o relógio e preencher cenários.
+"""V84.24. Move kitchen clock onto the middle wall; make all scenes fill tall panels.
 
-Execute após a importação inicial do jogo (requer Pillow):
-    python3 scripts/ajustar_v84_24.py
-    python3 scripts/update_sw.py
-    python3 scripts/verify_pages.py
-Não modifica saves nem os demais 12 cenários.
+Idempotent: restores the old clock's background from unmodified kitchen_fundo.png
+before drawing a clock at its new location in each existing animation frame.
 """
 from pathlib import Path
 from PIL import Image
@@ -14,57 +11,64 @@ import re
 ROOT=Path(__file__).resolve().parents[1]
 WEB=ROOT/'web'
 SCENES=WEB/'assets/scenes'
-BASE=Image.open(ROOT/'assets-src/v63/cenarios/kitchen_fundo.png').convert('RGBA')
-SHEET=Image.open(ROOT/'assets-src/v63/objetos/kitchen__clock_spritesheet.png').convert('RGBA')
-CLOCK_X,CLOCK_Y=131,48
-REGION=(261,123,297,173)
-CLOCK=[SHEET.crop((128*(i%5),144*(i//5),128*(i%5+1),144*(i//5+1))).resize((64,72),Image.Resampling.NEAREST) for i in range(10)]
+SOURCE=ROOT/'assets-src/v63'
+BASE=Image.open(SOURCE/'cenarios/kitchen_fundo.png').convert('RGBA')
+SHEET=Image.open(SOURCE/'objetos/kitchen__clock_spritesheet.png').convert('RGBA')
+assert BASE.size==(320,320) and SHEET.size==(640,288)
+NEW_X,NEW_Y=131,48
+# Covers old sprite *including* its frame-to-frame movement without painting over
+# the floor; all covered pixels are sourced from the actual approved base background.
+OLD_RECT=(258,119,303,188)
+CLOCK_TILES=[SHEET.crop((128*(n%5),144*(n//5),128*(n%5+1),144*(n//5+1))).resize((64,72), Image.Resampling.NEAREST) for n in range(10)]
 
-def patch_frame(source, index):
-    image=source.convert('RGBA').copy()
-    image.paste(BASE.crop(REGION),REGION[:2]) # restaurar gabinete original
-    image.alpha_composite(CLOCK[(index//4)%10],(CLOCK_X,CLOCK_Y))
-    return image.convert('RGB')
+def paint(frame,n):
+    fr=frame.convert('RGBA').copy()
+    fr.paste(BASE.crop(OLD_RECT), OLD_RECT[:2])
+    fr.alpha_composite(CLOCK_TILES[(n//4)%10], (NEW_X,NEW_Y))
+    return fr
 
-def gif_write(images,path,durations):
-    palette=images[0].quantize(colors=256,method=Image.Quantize.MEDIANCUT,dither=Image.Dither.NONE)
-    frames=[f.quantize(palette=palette,dither=Image.Dither.NONE) for f in images]
-    frames[0].save(path,save_all=True,append_images=frames[1:],duration=durations,loop=0,disposal=2,optimize=False)
+def save_gif(images,path,durations):
+    # Keep palette coherent, preserve exactly 40 or 20 frames.
+    p=images[0].convert('RGB').quantize(colors=256,method=Image.Quantize.MEDIANCUT,dither=Image.Dither.NONE)
+    fs=[im.convert('RGB').quantize(palette=p,dither=Image.Dither.NONE) for im in images]
+    fs[0].save(path,save_all=True,append_images=fs[1:],loop=0,duration=durations,disposal=2,optimize=False)
+    chk=Image.open(path)
+    assert chk.n_frames==len(images),f'{path}: {chk.n_frames}, expected {len(images)}'
 
-old=Image.open(SCENES/'kitchen-gif.gif')
-frames=[]
-lengths=[]
-for i in range(old.n_frames):
-    old.seek(i)
-    frames.append(patch_frame(old.convert('RGBA'),i))
-    lengths.append(old.info.get('duration',145))
-assert len(frames)==40
-gif_write(frames,SCENES/'kitchen-gif.gif',lengths)
+src=Image.open(SCENES/'kitchen-gif.gif')
+assert src.n_frames==40
+frames=[];duration=[]
+for n in range(40):
+    src.seek(n)
+    frames.append(paint(src.convert('RGBA'),n))
+    duration.append(src.info.get('duration',145) or 145)
+save_gif(frames,SCENES/'kitchen-gif.gif',duration)
 frames[0].save(SCENES/'kitchen-still.png',optimize=True)
-
-thumb=Image.open(SCENES/'kitchen-preview.gif')
-mini=[frames[min(i*2,len(frames)-1)].resize(thumb.size,Image.Resampling.NEAREST) for i in range(thumb.n_frames)]
-gif_write(mini,SCENES/'kitchen-preview.gif',[145]*len(mini))
-
-source=ROOT/'assets-src/v63/cenarios/kitchen_sem_pet.png'
-frames[0].save(source,optimize=True)
-gif_write(frames,ROOT/'assets-src/v63/animacoes/kitchen_sem_pet.gif',lengths)
+# Preview GIF: 20 frames at the same 120×120 resolution and cadence.
+pre=Image.open(SCENES/'kitchen-preview.gif')
+assert pre.n_frames==20
+small=[frames[2*n].resize(pre.size,Image.Resampling.NEAREST) for n in range(20)]
+save_gif(small,SCENES/'kitchen-preview.gif',[290]*20)
+# Maintain independent source exports for future rebuilds.
+frames[0].save(SOURCE/'cenarios/kitchen_sem_pet.png',optimize=True)
+save_gif(frames,SOURCE/'animacoes/kitchen_sem_pet.gif',duration)
 
 meta=WEB/'scene-v63-data.js'
-text=meta.read_text(encoding='utf-8')
-text,count=re.subn(r'(\{"key":"kitchen__clock","x":)\d+(,"y":)\d+(,"w":64,"h":72,"trajectory":null\})',r'\g<1>131\g<2>48\3',text,count=1)
-assert count==1
-meta.write_text(text,encoding='utf-8')
+text=meta.read_text('utf-8')
+text,changes=re.subn(r'(\{"key":"kitchen__clock","x":)\d+(,"y":)\d+(,"w":64,"h":72,"trajectory":null\})',r'\g<1>131\g<2>48\3',text,count=1)
+assert changes==1
+meta.write_text(text,'utf-8')
 
 css=WEB/'scene-v64.css'
-text=css.read_text(encoding='utf-8')
+s=css.read_text('utf-8')
 old='.v64-scene-stage {height:100%;height:min(100%, 100cqw);aspect-ratio:auto;}'
-new='''/* V84.24: o fundo ocupa toda a janela sem faixa vazia; pet mantém escala própria. */
+assert old in s
+s=s.replace(old, '''/* V84.24: no letterbox at the top of tall rooms or scenes. */
 #scene-art .v64-scene-stage,
-#create-scene-art .v64-scene-stage {inset:0;width:100%;height:100%;aspect-ratio:auto;}
-.v64-scene-stage {height:100%;aspect-ratio:auto;}'''
-if old in text: text=text.replace(old,new,1)
-assert new in text
-text=text.replace('.choice-pet.v64-scene-choice .v64-scene-stage {height:100%;height:min(100%, 100cqw);aspect-ratio:auto;}','.choice-pet.v64-scene-choice .v64-scene-stage {height:100%;aspect-ratio:auto;}')
-css.write_text(text,encoding='utf-8')
-print('V84.24 aplicado: relógio da cozinha no lugar, sem faixa vazia nos cenários.')
+#create-scene-art .v64-scene-stage{inset:0;width:100%;height:100%;aspect-ratio:auto;}
+.v64-scene-stage {height:100%;aspect-ratio:auto;}''')
+s=s.replace('.choice-pet.v64-scene-choice .v64-scene-stage {height:100%;height:min(100%, 100cqw);aspect-ratio:auto;}','.choice-pet.v64-scene-choice .v64-scene-stage {height:100%;aspect-ratio:auto;}')
+# Decorative fallback backgrounds may also occupy full height.
+s=s.replace('top:0;bottom:min(100cqw, 100%);background:url(', 'top:0;bottom:0;background:url(')
+css.write_text(s,'utf-8')
+print('OK V84.24: clock and 13 scene sizing rules applied')

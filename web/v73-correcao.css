@@ -1,0 +1,19 @@
+/* V73: água e espuma sempre seguem a caixa/posição física do PET. */
+#pet-wrap #pet-bath-bubbles{position:absolute;inset:0;pointer-events:none;z-index:7;display:none;overflow:visible}
+#pet-wrap[data-bathing="true"] #pet-bath-bubbles{display:block}
+#pet-bath-bubbles i{position:absolute;left:var(--bubble-x);top:var(--bubble-y);width:8px;height:8px;border-radius:50%;border:1.5px solid #62aecb;background:#b5efffff;box-shadow:inset 2px 1px 0 #fff,0 0 1px #e9ffff;transform:translate(-50%,-50%);animation:v73-bubble 1.35s ease-in-out var(--delay) infinite alternate;opacity:.85}
+#pet-bath-bubbles i:nth-child(3n){width:5px;height:5px}#pet-bath-bubbles i:nth-child(4n){width:10px;height:10px}
+@keyframes v73-bubble{0%{transform:translate(-50%,4px) scale(.84);opacity:.45}45%{opacity:1}100%{transform:translate(-50%,-14px) scale(1.08);opacity:.73}}
+/* Elimina as bolhas do efeito antigo, que se prendiam à TELA. */
+#care-layer .care-water,#care-layer .care-foam{display:none!important}
+/* Durante o sono, o botão da Diversão e seu indicador ficam visualmente bloqueados. */
+#action-groups button:disabled{opacity:.44!important;filter:grayscale(.58);cursor:default!important;pointer-events:none}
+#needs-dashboard [data-need-indicator="play"].is-unavailable{opacity:.45!important;filter:grayscale(.55);cursor:default!important}
+/* Pixel art de álbum: os dez quadros são reais, não apenas um SVG deslocado. */
+.album-v73-sprite{position:relative;display:block;width:100%;height:100%;overflow:hidden;image-rendering:pixelated;contain:paint}
+.album-v73-sprite img{position:absolute;left:0;top:0;width:1000%;height:100%;max-width:none;image-rendering:pixelated;transform:translateX(0);animation:album-v73-frames var(--anim-time,1.6s) steps(10,end) infinite;will-change:transform}
+@keyframes album-v73-frames{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}
+.album-object:has(.album-v73-sprite),.scene-decoration:has(.album-v73-sprite) .decoration-art{animation:none!important}
+.album-card .album-object:has(.album-v73-sprite){width:62px;height:62px}
+@media(prefers-reduced-motion:reduce){.album-v73-sprite img{animation:none!important}}
+.paused .album-v73-sprite img{animation-play-state:paused!important}

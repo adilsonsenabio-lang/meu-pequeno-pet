@@ -1,0 +1,21 @@
+{
+  "name": "meu-pequeno-pet-github-pwa",
+  "version": "84.24.0",
+  "private": true,
+  "type": "module",
+  "description": "Meu Pequeno Pet V84.24 — PWA GitHub Pages, relógio da cozinha corrigido e cenas responsivas.",
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "build": "node scripts/build.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "android:sync": "npm run build && npx cap sync android",
+    "android:open": "npx cap open android",
+    "sprites:source": "node scripts/export-sprites.mjs",
+    "sprites:render": "python scripts/render-sprites.py",
+    "sprites:test": "python tests/sprite_qa_v59.py",
+    "preview:sprites": "node scripts/build-scenes-gallery-v60.mjs",
+    "test:visual": "python tests/visual_smoke_v59.py && python tests/qa_game_v59.py",
+    "verify:pages": "python3 scripts/verify_pages.py",
+    "test:pwa": "node --test tests/sw-pages.test.mjs"
+  }
+}

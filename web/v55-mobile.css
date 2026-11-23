@@ -1,0 +1,22 @@
+/* V55: mais altura útil sem alterar a largura do jogo nem distorcer os sprites. */
+#world.world { height:clamp(350px, 62dvh, 570px); min-height:0; }
+#create-screen .create-preview {height:clamp(255px, 38dvh, 360px); min-height:0;}
+/* Estilos com muitas opções: cartões roláveis, setas de navegação sempre acessíveis. */
+#choice-list[data-category="eyes"], #choice-list[data-category="shoes"] {
+ max-height:clamp(198px, 32dvh, 300px); overflow-y:auto; overscroll-behavior:contain;
+ scrollbar-width:thin; padding:3px 3px 8px; align-content:start;
+}
+#choice-list[data-category="eyes"] .choice, #choice-list[data-category="shoes"] .choice {min-height:93px;}
+#choice-list[data-category="eyes"] .choice-pet, #choice-list[data-category="shoes"] .choice-pet {
+ width:min(100%, 66px);height:58px;overflow:hidden;
+}
+#choice-list[data-category="eyes"] .choice-pet svg,#choice-list[data-category="shoes"] .choice-pet svg {width:100%;height:100%;image-rendering:pixelated;shape-rendering:crispEdges;}
+/* Tela baixa mantém mais cenário, com rolagem vertical da página para os controles. */
+@media(max-height:650px){
+ #world.world{height:clamp(315px, 58dvh, 440px);min-height:0;}
+ #create-screen .create-preview{height:clamp(220px, 35dvh, 275px);min-height:0;}
+ #choice-list[data-category="eyes"],#choice-list[data-category="shoes"]{max-height:205px;}
+}
+@media(max-width:350px){
+ #choice-list[data-category="eyes"] .choice,#choice-list[data-category="shoes"] .choice{font-size:10px;}
+}

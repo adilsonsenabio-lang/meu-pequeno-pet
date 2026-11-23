@@ -1,0 +1,2232 @@
+{
+  "version": 59,
+  "coordinates": "200x200",
+  "palette_source": "Original do Meu Pequeno Pet V59; paleta existente preservada",
+  "sprites": {
+    "eyes": {
+      "count": 25,
+      "size": [
+        128,
+        128
+      ],
+      "atlas": "atlas-eyes.png",
+      "columns": 6,
+      "items": {
+        "big": {
+          "file": "parts/eyes/big.png",
+          "rect": [
+            0,
+            0,
+            128,
+            128
+          ]
+        },
+        "dots": {
+          "file": "parts/eyes/dots.png",
+          "rect": [
+            128,
+            0,
+            128,
+            128
+          ]
+        },
+        "cat": {
+          "file": "parts/eyes/cat.png",
+          "rect": [
+            256,
+            0,
+            128,
+            128
+          ]
+        },
+        "sleepy": {
+          "file": "parts/eyes/sleepy.png",
+          "rect": [
+            384,
+            0,
+            128,
+            128
+          ]
+        },
+        "happy": {
+          "file": "parts/eyes/happy.png",
+          "rect": [
+            512,
+            0,
+            128,
+            128
+          ]
+        },
+        "star": {
+          "file": "parts/eyes/star.png",
+          "rect": [
+            640,
+            0,
+            128,
+            128
+          ]
+        },
+        "heart": {
+          "file": "parts/eyes/heart.png",
+          "rect": [
+            0,
+            128,
+            128,
+            128
+          ]
+        },
+        "angry": {
+          "file": "parts/eyes/angry.png",
+          "rect": [
+            128,
+            128,
+            128,
+            128
+          ]
+        },
+        "wink": {
+          "file": "parts/eyes/wink.png",
+          "rect": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        "wide": {
+          "file": "parts/eyes/wide.png",
+          "rect": [
+            384,
+            128,
+            128,
+            128
+          ]
+        },
+        "sparkle": {
+          "file": "parts/eyes/sparkle.png",
+          "rect": [
+            512,
+            128,
+            128,
+            128
+          ]
+        },
+        "oval": {
+          "file": "parts/eyes/oval.png",
+          "rect": [
+            640,
+            128,
+            128,
+            128
+          ]
+        },
+        "square": {
+          "file": "parts/eyes/square.png",
+          "rect": [
+            0,
+            256,
+            128,
+            128
+          ]
+        },
+        "diamond": {
+          "file": "parts/eyes/diamond.png",
+          "rect": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        "crescent": {
+          "file": "parts/eyes/crescent.png",
+          "rect": [
+            256,
+            256,
+            128,
+            128
+          ]
+        },
+        "lashes": {
+          "file": "parts/eyes/lashes.png",
+          "rect": [
+            384,
+            256,
+            128,
+            128
+          ]
+        },
+        "shy": {
+          "file": "parts/eyes/shy.png",
+          "rect": [
+            512,
+            256,
+            128,
+            128
+          ]
+        },
+        "robot": {
+          "file": "parts/eyes/robot.png",
+          "rect": [
+            640,
+            256,
+            128,
+            128
+          ]
+        },
+        "rainbow": {
+          "file": "parts/eyes/rainbow.png",
+          "rect": [
+            0,
+            384,
+            128,
+            128
+          ]
+        },
+        "galaxy": {
+          "file": "parts/eyes/galaxy.png",
+          "rect": [
+            128,
+            384,
+            128,
+            128
+          ]
+        },
+        "teary": {
+          "file": "parts/eyes/teary.png",
+          "rect": [
+            256,
+            384,
+            128,
+            128
+          ]
+        },
+        "tiny": {
+          "file": "parts/eyes/tiny.png",
+          "rect": [
+            384,
+            384,
+            128,
+            128
+          ]
+        },
+        "tall": {
+          "file": "parts/eyes/tall.png",
+          "rect": [
+            512,
+            384,
+            128,
+            128
+          ]
+        },
+        "sleepywide": {
+          "file": "parts/eyes/sleepywide.png",
+          "rect": [
+            640,
+            384,
+            128,
+            128
+          ]
+        },
+        "gem": {
+          "file": "parts/eyes/gem.png",
+          "rect": [
+            0,
+            512,
+            128,
+            128
+          ]
+        }
+      }
+    },
+    "snout": {
+      "count": 22,
+      "size": [
+        128,
+        128
+      ],
+      "atlas": "atlas-snout.png",
+      "columns": 6,
+      "items": {
+        "button": {
+          "file": "parts/snout/button.png",
+          "rect": [
+            0,
+            0,
+            128,
+            128
+          ]
+        },
+        "cat": {
+          "file": "parts/snout/cat.png",
+          "rect": [
+            128,
+            0,
+            128,
+            128
+          ]
+        },
+        "dog": {
+          "file": "parts/snout/dog.png",
+          "rect": [
+            256,
+            0,
+            128,
+            128
+          ]
+        },
+        "beak": {
+          "file": "parts/snout/beak.png",
+          "rect": [
+            384,
+            0,
+            128,
+            128
+          ]
+        },
+        "dragon": {
+          "file": "parts/snout/dragon.png",
+          "rect": [
+            512,
+            0,
+            128,
+            128
+          ]
+        },
+        "pig": {
+          "file": "parts/snout/pig.png",
+          "rect": [
+            640,
+            0,
+            128,
+            128
+          ]
+        },
+        "grin": {
+          "file": "parts/snout/grin.png",
+          "rect": [
+            0,
+            128,
+            128,
+            128
+          ]
+        },
+        "bunny": {
+          "file": "parts/snout/bunny.png",
+          "rect": [
+            128,
+            128,
+            128,
+            128
+          ]
+        },
+        "mouse": {
+          "file": "parts/snout/mouse.png",
+          "rect": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        "trunk": {
+          "file": "parts/snout/trunk.png",
+          "rect": [
+            384,
+            128,
+            128,
+            128
+          ]
+        },
+        "cat3": {
+          "file": "parts/snout/cat3.png",
+          "rect": [
+            512,
+            128,
+            128,
+            128
+          ]
+        },
+        "tongue": {
+          "file": "parts/snout/tongue.png",
+          "rect": [
+            640,
+            128,
+            128,
+            128
+          ]
+        },
+        "short": {
+          "file": "parts/snout/short.png",
+          "rect": [
+            0,
+            256,
+            128,
+            128
+          ]
+        },
+        "long": {
+          "file": "parts/snout/long.png",
+          "rect": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        "wide": {
+          "file": "parts/snout/wide.png",
+          "rect": [
+            256,
+            256,
+            128,
+            128
+          ]
+        },
+        "heart": {
+          "file": "parts/snout/heart.png",
+          "rect": [
+            384,
+            256,
+            128,
+            128
+          ]
+        },
+        "whiskers": {
+          "file": "parts/snout/whiskers.png",
+          "rect": [
+            512,
+            256,
+            128,
+            128
+          ]
+        },
+        "whiskerslong": {
+          "file": "parts/snout/whiskerslong.png",
+          "rect": [
+            640,
+            256,
+            128,
+            128
+          ]
+        },
+        "whiskerscurled": {
+          "file": "parts/snout/whiskerscurled.png",
+          "rect": [
+            0,
+            384,
+            128,
+            128
+          ]
+        },
+        "whiskersdots": {
+          "file": "parts/snout/whiskersdots.png",
+          "rect": [
+            128,
+            384,
+            128,
+            128
+          ]
+        },
+        "foxy": {
+          "file": "parts/snout/foxy.png",
+          "rect": [
+            256,
+            384,
+            128,
+            128
+          ]
+        },
+        "bunnywhiskers": {
+          "file": "parts/snout/bunnywhiskers.png",
+          "rect": [
+            384,
+            384,
+            128,
+            128
+          ]
+        }
+      }
+    },
+    "mouth": {
+      "count": 18,
+      "size": [
+        128,
+        128
+      ],
+      "atlas": "atlas-mouth.png",
+      "columns": 6,
+      "items": {
+        "smile": {
+          "file": "parts/mouth/smile.png",
+          "rect": [
+            0,
+            0,
+            128,
+            128
+          ]
+        },
+        "open": {
+          "file": "parts/mouth/open.png",
+          "rect": [
+            128,
+            0,
+            128,
+            128
+          ]
+        },
+        "cat": {
+          "file": "parts/mouth/cat.png",
+          "rect": [
+            256,
+            0,
+            128,
+            128
+          ]
+        },
+        "heart": {
+          "file": "parts/mouth/heart.png",
+          "rect": [
+            384,
+            0,
+            128,
+            128
+          ]
+        },
+        "surprised": {
+          "file": "parts/mouth/surprised.png",
+          "rect": [
+            512,
+            0,
+            128,
+            128
+          ]
+        },
+        "teeth": {
+          "file": "parts/mouth/teeth.png",
+          "rect": [
+            640,
+            0,
+            128,
+            128
+          ]
+        },
+        "tongue": {
+          "file": "parts/mouth/tongue.png",
+          "rect": [
+            0,
+            128,
+            128,
+            128
+          ]
+        },
+        "serious": {
+          "file": "parts/mouth/serious.png",
+          "rect": [
+            128,
+            128,
+            128,
+            128
+          ]
+        },
+        "grin": {
+          "file": "parts/mouth/grin.png",
+          "rect": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        "smirk": {
+          "file": "parts/mouth/smirk.png",
+          "rect": [
+            384,
+            128,
+            128,
+            128
+          ]
+        },
+        "kiss": {
+          "file": "parts/mouth/kiss.png",
+          "rect": [
+            512,
+            128,
+            128,
+            128
+          ]
+        },
+        "wave": {
+          "file": "parts/mouth/wave.png",
+          "rect": [
+            640,
+            128,
+            128,
+            128
+          ]
+        },
+        "tiny": {
+          "file": "parts/mouth/tiny.png",
+          "rect": [
+            0,
+            256,
+            128,
+            128
+          ]
+        },
+        "fangs": {
+          "file": "parts/mouth/fangs.png",
+          "rect": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        "laugh": {
+          "file": "parts/mouth/laugh.png",
+          "rect": [
+            256,
+            256,
+            128,
+            128
+          ]
+        },
+        "pout": {
+          "file": "parts/mouth/pout.png",
+          "rect": [
+            384,
+            256,
+            128,
+            128
+          ]
+        },
+        "soft": {
+          "file": "parts/mouth/soft.png",
+          "rect": [
+            512,
+            256,
+            128,
+            128
+          ]
+        },
+        "none": {
+          "file": "parts/mouth/none.png",
+          "rect": [
+            640,
+            256,
+            128,
+            128
+          ]
+        }
+      }
+    },
+    "markings": {
+      "count": 13,
+      "size": [
+        128,
+        128
+      ],
+      "atlas": "atlas-markings.png",
+      "columns": 6,
+      "items": {
+        "blush": {
+          "file": "parts/markings/blush.png",
+          "rect": [
+            0,
+            0,
+            128,
+            128
+          ]
+        },
+        "spots": {
+          "file": "parts/markings/spots.png",
+          "rect": [
+            128,
+            0,
+            128,
+            128
+          ]
+        },
+        "stripes": {
+          "file": "parts/markings/stripes.png",
+          "rect": [
+            256,
+            0,
+            128,
+            128
+          ]
+        },
+        "freckles": {
+          "file": "parts/markings/freckles.png",
+          "rect": [
+            384,
+            0,
+            128,
+            128
+          ]
+        },
+        "forehead": {
+          "file": "parts/markings/forehead.png",
+          "rect": [
+            512,
+            0,
+            128,
+            128
+          ]
+        },
+        "swirl": {
+          "file": "parts/markings/swirl.png",
+          "rect": [
+            640,
+            0,
+            128,
+            128
+          ]
+        },
+        "brows": {
+          "file": "parts/markings/brows.png",
+          "rect": [
+            0,
+            128,
+            128,
+            128
+          ]
+        },
+        "tuxedo": {
+          "file": "parts/markings/tuxedo.png",
+          "rect": [
+            128,
+            128,
+            128,
+            128
+          ]
+        },
+        "bolt": {
+          "file": "parts/markings/bolt.png",
+          "rect": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        "confetti": {
+          "file": "parts/markings/confetti.png",
+          "rect": [
+            384,
+            128,
+            128,
+            128
+          ]
+        },
+        "whiskers": {
+          "file": "parts/markings/whiskers.png",
+          "rect": [
+            512,
+            128,
+            128,
+            128
+          ]
+        },
+        "bandage": {
+          "file": "parts/markings/bandage.png",
+          "rect": [
+            640,
+            128,
+            128,
+            128
+          ]
+        },
+        "plain": {
+          "file": "parts/markings/plain.png",
+          "rect": [
+            0,
+            256,
+            128,
+            128
+          ]
+        }
+      }
+    },
+    "ears": {
+      "count": 17,
+      "size": [
+        128,
+        128
+      ],
+      "atlas": "atlas-ears.png",
+      "columns": 6,
+      "items": {
+        "cat": {
+          "file": "parts/ears/cat.png",
+          "rect": [
+            0,
+            0,
+            128,
+            128
+          ]
+        },
+        "dog": {
+          "file": "parts/ears/dog.png",
+          "rect": [
+            128,
+            0,
+            128,
+            128
+          ]
+        },
+        "bunny": {
+          "file": "parts/ears/bunny.png",
+          "rect": [
+            256,
+            0,
+            128,
+            128
+          ]
+        },
+        "bear": {
+          "file": "parts/ears/bear.png",
+          "rect": [
+            384,
+            0,
+            128,
+            128
+          ]
+        },
+        "horns": {
+          "file": "parts/ears/horns.png",
+          "rect": [
+            512,
+            0,
+            128,
+            128
+          ]
+        },
+        "unicorn": {
+          "file": "parts/ears/unicorn.png",
+          "rect": [
+            640,
+            0,
+            128,
+            128
+          ]
+        },
+        "antlers": {
+          "file": "parts/ears/antlers.png",
+          "rect": [
+            0,
+            128,
+            128,
+            128
+          ]
+        },
+        "elf": {
+          "file": "parts/ears/elf.png",
+          "rect": [
+            128,
+            128,
+            128,
+            128
+          ]
+        },
+        "bat": {
+          "file": "parts/ears/bat.png",
+          "rect": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        "mouse": {
+          "file": "parts/ears/mouse.png",
+          "rect": [
+            384,
+            128,
+            128,
+            128
+          ]
+        },
+        "antenna": {
+          "file": "parts/ears/antenna.png",
+          "rect": [
+            512,
+            128,
+            128,
+            128
+          ]
+        },
+        "ram": {
+          "file": "parts/ears/ram.png",
+          "rect": [
+            640,
+            128,
+            128,
+            128
+          ]
+        },
+        "fox": {
+          "file": "parts/ears/fox.png",
+          "rect": [
+            0,
+            256,
+            128,
+            128
+          ]
+        },
+        "floppy": {
+          "file": "parts/ears/floppy.png",
+          "rect": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        "spiky": {
+          "file": "parts/ears/spiky.png",
+          "rect": [
+            256,
+            256,
+            128,
+            128
+          ]
+        },
+        "deer": {
+          "file": "parts/ears/deer.png",
+          "rect": [
+            384,
+            256,
+            128,
+            128
+          ]
+        },
+        "none": {
+          "file": "parts/ears/none.png",
+          "rect": [
+            512,
+            256,
+            128,
+            128
+          ]
+        }
+      }
+    },
+    "tail": {
+      "count": 10,
+      "size": [
+        128,
+        128
+      ],
+      "atlas": "atlas-tail.png",
+      "columns": 6,
+      "items": {
+        "cat": {
+          "file": "parts/tail/cat.png",
+          "rect": [
+            0,
+            0,
+            128,
+            128
+          ]
+        },
+        "dog": {
+          "file": "parts/tail/dog.png",
+          "rect": [
+            128,
+            0,
+            128,
+            128
+          ]
+        },
+        "pompom": {
+          "file": "parts/tail/pompom.png",
+          "rect": [
+            256,
+            0,
+            128,
+            128
+          ]
+        },
+        "dragon": {
+          "file": "parts/tail/dragon.png",
+          "rect": [
+            384,
+            0,
+            128,
+            128
+          ]
+        },
+        "fish": {
+          "file": "parts/tail/fish.png",
+          "rect": [
+            512,
+            0,
+            128,
+            128
+          ]
+        },
+        "fox": {
+          "file": "parts/tail/fox.png",
+          "rect": [
+            640,
+            0,
+            128,
+            128
+          ]
+        },
+        "peacock": {
+          "file": "parts/tail/peacock.png",
+          "rect": [
+            0,
+            128,
+            128,
+            128
+          ]
+        },
+        "flame": {
+          "file": "parts/tail/flame.png",
+          "rect": [
+            128,
+            128,
+            128,
+            128
+          ]
+        },
+        "leaf": {
+          "file": "parts/tail/leaf.png",
+          "rect": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        "none": {
+          "file": "parts/tail/none.png",
+          "rect": [
+            384,
+            128,
+            128,
+            128
+          ]
+        }
+      }
+    },
+    "wings": {
+      "count": 9,
+      "size": [
+        128,
+        128
+      ],
+      "atlas": "atlas-wings.png",
+      "columns": 6,
+      "items": {
+        "dragon": {
+          "file": "parts/wings/dragon.png",
+          "rect": [
+            0,
+            0,
+            128,
+            128
+          ]
+        },
+        "angel": {
+          "file": "parts/wings/angel.png",
+          "rect": [
+            128,
+            0,
+            128,
+            128
+          ]
+        },
+        "fairy": {
+          "file": "parts/wings/fairy.png",
+          "rect": [
+            256,
+            0,
+            128,
+            128
+          ]
+        },
+        "bat": {
+          "file": "parts/wings/bat.png",
+          "rect": [
+            384,
+            0,
+            128,
+            128
+          ]
+        },
+        "phoenix": {
+          "file": "parts/wings/phoenix.png",
+          "rect": [
+            512,
+            0,
+            128,
+            128
+          ]
+        },
+        "tiny": {
+          "file": "parts/wings/tiny.png",
+          "rect": [
+            640,
+            0,
+            128,
+            128
+          ]
+        },
+        "butterfly": {
+          "file": "parts/wings/butterfly.png",
+          "rect": [
+            0,
+            128,
+            128,
+            128
+          ]
+        },
+        "fin": {
+          "file": "parts/wings/fin.png",
+          "rect": [
+            128,
+            128,
+            128,
+            128
+          ]
+        },
+        "none": {
+          "file": "parts/wings/none.png",
+          "rect": [
+            256,
+            128,
+            128,
+            128
+          ]
+        }
+      }
+    },
+    "shoes": {
+      "count": 14,
+      "size": [
+        128,
+        128
+      ],
+      "atlas": "atlas-shoes.png",
+      "columns": 6,
+      "items": {
+        "none": {
+          "file": "parts/shoes/none.png",
+          "rect": [
+            0,
+            0,
+            128,
+            128
+          ]
+        },
+        "shoes": {
+          "file": "parts/shoes/shoes.png",
+          "rect": [
+            128,
+            0,
+            128,
+            128
+          ]
+        },
+        "sneakers": {
+          "file": "parts/shoes/sneakers.png",
+          "rect": [
+            256,
+            0,
+            128,
+            128
+          ]
+        },
+        "heels": {
+          "file": "parts/shoes/heels.png",
+          "rect": [
+            384,
+            0,
+            128,
+            128
+          ]
+        },
+        "boots": {
+          "file": "parts/shoes/boots.png",
+          "rect": [
+            512,
+            0,
+            128,
+            128
+          ]
+        },
+        "slippers": {
+          "file": "parts/shoes/slippers.png",
+          "rect": [
+            640,
+            0,
+            128,
+            128
+          ]
+        },
+        "sandals": {
+          "file": "parts/shoes/sandals.png",
+          "rect": [
+            0,
+            128,
+            128,
+            128
+          ]
+        },
+        "rainboots": {
+          "file": "parts/shoes/rainboots.png",
+          "rect": [
+            128,
+            128,
+            128,
+            128
+          ]
+        },
+        "rollers": {
+          "file": "parts/shoes/rollers.png",
+          "rect": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        "highTops": {
+          "file": "parts/shoes/highTops.png",
+          "rect": [
+            384,
+            128,
+            128,
+            128
+          ]
+        },
+        "ballet": {
+          "file": "parts/shoes/ballet.png",
+          "rect": [
+            512,
+            128,
+            128,
+            128
+          ]
+        },
+        "flipflops": {
+          "file": "parts/shoes/flipflops.png",
+          "rect": [
+            640,
+            128,
+            128,
+            128
+          ]
+        },
+        "loafers": {
+          "file": "parts/shoes/loafers.png",
+          "rect": [
+            0,
+            256,
+            128,
+            128
+          ]
+        },
+        "snowboots": {
+          "file": "parts/shoes/snowboots.png",
+          "rect": [
+            128,
+            256,
+            128,
+            128
+          ]
+        }
+      }
+    },
+    "accessory": {
+      "count": 10,
+      "size": [
+        128,
+        128
+      ],
+      "atlas": "atlas-accessory.png",
+      "columns": 6,
+      "items": {
+        "star": {
+          "file": "parts/accessory/star.png",
+          "rect": [
+            0,
+            0,
+            128,
+            128
+          ]
+        },
+        "crown": {
+          "file": "parts/accessory/crown.png",
+          "rect": [
+            128,
+            0,
+            128,
+            128
+          ]
+        },
+        "halo": {
+          "file": "parts/accessory/halo.png",
+          "rect": [
+            256,
+            0,
+            128,
+            128
+          ]
+        },
+        "bow": {
+          "file": "parts/accessory/bow.png",
+          "rect": [
+            384,
+            0,
+            128,
+            128
+          ]
+        },
+        "party": {
+          "file": "parts/accessory/party.png",
+          "rect": [
+            512,
+            0,
+            128,
+            128
+          ]
+        },
+        "glasses": {
+          "file": "parts/accessory/glasses.png",
+          "rect": [
+            640,
+            0,
+            128,
+            128
+          ]
+        },
+        "flower": {
+          "file": "parts/accessory/flower.png",
+          "rect": [
+            0,
+            128,
+            128,
+            128
+          ]
+        },
+        "bell": {
+          "file": "parts/accessory/bell.png",
+          "rect": [
+            128,
+            128,
+            128,
+            128
+          ]
+        },
+        "sunglasses": {
+          "file": "parts/accessory/sunglasses.png",
+          "rect": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        "none": {
+          "file": "parts/accessory/none.png",
+          "rect": [
+            384,
+            128,
+            128,
+            128
+          ]
+        }
+      }
+    },
+    "outfit": {
+      "count": 21,
+      "size": [
+        128,
+        128
+      ],
+      "atlas": "atlas-outfit.png",
+      "columns": 6,
+      "items": {
+        "none": {
+          "file": "parts/outfit/none.png",
+          "rect": [
+            0,
+            0,
+            128,
+            128
+          ]
+        },
+        "dress": {
+          "file": "parts/outfit/dress.png",
+          "rect": [
+            128,
+            0,
+            128,
+            128
+          ]
+        },
+        "overalls": {
+          "file": "parts/outfit/overalls.png",
+          "rect": [
+            256,
+            0,
+            128,
+            128
+          ]
+        },
+        "vest": {
+          "file": "parts/outfit/vest.png",
+          "rect": [
+            384,
+            0,
+            128,
+            128
+          ]
+        },
+        "cardigan": {
+          "file": "parts/outfit/cardigan.png",
+          "rect": [
+            512,
+            0,
+            128,
+            128
+          ]
+        },
+        "sailor": {
+          "file": "parts/outfit/sailor.png",
+          "rect": [
+            640,
+            0,
+            128,
+            128
+          ]
+        },
+        "pajamas": {
+          "file": "parts/outfit/pajamas.png",
+          "rect": [
+            0,
+            128,
+            128,
+            128
+          ]
+        },
+        "hoodie": {
+          "file": "parts/outfit/hoodie.png",
+          "rect": [
+            128,
+            128,
+            128,
+            128
+          ]
+        },
+        "raincoat": {
+          "file": "parts/outfit/raincoat.png",
+          "rect": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        "kimono": {
+          "file": "parts/outfit/kimono.png",
+          "rect": [
+            384,
+            128,
+            128,
+            128
+          ]
+        },
+        "princess": {
+          "file": "parts/outfit/princess.png",
+          "rect": [
+            512,
+            128,
+            128,
+            128
+          ]
+        },
+        "superhero": {
+          "file": "parts/outfit/superhero.png",
+          "rect": [
+            640,
+            128,
+            128,
+            128
+          ]
+        },
+        "pirate": {
+          "file": "parts/outfit/pirate.png",
+          "rect": [
+            0,
+            256,
+            128,
+            128
+          ]
+        },
+        "astronaut": {
+          "file": "parts/outfit/astronaut.png",
+          "rect": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        "bee": {
+          "file": "parts/outfit/bee.png",
+          "rect": [
+            256,
+            256,
+            128,
+            128
+          ]
+        },
+        "wizardrobe": {
+          "file": "parts/outfit/wizardrobe.png",
+          "rect": [
+            384,
+            256,
+            128,
+            128
+          ]
+        },
+        "winter": {
+          "file": "parts/outfit/winter.png",
+          "rect": [
+            512,
+            256,
+            128,
+            128
+          ]
+        },
+        "chef": {
+          "file": "parts/outfit/chef.png",
+          "rect": [
+            640,
+            256,
+            128,
+            128
+          ]
+        },
+        "sport": {
+          "file": "parts/outfit/sport.png",
+          "rect": [
+            0,
+            384,
+            128,
+            128
+          ]
+        },
+        "flower": {
+          "file": "parts/outfit/flower.png",
+          "rect": [
+            128,
+            384,
+            128,
+            128
+          ]
+        },
+        "dinosaur": {
+          "file": "parts/outfit/dinosaur.png",
+          "rect": [
+            256,
+            384,
+            128,
+            128
+          ]
+        }
+      }
+    }
+  },
+  "sheets": {
+    "baby/idle": {
+      "file": "animations/baby/idle.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": true,
+      "events": {}
+    },
+    "baby/jump": {
+      "file": "animations/baby/jump.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": false,
+      "events": {}
+    },
+    "baby/fly": {
+      "file": "animations/baby/fly.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": true,
+      "events": {}
+    },
+    "baby/land": {
+      "file": "animations/baby/land.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": false,
+      "events": {
+        "impact_frame": 3
+      }
+    },
+    "baby/sleep": {
+      "file": "animations/baby/sleep.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": true,
+      "events": {}
+    },
+    "baby/eat": {
+      "file": "animations/baby/eat.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": false,
+      "events": {}
+    },
+    "baby/drink": {
+      "file": "animations/baby/drink.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": true,
+      "events": {}
+    },
+    "baby/bath": {
+      "file": "animations/baby/bath.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": true,
+      "events": {}
+    },
+    "baby/love": {
+      "file": "animations/baby/love.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": false,
+      "events": {}
+    },
+    "baby/play": {
+      "file": "animations/baby/play.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": true,
+      "events": {}
+    },
+    "baby/potty": {
+      "file": "animations/baby/potty.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": false,
+      "events": {}
+    },
+    "baby/injection": {
+      "file": "animations/baby/injection.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": false,
+      "events": {}
+    },
+    "baby/wake": {
+      "file": "animations/baby/wake.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": false,
+      "events": {}
+    },
+    "baby/greet": {
+      "file": "animations/baby/greet.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": false,
+      "events": {}
+    },
+    "baby/sick": {
+      "file": "animations/baby/sick.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": false,
+      "events": {}
+    },
+    "child/idle": {
+      "file": "animations/child/idle.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": true,
+      "events": {}
+    },
+    "child/jump": {
+      "file": "animations/child/jump.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": false,
+      "events": {}
+    },
+    "child/fly": {
+      "file": "animations/child/fly.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": true,
+      "events": {}
+    },
+    "child/land": {
+      "file": "animations/child/land.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": false,
+      "events": {
+        "impact_frame": 3
+      }
+    },
+    "child/sleep": {
+      "file": "animations/child/sleep.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": true,
+      "events": {}
+    },
+    "child/eat": {
+      "file": "animations/child/eat.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": false,
+      "events": {}
+    },
+    "child/drink": {
+      "file": "animations/child/drink.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": true,
+      "events": {}
+    },
+    "child/bath": {
+      "file": "animations/child/bath.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": true,
+      "events": {}
+    },
+    "child/love": {
+      "file": "animations/child/love.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": false,
+      "events": {}
+    },
+    "child/play": {
+      "file": "animations/child/play.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": true,
+      "events": {}
+    },
+    "child/potty": {
+      "file": "animations/child/potty.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": false,
+      "events": {}
+    },
+    "child/injection": {
+      "file": "animations/child/injection.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": false,
+      "events": {}
+    },
+    "child/wake": {
+      "file": "animations/child/wake.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": false,
+      "events": {}
+    },
+    "child/greet": {
+      "file": "animations/child/greet.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": false,
+      "events": {}
+    },
+    "child/sick": {
+      "file": "animations/child/sick.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": false,
+      "events": {}
+    },
+    "adult/idle": {
+      "file": "animations/adult/idle.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": true,
+      "events": {}
+    },
+    "adult/jump": {
+      "file": "animations/adult/jump.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": false,
+      "events": {}
+    },
+    "adult/fly": {
+      "file": "animations/adult/fly.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": true,
+      "events": {}
+    },
+    "adult/land": {
+      "file": "animations/adult/land.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": false,
+      "events": {
+        "impact_frame": 3
+      }
+    },
+    "adult/sleep": {
+      "file": "animations/adult/sleep.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": true,
+      "events": {}
+    },
+    "adult/eat": {
+      "file": "animations/adult/eat.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": false,
+      "events": {}
+    },
+    "adult/drink": {
+      "file": "animations/adult/drink.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": true,
+      "events": {}
+    },
+    "adult/bath": {
+      "file": "animations/adult/bath.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": true,
+      "events": {}
+    },
+    "adult/love": {
+      "file": "animations/adult/love.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": false,
+      "events": {}
+    },
+    "adult/play": {
+      "file": "animations/adult/play.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": true,
+      "events": {}
+    },
+    "adult/potty": {
+      "file": "animations/adult/potty.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": false,
+      "events": {}
+    },
+    "adult/injection": {
+      "file": "animations/adult/injection.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": false,
+      "events": {}
+    },
+    "adult/wake": {
+      "file": "animations/adult/wake.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": false,
+      "events": {}
+    },
+    "adult/greet": {
+      "file": "animations/adult/greet.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": false,
+      "events": {}
+    },
+    "adult/sick": {
+      "file": "animations/adult/sick.png",
+      "frames": 10,
+      "fps": 10,
+      "columns": 5,
+      "rows": 2,
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "anchor": [
+        100,
+        190
+      ],
+      "loop": false,
+      "events": {}
+    }
+  },
+  "source": "web/pixel-pet.js e web/pet-frames.js"
+}

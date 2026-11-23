@@ -1,0 +1,24 @@
+/* V58 — mais altura, pet maior e no chão (sem ampliar a largura). */
+#world.world{height:clamp(390px,68dvh,635px);min-height:0;}
+#create-screen .create-preview{height:clamp(300px,44dvh,455px);min-height:0;--pet-floor:12%;}
+#create-screen .create-art{width:222px;height:236px;left:50%;bottom:calc(var(--pet-floor) - 12px);transform:translateX(-50%);}
+#create-screen .create-preview:after{bottom:calc(var(--pet-floor) + 7px);width:86px;height:8px;background:#173d3d66;filter:blur(1px);}
+#pet-wrap.pet-wrap{width:168px;height:190px;bottom:37px;}
+#pet-wrap .pet-pose{transform-origin:100px 190px;}
+/* Na criação o tronco respira, mas nenhum movimento de raiz levanta o personagem. */
+#create-screen .create-art .pet-pose{animation:none!important;transform:none!important;}
+#create-screen .create-art .atelier-body{transform-origin:100px 169px;animation:v58-breathe 2.8s steps(6,end) infinite;}
+#create-screen .create-art .atelier-head{transform-origin:100px 113px;animation:v58-head 3.2s steps(7,end) infinite;}
+#create-screen .create-art .atelier-tail{transform-origin:132px 150px;animation:v58-tail 2.1s steps(5,end) infinite;}
+#create-screen .create-art .pixel-wing-pose{transform-origin:55px 128px;animation:v58-wing 1.05s steps(5,end) infinite;}
+@keyframes v58-breathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.012,1.025)}}
+@keyframes v58-head{0%,100%{transform:rotate(0)}45%{transform:rotate(-1.3deg)}75%{transform:rotate(1.2deg)}}
+@keyframes v58-tail{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(7deg)}}
+@keyframes v58-wing{0%,100%{transform:rotate(9deg)}50%{transform:rotate(-16deg)}}
+#choice-list[data-category="outfit"]{max-height:clamp(205px,31dvh,318px);overflow-y:auto;overscroll-behavior:contain;align-content:start;padding:3px 3px 9px;}
+#choice-list[data-category="outfit"] .choice{min-height:92px;}
+#choice-list[data-category="outfit"] .choice-pet{width:75px;height:60px;}
+#choice-list[data-category="outfit"] .choice-pet svg{width:100%;height:100%;shape-rendering:crispEdges;image-rendering:pixelated;}
+@media(max-width:350px){#create-screen .create-art{width:202px;height:215px;}#pet-wrap.pet-wrap{width:158px;height:179px;}}
+@media(max-height:650px){#world.world{height:clamp(350px,65dvh,500px);}#create-screen .create-preview{height:clamp(260px,42dvh,355px);}}
+@media(prefers-reduced-motion:reduce){#create-screen .create-art :is(.atelier-body,.atelier-head,.atelier-tail,.pixel-wing-pose){animation:none!important;}}

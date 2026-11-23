@@ -1,0 +1,10 @@
+/* V66: miniaturas animadas específicas e botão Diversão unificado. */
+#choice-list .choice:has(.v66-scene-choice){overflow:hidden;contain:paint}
+#choice-list .v66-scene-choice{isolation:isolate;background:#aec4c5;border:2px solid #b7c9c1;border-radius:4px}
+#choice-list .v66-scene-choice img{display:block;image-rendering:pixelated;object-fit:contain}
+#choice-list .v66-scene-choice .v64-scene-stage{width:100%;height:auto;aspect-ratio:1/1}
+#needs-dashboard .need-indicator-readonly{cursor:default;opacity:1!important;pointer-events:none}
+#needs-dashboard .need-indicator-readonly .need-symbol svg{shape-rendering:crispEdges}
+#activity-panel .v66-fun-heading{font-size:16px;font-weight:900;text-align:center;color:#fff0df;margin:-21px 30px 15px;min-height:21px}
+#activity-panel[data-kind="toys"] .activity-options button{background:#677e83;border-color:#b6cac3}
+@media(max-width:350px){#activity-panel .v66-fun-heading{font-size:13px}}

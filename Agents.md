@@ -1,47 +1,34 @@
-# Agents.md — Meu Pequeno Pet
+# Agents.md — Meu Pequeno Pet no GitHub (V84.24)
 
-## Propósito
-Jogo de bichinho virtual infantil em pixel art, pensado para criança pequena, com interação por ícones, vários cenários, animações, cuidados e salvamento local.
+## Objetivo
+Jogo de bichinho virtual em português para criança de 4 anos, acessível mesmo sem saber ler. Priorizar botões com ícones, feedback visual, animações suaves, baixa exigência de hardware, cuidado e evolução do pet.
 
-## Base e estrutura
-- Versão-base da migração: V84.23 (continuação da V84.22).
-- O aplicativo PWA será publicado da pasta `web/` pelo GitHub Pages.
-- Usar caminhos relativos compatíveis com `/meu-pequeno-pet/`.
-- Em atualizações normais, modificar os arquivos necessários e enviar commits: não gerar novos HTMLs offline nem ZIPs por padrão.
-- Preservar código-fonte, spritesheets editáveis, artes aprovadas, caches e documentos de testes.
+## Publicação
+- Fonte principal: `web/` (app HTML/CSS/JS e assets referenciados por URL relativa).
+- GitHub Actions em `.github/workflows/pages.yml` publica `web/` no GitHub Pages ao fazer push em `main`.
+- PWA usa `web/sw.js` e `web/manifest.webmanifest`, mantendo o mesmo domínio/scope em todas as versões.
+- Ao editar JS/CSS/imagens, rodar `python3 scripts/update_sw.py` para gerar hashes dos arquivos; a Action faz isso automaticamente. O cache PWA é incremental: imagens não alteradas são reaproveitadas. Atualizar sem limpar `localStorage`.
+- **Não gerar HTML offline completo ou ZIP a cada mudança.** Alterar arquivos e versionar via commits. ZIP só em backup solicitado; todo ZIP deve conter `Agents.md`.
+- As mídias dos 13 cenários foram extraídas do JSON de base64 e estão em `web/assets/scenes/<scene>-<gif|still|preview>.<ext>`. `web/index.html` contém apenas os caminhos relativos.
+- `scripts/verify_pages.py` confirma existência de todas as cenas e cache; `npm run test:pwa` testa o cache incremental; `npm run dev` roda servidor local.
+- Fontes de sprites aprovadas permanecem em `assets-src/v63/` e `assets-src/v84_remakes/`. Não rodar scripts históricos que voltem a incorporar cenas em base64 sem adaptar a este padrão.
 
-## Regressões a evitar
-- Preservar os cenários, o pet, sua evolução, as necessidades, a criação e os controles mobile.
-- Boca: não aplicar filtro de cor às peças de boca.
-- Jardim: árvore estreita, tronco parado e folhas animadas; flores e borboletas na escala aprovada.
-- Entardecer: sem moinho, apenas os pássaros corrigidos e luminária no tamanho original.
-- Noite: coruja maior; luminária transparente com animação sutil na ponta e iluminação contínua, sem saltos.
-- Floresta: tronco aprovado imóvel, formiga andando por cima e espelhada na volta; conservar o esquilo.
-- Halloween: ajustar os períodos de aparição/desaparição do fantasma conforme o requisito da versão-base (15 segundos).
-- Não substituir, recriar ou mudar artes já aprovadas sem pedido explícito.
+## Regras visuais e mecânicas já aprovadas
+- Jardim: flores e borboletas ampliadas, árvore estreita e movimento somente nas folhas.
+- Entardecer: sem moinho; dois pássaros com asas animadas; luminária com base correta, ponta animada e luz constante.
+- Noite: coruja maior; luminária sem fundo branco, no tamanho correto restaurado na V84.19.
+- Floresta: manter cenário ilustrado aprovado, tronco estático e formiga que espelha no retorno.
+- Halloween: ciclo de surgimento/desaparecimento do fantasma de **15 segundos**.
+- V84.24 Cozinha: relógio original movido para a parede entre a geladeira e o armário (posição x=131, y=48, considerando a imagem inteira 320×320); balcão da direita restaurado.
+- V84.24 Telas: o palco dos cenários deve ocupar toda a área interna da moldura, sem a faixa superior colorida; manter miniaturas e pet em dimensões próprias.
+- Boca: sem seletor/filtro de cor; manter ajustes de tamanho/altura.
+- Preservar as 13 cenas, casa, jardim, ambientes, evolução, alimentação, sono, cuidados, animais e persistência dos saves.
+- Não substituir os gráficos por arte genérica ou recriar cenários quando o usuário pede apenas um ajuste pontual.
 
-## Correções V84.24 (aguardando importação inicial dos assets)
-- Cozinha: usar o relógio `kitchen__clock` na parede central (x=131, y=48 no cenário 320×320), jamais sobre a bancada direita. Restaurar bancada a partir de `assets-src/v63/cenarios/kitchen_fundo.png` antes de redesenhar o relógio.
-- Visualização: `#scene-art .v64-scene-stage` e `#create-scene-art .v64-scene-stage` ocupam toda a altura/largura interna, sem faixa extra no Quarto/Cozinha. A imagem do cenário usa nearest-neighbor; pet fica em camada própria.
-- Aplicar `python3 scripts/ajustar_v84_24.py` uma vez após importar a base V84.23; reconstruir cache com `python3 scripts/update_sw.py`. Não apagar saves.
-- A implementação dos gráficos está preparada localmente; o repositório ainda não inclui os 13 cenários completos enquanto não ocorrer a importação inicial.
-
-## Qualidade e publicação
-1. Inspecionar a versão real antes de modificar.
-2. Realizar uma alteração focal, guardar reversibilidade e verificar o que mudou.
-3. Testar largura de 320, 390 e 430 px quando houver alteração visual.
-4. Testar carregamento, navegação Casa/Jardim, personalização, alimentação, sono, efeitos dos cenários e persistência sempre que afetados.
-5. Validar imagens, dimensões, GIFs e spritesheets; reportar apenas testes executados.
-6. O site está em `web/`; usar `scripts/update_sw.py` e `scripts/verify_pages.py` para preparar e validar assets.
-7. Atualizar `Agents.md`, README ou relatório quando mudar estrutura do projeto.
-8. O GitHub Pages publicará depois que os arquivos completos forem enviados e o Actions estiver habilitado.
-
-## Economia de espaço
-- Não versionar backups históricos, logs enormes, ZIPs antigos ou HTMLs offline duplicados.
-- Imagens em arquivos separados sob `web/assets/`, não embutidas todas em base64 no HTML.
-- Cache incremental no PWA para atualizar apenas arquivos modificados.
-- Confirmar que dados salvos do HTML antigo não migram automaticamente entre origens; orientar exportação/importação.
-
-## Segurança
-- Não enviar senhas, tokens de acesso ou dados pessoais ao repositório público.
-- Não publicar novas artes quando o usuário pedir uma prévia para aprovação.
+## Testes e alertas
+- Rodar `python3 scripts/update_sw.py`, `python3 scripts/verify_pages.py`, `npm run test:pwa` e testes de navegador em 320/390/430 px, online/offline quando disponíveis.
+- `scripts/ajustar_v84_24.py` documenta/reproduz a correção gráfica da V84.24. A versão deste ZIP já tem os arquivos finais corrigidos: **não é necessário executar esse script para publicar**.
+- A suíte histórica `npm test` da V84.22 ainda tinha 28 falhas antigas de expectativas obsoletas; não declarar regressão aprovada sem analisar a baseline.
+- Não anunciar URL público antes de existir repositório e deploy confirmado.
+- Saves de `file://` para GitHub Pages **não migram automaticamente**; orientar exportação/importação no jogo antigo.
+- O GitHub Pages implica hospedagem do código do jogo em um repositório público, se a opção Public for usada.

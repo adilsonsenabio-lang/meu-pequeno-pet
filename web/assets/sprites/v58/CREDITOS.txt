@@ -1,0 +1,3 @@
+Assets gerados do código pixel art original Meu Pequeno Pet V58.
+Nenhuma paleta externa foi copiada; preservados os HEX do projeto.
+PNG RGBA, 10 quadros por ação, âncora em (100,185) no quadro 200x200.

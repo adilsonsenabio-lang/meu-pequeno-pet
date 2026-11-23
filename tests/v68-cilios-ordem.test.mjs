@@ -1,0 +1,33 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {creatorKey,loadCreatorSession,saveCreatorSession} from '../web/creator-session.js';
+import {DEFAULT_APPEARANCE} from '../web/core.js';
+const read=name=>readFile(new URL('../web/'+name,import.meta.url),'utf8');
+const storage=()=>{const m=new Map();return {setItem:(k,v)=>m.set(k,String(v)),getItem:k=>m.get(k)||null,removeItem:k=>m.delete(k)}};
+test('V68 ordem de criacao: cenário, cores e boca',async()=>{
+ const app=await read('app.js'); const m=app.match(/const categories=([^\n]+);/);assert.ok(m);
+ assert.match(m[1],/^\[\{key:'scene'.+\{key:'color'.+\{key:'mouth'.+\{key:'body'.+\{key:'head'/);
+});
+test('V68 cílios maiores, visíveis e independentes do movimento da pupila',async()=>{
+ const pix=await read('pixel-pet.js');const c=pix.match(/if\(k==='lashes'\)\{([\s\S]*?)\n  \}/);
+ assert.ok(c); assert.match(c[1],/r\(x\+5,70,2,4,mid\)/);
+ assert.match(c[1],/r\(x-3,73,2,4,mid\)/);
+ assert.match(c[1],/r\(x\+15,73,2,4,mid\)/);
+ assert.ok(!c[1].includes('gaze('));
+});
+test('V68 migração rascunho V66/67 para aba correta',()=>{
+ const db=storage(),key=creatorKey('pet'),draft={...DEFAULT_APPEARANCE,scene:'beach',mouth:'heart',eyes:'lashes'};
+ for(const [oldStep,newStep] of [[0,0],[1,3],[2,4],[3,1],[4,5],[5,6],[6,7],[7,2],[8,8],[15,15]]){
+  db.setItem(key,JSON.stringify({version:2,draft,step:oldStep,creatingNew:false}));
+  const got=loadCreatorSession(db,key);assert.equal(got.step,newStep);assert.equal(got.draft.mouth,'heart');assert.equal(got.draft.scene,'beach');
+ }
+ saveCreatorSession(db,key,draft,2,false);
+ const saved=JSON.parse(db.getItem(key));assert.equal(saved.version,3);
+ const got=loadCreatorSession(db,key);assert.equal(got.step,2);
+});
+test('V68 cache-bust CSS/JS e HTML jogável',async()=>{
+ const [html,sw]=await Promise.all([read('index.html'),read('sw.js')]);
+ assert.match(html,/app\.js\?v=(?:70|74|75|77|80)/);assert.match(sw,/meu-pequeno-pet-v(?:74|75|77|80)/);
+ assert.match(sw,/pixel-pet\.js\?v=69/);assert.match(sw,/creator-session\.js\?v=69/);
+});

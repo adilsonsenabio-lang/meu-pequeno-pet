@@ -1,0 +1,44 @@
+<svg id="pet" class="pet idle has-badge" viewBox="0 0 440 470" role="img" aria-label="Dragão bebê branco, de olhos azuis, chifres dourados, asas brancas e capa azul">
+        <defs>
+          <linearGradient id="fur" x1="0" y1="0" x2=".75" y2="1"><stop stop-color="#fff"/><stop offset=".58" stop-color="#f6fbff"/><stop offset="1" stop-color="#bad8f4"/></linearGradient>
+          <linearGradient id="belly" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#c6e0f8"/></linearGradient>
+          <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff0a7"/><stop offset=".46" stop-color="#ffd15d"/><stop offset="1" stop-color="#e69d27"/></linearGradient>
+          <linearGradient id="cape" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#284d8d"/><stop offset=".58" stop-color="#17376f"/><stop offset="1" stop-color="#102756"/></linearGradient>
+          <radialGradient id="iris"><stop stop-color="#69c9ff"/><stop offset=".55" stop-color="#1686d1"/><stop offset="1" stop-color="#133c88"/></radialGradient>
+          <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="9"/></filter>
+        </defs>
+        <ellipse class="floor-shadow" cx="220" cy="416" rx="105" ry="16" fill="#7da3bc" opacity=".24" filter="url(#shadow)"/>
+        <g id="character">
+          <g class="tail-part"><path class="ink" fill="url(#fur)" d="M291 345 Q352 331 347 370 Q346 402 299 403 Q320 385 316 371 Q306 373 290 376Z"/><path class="detail" d="M320 365 Q338 373 319 388"/></g>
+          <g class="wing wing-left"><path class="ink" fill="url(#fur)" d="M157 236 Q112 204 87 271 Q81 299 91 337 Q111 315 122 324 Q131 353 148 361 Q163 329 170 290Z"/><path class="detail" d="M147 259 Q112 262 106 318 M145 283 Q126 297 128 333"/></g>
+          <g class="wing wing-right"><path class="ink" fill="url(#fur)" d="M282 236 Q328 204 353 271 Q359 299 349 337 Q329 315 318 324 Q309 353 292 361 Q277 329 270 290Z"/><path class="detail" d="M293 259 Q328 262 334 318 M295 283 Q314 297 312 333"/></g>
+          <g class="leg leg-left"><path class="ink" fill="url(#fur)" d="M166 344 Q145 370 149 399 Q151 420 186 419 L205 410 Q208 386 197 353Z"/><path class="ink" fill="#fff" d="M149 401 Q145 414 158 419 L191 419 Q205 414 201 402 Q190 391 176 396 Q164 390 149 401Z"/><path class="detail" d="M165 401 Q169 409 167 417 M182 400 Q187 408 185 418"/></g>
+          <g class="leg leg-right"><path class="ink" fill="url(#fur)" d="M274 344 Q295 370 291 399 Q289 420 254 419 L235 410 Q232 386 243 353Z"/><path class="ink" fill="#fff" d="M291 401 Q295 414 282 419 L249 419 Q235 414 239 402 Q250 391 264 396 Q276 390 291 401Z"/><path class="detail" d="M275 401 Q271 409 273 417 M258 400 Q253 408 255 418"/></g>
+          <g class="body-part"><path class="ink" fill="url(#fur)" d="M155 268 Q167 241 220 239 Q273 241 285 268 Q301 325 279 370 Q258 399 220 399 Q182 399 161 370 Q139 325 155 268Z"/><path class="ink" fill="url(#belly)" d="M187 278 Q198 267 220 267 Q242 267 253 278 Q267 323 248 365 Q238 383 220 385 Q202 383 192 365 Q173 323 187 278Z"/><path class="detail" d="M188 309 Q220 326 252 309 M188 341 Q220 358 252 341"/></g>
+          <g class="cape-part"><path class="ink" fill="url(#cape)" d="M162 255 Q143 274 136 311 Q124 353 111 376 Q142 384 179 365 Q188 331 188 292 L220 273 L252 292 Q252 331 261 365 Q298 384 329 376 Q316 353 304 311 Q297 274 278 255 Q250 274 220 280 Q190 274 162 255Z"/><path fill="none" stroke="url(#gold)" stroke-width="8" stroke-linecap="round" d="M117 370 Q149 376 174 357 M323 370 Q291 376 266 357 M161 266 Q186 286 220 290 Q254 286 279 266"/><path fill="#102756" d="M171 289 Q181 300 185 320 L181 348 Q158 355 135 361 Q157 322 171 289 M269 289 Q259 300 255 320 L259 348 Q282 355 305 361 Q283 322 269 289"/></g>
+          <g class="arm arm-left"><path class="ink" fill="url(#fur)" d="M168 285 Q149 289 148 314 Q148 334 174 342 Q195 343 202 325 Q200 304 184 291Z"/><path class="ink" fill="#fff" d="M176 316 Q153 306 150 323 Q148 338 169 343 Q188 348 197 332 Q199 320 188 317Z"/><path class="detail" d="M162 329 Q169 335 176 335 M178 323 Q184 329 188 328"/></g>
+          <g class="arm arm-right"><path class="ink" fill="url(#fur)" d="M272 285 Q291 289 292 314 Q292 334 266 342 Q245 343 238 325 Q240 304 256 291Z"/><path class="ink" fill="#fff" d="M264 316 Q287 306 290 323 Q292 338 271 343 Q252 348 243 332 Q241 320 252 317Z"/><path class="detail" d="M278 329 Q271 335 264 335 M262 323 Q256 329 252 328"/></g>
+          <g class="head-part">
+            <g class="horn horn-left"><path class="ink" fill="url(#gold)" d="M160 141 Q132 106 147 79 Q149 109 191 111 Q185 133 160 141Z"/><path class="gold-detail" d="M150 109 Q164 123 181 122"/></g>
+            <g class="horn horn-right"><path class="ink" fill="url(#gold)" d="M280 141 Q308 106 293 79 Q291 109 249 111 Q255 133 280 141Z"/><path class="gold-detail" d="M290 109 Q276 123 259 122"/></g>
+            <path class="ink" fill="url(#fur)" d="M160 143 Q138 149 121 183 Q115 208 133 222 Q127 239 144 244 Q157 239 169 229 L186 207Z"/>
+            <path class="ink" fill="url(#fur)" d="M280 143 Q302 149 319 183 Q325 208 307 222 Q313 239 296 244 Q283 239 271 229 L254 207Z"/>
+            <path class="ink" fill="url(#fur)" d="M220 102 Q271 101 296 141 Q319 170 305 217 Q291 250 259 260 Q220 272 181 260 Q149 250 135 217 Q121 170 144 141 Q169 101 220 102Z"/>
+            <path fill="#fff" d="M158 155 Q181 115 222 118 Q190 130 181 158 Q166 170 155 188Z" opacity=".8"/>
+            <path class="ink" fill="url(#fur)" d="M187 112 Q204 91 222 112 Q234 88 255 105 Q263 116 255 130 Q238 124 226 137 Q210 129 194 139 Q176 135 170 127Z"/>
+            <path class="detail" d="M158 188 Q170 177 181 181 M282 181 Q293 177 301 188"/>
+            <g class="eyes-open"><ellipse cx="181" cy="190" rx="25" ry="30" fill="#fff" stroke="#101d44" stroke-width="5"/><ellipse cx="259" cy="190" rx="25" ry="30" fill="#fff" stroke="#101d44" stroke-width="5"/><ellipse cx="182" cy="192" rx="15" ry="23" fill="url(#iris)"/><ellipse cx="258" cy="192" rx="15" ry="23" fill="url(#iris)"/><ellipse cx="183" cy="193" rx="8" ry="17" fill="#10214a"/><ellipse cx="257" cy="193" rx="8" ry="17" fill="#10214a"/><circle cx="176" cy="181" r="6" fill="#fff"/><circle cx="251" cy="181" r="6" fill="#fff"/><circle cx="188" cy="201" r="2.5" fill="#fff"/><circle cx="263" cy="201" r="2.5" fill="#fff"/></g>
+            <g class="eyes-closed"><path class="ink-line" d="M159 191 Q181 209 203 191 M237 191 Q259 209 281 191"/></g>
+            <g class="eyes-happy"><path class="ink-line" d="M159 199 Q181 168 203 199 M237 199 Q259 168 281 199"/></g>
+            <path class="ink" fill="url(#fur)" d="M185 220 Q186 205 220 207 Q254 205 255 220 Q286 218 291 238 Q294 260 264 270 Q243 276 220 271 Q197 276 176 270 Q146 260 149 238 Q154 218 185 220Z"/>
+            <ellipse cx="187" cy="238" rx="5" ry="7" fill="#101d44" transform="rotate(-20 187 238)"/><ellipse cx="253" cy="238" rx="5" ry="7" fill="#101d44" transform="rotate(20 253 238)"/>
+            <path class="mouth mouth-smile" d="M197 251 Q220 269 243 251"/>
+            <g class="mouth mouth-open"><path d="M199 252 Q220 276 241 252 Q236 280 220 284 Q204 280 199 252Z" fill="#572d5e" stroke="#101d44" stroke-width="4"/><path d="M207 271 Q220 262 233 271 Q220 284 207 271" fill="#fa8cac"/></g>
+            <path class="mouth mouth-sleep" d="M211 260 Q220 264 229 260"/>
+            <ellipse class="blush" cx="160" cy="223" rx="15" ry="7" fill="#f8a6bb" opacity=".7"/><ellipse class="blush" cx="280" cy="223" rx="15" ry="7" fill="#f8a6bb" opacity=".7"/>
+          </g>
+          <g class="badge"><path class="ink" fill="url(#gold)" d="M220 272 L227 287 L244 289 L231 302 L234 319 L220 311 L206 319 L209 302 L196 289 L213 287Z"/><path fill="#fff2ad" opacity=".8" d="M220 277 L224 290 L236 292 L225 297Z"/></g>
+          <g class="berry"><circle cx="162" cy="310" r="15" fill="#ef607b" stroke="#101d44" stroke-width="4"/><path d="M153 295 Q163 286 170 295" fill="none" stroke="#3d9469" stroke-width="5" stroke-linecap="round"/><circle cx="156" cy="305" r="4" fill="#ffd4df"/></g>
+        </g>
+        <g class="sleep-symbol" fill="#2a63a4" font-family="system-ui" font-weight="800"><text x="305" y="178" font-size="24">z</text><text x="326" y="150" font-size="32">z</text></g>
+      </svg>

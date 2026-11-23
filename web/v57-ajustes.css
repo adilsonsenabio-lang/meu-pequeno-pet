@@ -1,0 +1,12 @@
+/* V57 — chão real na criação e peças conectadas. Não estica largura. */
+#create-screen .create-preview{--pet-floor:12%;}
+#create-screen .create-art{position:absolute;left:50%;bottom:var(--pet-floor);transform:translateX(-50%);width:190px;height:202px;z-index:3;pointer-events:none;}
+#create-screen .create-art .pet-pose{animation:none!important;transform:none!important;}
+#create-screen .create-art svg{height:100%;width:100%;shape-rendering:crispEdges;image-rendering:pixelated;overflow:visible;}
+#create-screen .create-preview:after{content:"";position:absolute;z-index:1;left:50%;bottom:calc(var(--pet-floor) + 5px);width:74px;height:8px;transform:translateX(-50%);border-radius:50%;background:#244d4c45;filter:blur(1px);pointer-events:none;}
+#choice-list[data-category="mouth"],#choice-list[data-category="markings"]{max-height:clamp(190px,29dvh,275px);overflow-y:auto;align-content:start;}
+#choice-list:is([data-category="mouth"],[data-category="markings"]) .choice{min-height:89px;}
+#choice-list:is([data-category="mouth"],[data-category="markings"]) .choice-pet{height:57px;width:74px;}
+#choice-list:is([data-category="mouth"],[data-category="markings"]) .choice-pet svg{width:100%;height:100%;image-rendering:pixelated;shape-rendering:crispEdges;}
+@media(max-width:350px){#create-screen .create-art{width:170px;height:182px}#create-screen .create-preview{--pet-floor:12%;}}
+@media(max-height:650px){#create-screen .create-preview{--pet-floor:11%;}}

@@ -1,0 +1,4 @@
+/* V65: pupila desliza dentro da íris; pálpebra e contorno não se movem. */
+#play-art .atelier-eyes .pixel-pupil {transform:translate(var(--eye-x,0px),var(--eye-y,0px));transition:transform .25s cubic-bezier(.25,.08,.2,1);transform-box:view-box;will-change:transform;}
+#play-art[data-motion="look-target"] .atelier-head {transition:transform .32s cubic-bezier(.2,.08,.15,1);transform-origin:100px 113px;}
+@media(prefers-reduced-motion:reduce){#play-art .atelier-eyes .pixel-pupil{transition-duration:.12s}#play-art[data-motion="look-target"] .atelier-head{transition-duration:.12s}}

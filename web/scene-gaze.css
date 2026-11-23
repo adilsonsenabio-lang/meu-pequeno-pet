@@ -1,0 +1,28 @@
+.scene-life-layer{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+.scene-life{position:absolute;left:-14%;top:20%;width:42px;height:36px;pointer-events:none;animation:scene-life-cross 16s steps(128,end) infinite;image-rendering:pixelated}
+.scene-life svg{width:100%;height:100%;overflow:visible}
+.scene-life{pointer-events:none}
+.scene-decoration.interacting{filter:drop-shadow(0 0 5px #fff3ad)}
+.scene-decoration.interacting .pixel-item>*{animation-duration:.5s!important}
+.scene-focus{transform-box:fill-box}
+.scene-focus-crab .scene-crab-legs{animation:scene-crab-steps .8s steps(4,end) infinite;transform-origin:center}
+.scene-life .life-wing{animation:scene-life-flap .55s steps(5,end) infinite;transform-origin:24px 17px}
+.scene-life .life-claw{animation:scene-life-claw 1.2s steps(5,end) infinite;transform-origin:24px 17px}
+.scene-life .life-fin{animation:scene-life-fin .7s steps(5,end) infinite;transform-origin:20px 13px}
+.scene-life-crab{top:72%;animation:scene-life-crab 9s steps(45,end) infinite}
+.scene-life-fish{top:48%;animation-duration:18s}
+.scene-life-star{left:67%;top:18%;animation:scene-life-twinkle 4s steps(4,end) infinite}
+.scene-life-snow{left:58%;top:16%;animation:scene-life-snow 6s steps(48,end) infinite}
+.scene-life-butterfly{top:26%;animation-duration:19s}
+.scene-life-steam{left:63%;top:27%;animation:scene-life-steam 4s steps(8,end) infinite}
+@keyframes scene-life-cross{0%,8%{opacity:0;transform:translateX(0)}10%{opacity:1}86%{opacity:1;transform:translateX(128vw)}88%,100%{opacity:0;transform:translateX(128vw)}}
+@keyframes scene-life-crab{0%{transform:translateX(0)}70%,100%{transform:translateX(95vw)}}
+@keyframes scene-life-twinkle{0%,100%{opacity:.45;transform:scale(1)}50%{opacity:1;transform:scale(1.14)}}
+@keyframes scene-life-snow{to{transform:translate(-8vw,42vh)}}
+@keyframes scene-life-steam{0%,100%{opacity:.15;transform:translateY(5px)}45%{opacity:.8;transform:translateY(-4px)}}
+@keyframes scene-life-flap{0%,100%{transform:scaleY(1)}20%{transform:scaleY(.72)}40%{transform:scaleY(.42)}60%{transform:scaleY(.58)}80%{transform:scaleY(.86)}}
+@keyframes scene-life-claw{0%,100%{transform:rotate(0)}20%{transform:rotate(-4deg)}40%{transform:rotate(-9deg)}60%{transform:rotate(-5deg)}80%{transform:rotate(2deg)}}
+@keyframes scene-life-fin{0%,100%{transform:rotate(0)}20%{transform:rotate(5deg)}40%{transform:rotate(11deg)}60%{transform:rotate(6deg)}80%{transform:rotate(-3deg)}}
+@keyframes scene-crab-steps{0%,100%{transform:translateY(0)}25%{transform:translateY(-1px)}50%{transform:translateY(1px)}75%{transform:translateY(-1px)}}
+.paused .scene-life,.paused .scene-life *{animation-play-state:paused!important}
+@media(prefers-reduced-motion:reduce){.scene-life,.scene-life *{animation:none!important}.scene-life{left:65%;top:25%}}

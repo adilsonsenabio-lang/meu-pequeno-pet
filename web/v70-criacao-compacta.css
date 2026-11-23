@@ -1,0 +1,73 @@
+/* V70 — criação compacta; só a LISTA de opções rola (não os controles). */
+/* Reduz o topo na criação, mas deixa a barra superior do jogo intacta. */
+.game-root:has(#create-screen:not([hidden])) .game-header{
+  height:54px;
+  min-height:54px;
+  padding:1px 4px 1px 8px;
+}
+.game-root:has(#create-screen:not([hidden])) .game-header .brand{font-size:16px;gap:6px;}
+.game-root:has(#create-screen:not([hidden])) .game-header .brand-star{font-size:22px;}
+.game-root:has(#create-screen:not([hidden])) .game-header #parents-open{width:48px;height:48px;min-width:48px;}
+.game-root:has(#create-screen:not([hidden])) .game-header #parents-open svg{width:27px;height:27px;}
+#create-screen .intro{margin:0 0 6px;padding:0;}
+#create-screen .intro h1{font-size:19px;line-height:1.2;margin:0;}
+#create-screen .intro p{font-size:12px;line-height:1.15;margin:2px 0 0;}
+/* A cena diminui um pouco sem mudar o tamanho ou a âncora dos pés do pet. */
+#create-screen .create-preview{height:clamp(265px,39dvh,390px);min-height:0;}
+#create-screen .creator{margin-top:9px;padding:10px;}
+#create-screen .creator-title{height:35px;min-height:35px;font-size:16px;}
+#create-screen .creator-title svg{height:24px;width:24px;}
+/* Exatamente duas fileiras por vez; as demais escolhas continuam acessíveis. */
+#create-screen #choice-list.two-row-options{
+  --row-height:clamp(78px,10.9dvh,92px);
+  --row-gap:8px;
+  grid-auto-rows:var(--row-height);
+  row-gap:var(--row-gap);
+  max-height:calc(var(--row-height)*2 + var(--row-gap));
+  overflow-x:hidden;
+  overflow-y:auto;
+  align-content:start;
+  overscroll-behavior-y:contain;
+  scrollbar-width:thin;
+  scrollbar-color:#d6b6b4 #6d6a74;
+  touch-action:pan-y;
+  scroll-snap-type:y proximity;
+  padding:0 3px 0 0;
+}
+#create-screen #choice-list.two-row-options .choice{
+  height:var(--row-height);
+  min-height:0;
+  max-height:var(--row-height);
+  padding:3px 2px;
+  gap:2px;
+  scroll-snap-align:start;
+  overflow:hidden;
+}
+#create-screen #choice-list.two-row-options .choice-pet{max-height:55px;}
+/* Os ajustes ficam logo após a segunda fileira. Mantemos os alvos de toque. */
+#create-screen .creator-adjust{margin-top:7px;padding:8px 10px 7px;}
+#create-screen .creator-adjust .size-head{font-size:12px;}
+#create-screen .creator-adjust input[type=range]{height:28px;}
+#create-screen .creator-adjust .colors-head{margin:4px 0;font-size:12px;}
+#create-screen .creator-adjust .part-colors{gap:8px;padding:4px 4px 6px;}
+#create-screen .mouth-height-adjust{margin:4px 0 5px;padding:6px 0 1px;}
+#create-screen .creator-nav{margin-top:8px;}
+#create-screen .nav-button{height:54px;}
+@media(max-height:690px){
+  #create-screen .create-preview{height:clamp(245px,38dvh,310px);}
+  #create-screen .creator-title{height:33px;min-height:33px;}
+  #create-screen #choice-list.two-row-options{--row-height:76px;}
+  #create-screen #choice-list.two-row-options .choice-pet{max-height:48px;}
+  #create-screen .intro h1{font-size:18px;}
+}
+@media(max-width:350px){
+  .game-root:has(#create-screen:not([hidden])) .game-header .brand{font-size:14px;}
+  #create-screen .creator{padding:8px;}
+  #create-screen #choice-list.two-row-options{--row-height:79px;--row-gap:6px;}
+  #create-screen #choice-list.two-row-options .choice{font-size:10px;}
+  #create-screen #choice-list.two-row-options .choice-pet{max-height:46px;}
+}
+
+/* V84.17 — sem seletor/filtro de cor na etapa Boca. */
+#create-screen .creator-adjust .colors-head[hidden],
+#create-screen .creator-adjust #part-colors[hidden]{display:none!important;}

@@ -1,0 +1,10 @@
+import {cp, mkdir, rm, stat} from 'node:fs/promises';
+import {resolve, join} from 'node:path';
+const root=resolve(import.meta.dirname,'..');
+const src=join(root,'web');
+const dest=join(root,'dist');
+for(const name of ['index.html','app.js','core.js','storage.js','icon.svg'])await stat(join(src,name));
+await rm(dest,{recursive:true,force:true});
+await mkdir(dest,{recursive:true});
+await cp(src,dest,{recursive:true,force:true});
+console.log(`Arquivos originais copiados para dist/ (${dest})`);

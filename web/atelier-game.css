@@ -1,0 +1,225 @@
+/* The atelier's 200 × 200 illustration shares one stage and palette across all poses. */
+.scene-art{position:absolute;inset:0;z-index:0;pointer-events:none}.scene-art svg{display:block;width:100%;height:100%;preserveAspectRatio:none}.world .sun,.world .cloud,.world .hill{display:none}
+.create-scene-art{position:absolute;inset:0;z-index:0;pointer-events:none}.create-scene-art svg{display:block;width:100%;height:100%}
+.create-preview:before,.preview-floor{display:none}.create-art{z-index:2}
+.create-art,.pet-wrap #play-art{display:grid;place-items:center}.create-art svg,#play-art>svg{width:100%;height:100%;overflow:visible;display:block}.create-art .pet-pose,#play-art .pet-pose{transform-origin:100px 180px}
+.pet-wrap{bottom:18px;width:255px;height:290px}.create-art{width:250px;height:250px}.scene-object svg,.care-grid button>svg,.need-cue svg,.world-effect svg{fill:none;stroke:none}.scene-object svg{width:52px;height:52px}.care-grid button>svg{width:40px;height:40px;overflow:visible}.need-cue svg{width:36px;height:36px}.world-effect svg{width:58px;height:58px}
+.choice-list{grid-template-columns:repeat(4,minmax(0,1fr))}.choice{min-height:80px;padding:2px;font-size:11px}.choice-pet{width:54px;height:54px;display:block}.choice-pet svg{width:100%;height:100%}.choice-art.swatch-art{width:42px;height:42px}
+#play-art[data-motion="idle"] .pet-pose,#create-art[data-motion="idle"] .pet-pose{animation:atelier-breathe 2.4s ease-in-out infinite}
+#play-art[data-motion="walk"] .pet-pose{animation:atelier-walk .36s ease-in-out infinite}
+#play-art[data-motion="happy"] .pet-pose,#play-art[data-motion="satisfied"] .pet-pose{animation:atelier-happy .55s ease-in-out 2}
+#play-art[data-motion="notice"] .pet-pose,#play-art[data-motion="request"] .pet-pose,#play-art[data-motion="look"] .pet-pose{animation:atelier-look 1.2s ease-in-out infinite}
+#play-art[data-motion="stretch"] .pet-pose{animation:atelier-stretch 1.4s ease-in-out infinite}
+#play-art[data-motion="food-reach"] .pet-pose,#play-art[data-motion="food-bite"] .pet-pose,#play-art[data-motion="food-chew"] .pet-pose,#play-art[data-motion="eat"] .pet-pose{animation:atelier-eat .55s ease-in-out infinite}
+#play-art[data-motion="sleep"] .pet-pose{animation:atelier-sleep 2.2s ease-in-out infinite}
+#play-art[data-motion="drink"] .pet-pose,#play-art[data-motion="bath"] .pet-pose,#play-art[data-motion="potty"] .pet-pose,#play-art[data-motion="play"] .pet-pose{animation:atelier-care .7s ease-in-out infinite}
+@keyframes atelier-breathe{50%{transform:scale(1.015,.99)}}@keyframes atelier-walk{50%{transform:translateY(-5px) rotate(2deg)}}@keyframes atelier-happy{50%{transform:translateY(-10px) scale(1.03)}}@keyframes atelier-look{50%{transform:rotate(-4deg)}}@keyframes atelier-stretch{50%{transform:scale(1.04,.97)}}@keyframes atelier-eat{50%{transform:rotate(2deg) translateY(2px)}}@keyframes atelier-sleep{50%{transform:scale(1.01,.96) rotate(-4deg)}}@keyframes atelier-care{50%{transform:translateY(-4px) rotate(2deg)}}
+@media(max-width:370px){.pet-wrap{width:175px;height:205px;bottom:18px}.choice-pet{width:44px;height:44px}.choice{min-height:68px}}
+@media(max-height:650px){.pet-wrap{width:170px;height:195px;bottom:14px}.choice-pet{width:37px;height:37px}.choice{min-height:57px}}
+
+/* The animal acts with separate head, wing, tail, body and foot layers. */
+#play-art .atelier-tail,#play-art .atelier-head,#play-art .atelier-wings,#play-art .atelier-feet,#play-art .atelier-body{transform-box:view-box;transition:transform .2s ease}
+#play-art[data-motion="idle"] .atelier-tail{animation:tail-swish 3s ease-in-out infinite}
+#play-art[data-motion="idle"] .atelier-head{animation:head-blink 4s ease-in-out infinite}
+#play-art[data-motion="walk"] .atelier-feet{animation:feet-step .35s ease-in-out infinite}
+#play-art[data-motion="walk"] .atelier-tail{animation:tail-swish .45s ease-in-out infinite}
+#play-art[data-motion="walk"] .atelier-wings{animation:wing-flutter .38s ease-in-out infinite}
+#play-art[data-motion="happy"] .atelier-wings,#play-art[data-motion="satisfied"] .atelier-wings,#play-art[data-motion="play"] .atelier-wings{animation:wing-flutter .4s ease-in-out 3}
+#play-art[data-motion="happy"] .atelier-head,#play-art[data-motion="satisfied"] .atelier-head{animation:head-nod .5s ease-in-out 2}
+#play-art[data-motion="notice"] .atelier-head,#play-art[data-motion="look"] .atelier-head,#play-art[data-motion="request"] .atelier-head{animation:head-look 1.2s ease-in-out infinite}
+#play-art[data-motion="food-ready"] .atelier-head,#play-art[data-motion="food-reach"] .atelier-head{transform:translateY(3px) rotate(-3deg)}
+#play-art[data-motion="food-bite"] .atelier-head,#play-art[data-motion="food-chew"] .atelier-head,#play-art[data-motion="eat"] .atelier-head{animation:head-nod .45s ease-in-out infinite}
+#play-art[data-motion="sleep"] .atelier-head{transform:translateY(8px) rotate(-9deg)}
+#play-art[data-motion="bath"] .atelier-wings,#play-art[data-motion="drink"] .atelier-head,#play-art[data-motion="potty"] .atelier-feet{animation:head-nod .6s ease-in-out infinite}
+@keyframes tail-swish{50%{transform:rotate(6deg) translateX(2px)}}@keyframes head-blink{48%,50%{transform:scaleY(.96)}}@keyframes feet-step{50%{transform:translateY(-5px) rotate(2deg)}}@keyframes wing-flutter{50%{transform:translateY(-5px) scaleX(1.07)}}@keyframes head-nod{50%{transform:translateY(4px) rotate(3deg)}}@keyframes head-look{50%{transform:rotate(-5deg)}}
+/* Feeding: the bite is drawn in the existing head, and the berry follows its mouth. */
+.atelier-eating-mouth{opacity:0}
+#play-art[data-motion="food-bite"] .atelier-snout,#play-art[data-motion="food-chew"] .atelier-snout{opacity:0}
+#play-art[data-motion="food-bite"] .atelier-eating-mouth,#play-art[data-motion="food-chew"] .atelier-eating-mouth{opacity:1}
+#play-art[data-motion="food-chew"] .atelier-eating-mouth{animation:atelier-chew .27s ease-in-out infinite}
+@keyframes atelier-chew{50%{transform:scaleY(.55) translateY(4px)}}
+#play-art[data-motion^="food-"] .pet-pose{animation:none}
+#play-art[data-motion="food-ready"] .atelier-head{transform:rotate(-5deg)}
+#play-art[data-motion="food-reach"] .atelier-head{transform:translateY(4px) rotate(4deg)}
+#play-art[data-motion="food-bite"] .atelier-head{animation:head-nod .65s ease-in-out 1}
+#play-art[data-motion="food-chew"] .atelier-head{animation:head-nod .34s ease-in-out 3}
+#play-art[data-motion="food-swallow"] .atelier-head{transform:translateY(-4px) rotate(-2deg)}
+#play-art[data-motion="food-reach"] .atelier-body{transform:translateY(2px) scaleX(1.04)}
+#play-art[data-motion="food-bite"] .atelier-body{transform:translateY(4px)}
+.food-piece{position:absolute;z-index:4;left:50%;bottom:50%;width:33px;height:33px;pointer-events:none;transform:translate(-50%,0);opacity:0;transition:transform .6s cubic-bezier(.25,.75,.2,1),opacity .15s}
+.food-piece svg{width:100%;height:100%;overflow:visible}.food-piece .food-bitten{display:none}
+.food-piece[data-stage="whole"],.food-piece[data-stage="bitten"]{opacity:1}
+.food-piece[data-stage="whole"]{transform:translate(42px,65px)}
+#play-art[data-motion="food-bite"]+.food-piece[data-stage="whole"]{transform:translate(-50%,0)}
+.food-piece[data-stage="bitten"]{transform:translate(-50%,1px)}
+.food-piece[data-stage="bitten"] .food-whole{display:none}.food-piece[data-stage="bitten"] .food-bitten{display:inline}
+.scene-object[data-eaten="1"] svg circle:nth-of-type(1),.scene-object[data-eaten="2"] svg circle:nth-of-type(1),.scene-object[data-eaten="2"] svg circle:nth-of-type(2),.scene-object[data-eaten="3"] svg circle{opacity:0}
+.scene-object{cursor:pointer}
+.food-piece{left:28%;bottom:calc(50% + 25px)}
+.food-piece[data-stage="whole"]{transform:translate(42px,90px)}
+#play-art[data-motion="food-reach"]+.food-piece[data-stage="whole"]{transform:translate(100px,170px)}
+#play-art[data-motion="food-bite"]+.food-piece[data-stage="whole"]{transform:translate(42px,90px)}
+.food-piece[data-stage="bitten"]{transform:translate(42px,90px)}
+#play-art[data-motion="food-reach"]+.food-piece[data-stage="whole"]{transform:translate(100px,143px)}
+#play-art[data-motion="food-bite"]+.food-piece[data-stage="whole"],.food-piece[data-stage="bitten"]{transform:translate(42px,52px)}
+
+#play-art .atelier-eating-mouth{transform-box:view-box;transform-origin:100px 106px}
+/* Keep the mouth anchored to the snout; SVG group scaling moved it to the forehead on Android. */
+#play-art[data-motion="food-chew"] .atelier-eating-mouth{animation:none;transform:none}
+/* Action poses are mutually exclusive via #play-art[data-motion]. */
+.care-layer{position:absolute;z-index:4;inset:0;pointer-events:none}.care-layer>span{position:absolute;opacity:0;transition:opacity .25s,transform .4s}
+.care-layer .care-sponge{width:35px;height:27px;border:3px solid #536ea0;border-radius:12px;background:#ffdc67;left:69%;bottom:28%;transform:translate(30px,20px)}
+.care-layer .care-water{width:62px;height:90px;left:66%;bottom:20%;background:radial-gradient(circle,#c4f6ff 20%,transparent 22%) 0 0/23px 24px;transform:translateY(-20px)}
+.care-layer .care-foam{width:80px;height:45px;left:50%;bottom:23%;transform:translateX(-50%);background:radial-gradient(circle,#fff 55%,transparent 57%) 0 0/28px 26px}
+.care-layer .care-screen{width:105px;height:105px;left:10%;bottom:9%;background:linear-gradient(125deg,#d7b6ea,#f3d4ed);border:4px solid #9f7bb4;border-radius:45% 45% 15% 15%}
+.care-layer .care-toy{width:36px;height:36px;border-radius:50%;border:3px solid #1d2b5e;background:conic-gradient(#f87f8a 0 25%,#ffe369 25% 50%,#75cbf5 50% 75%,#f87f8a 75%);left:27%;bottom:30%}
+.care-layer .care-syringe{width:54px;height:54px;left:68%;bottom:38%;transform:translate(34px,-18px) rotate(-28deg);transform-origin:50% 50%}.care-layer .care-syringe svg{width:100%;height:100%;filter:drop-shadow(0 2px 1px #27324955)}
+.care-layer[data-care="bath"][data-phase="bath-sponge"] .care-sponge{opacity:1;transform:translate(-20px,-35px)}
+.care-layer[data-care="bath"][data-phase="bath-sponge"] .care-foam,.care-layer[data-care="bath"][data-phase="bath-rinse"] .care-foam{opacity:.8}
+.care-layer[data-care="bath"][data-phase="bath-rinse"] .care-water{opacity:1;transform:translateY(0)}
+.care-layer[data-care="potty"][data-phase="potty-private"] .care-screen{opacity:1}
+.care-layer[data-care="play"] .care-toy{opacity:1;animation:toy-bounce 1s ease-in-out infinite}
+.care-layer[data-care="injection"][data-phase="health-ready"] .care-syringe{opacity:1;transform:translate(15px,-8px) rotate(-28deg)}.care-layer[data-care="injection"][data-phase="health-injection"] .care-syringe{opacity:1;animation:health-injection .65s steps(4,end) 1}.care-layer[data-care="injection"][data-phase="health-relief"] .care-syringe{opacity:0;transform:translate(34px,-18px) rotate(-28deg)}
+@keyframes health-injection{0%{transform:translate(15px,-8px) rotate(-28deg)}45%,70%{transform:translate(1px,4px) rotate(-28deg)}100%{transform:translate(15px,-8px) rotate(-28deg)}}
+@keyframes toy-bounce{50%{transform:translate(70px,-35px)}}
+#play-art[data-motion^="water-"] .pet-pose,#play-art[data-motion^="bath-"] .pet-pose,#play-art[data-motion^="potty-"] .pet-pose,#play-art[data-motion^="sleep-"] .pet-pose,#play-art[data-motion^="love-"] .pet-pose,#play-art[data-motion^="health-"] .pet-pose{animation:none}
+#play-art[data-motion="water-look"] .atelier-head,#play-art[data-motion="love-look"] .atelier-head{transform:rotate(6deg)}
+#play-art[data-motion="water-lower"] .atelier-head,#play-art[data-motion="water-sip"] .atelier-head{transform:translateY(8px) rotate(8deg)}
+#play-art[data-motion="water-sip"] .atelier-head{animation:head-nod .3s ease-in-out 4}
+#play-art[data-motion="water-lift"] .atelier-head{transform:translateY(-3px)}
+#play-art[data-motion="bath-notice"] .atelier-head{transform:rotate(-8deg)}
+#play-art[data-motion="bath-sponge"] .atelier-head{transform:rotate(8deg)}
+#play-art[data-motion="bath-rinse"] .atelier-head{transform:translateY(5px)}
+#play-art[data-motion="bath-shake"] .atelier-head,#play-art[data-motion="bath-shake"] .atelier-tail{animation:head-look .18s ease-in-out 4}
+#play-art[data-motion="potty-ask"] .atelier-body{transform:translateY(5px) scaleX(.94)}
+#play-art[data-motion="potty-private"] .atelier-body,#play-art[data-motion="potty-private"] .atelier-feet{transform:translateY(8px)}
+#play-art[data-motion="potty-relief"] .atelier-head{transform:translateY(-5px)}
+#play-art[data-motion="sleep-yawn"] .atelier-snout{opacity:0}
+#play-art[data-motion="sleep-yawn"] .atelier-eating-mouth{opacity:1}
+#play-art[data-motion="sleep-settle"] .atelier-head,#play-art[data-motion="sleep-rest"] .atelier-head{transform:translateY(8px) rotate(-9deg)}
+#play-art[data-motion="sleep-rest"] .pet-pose{animation:atelier-breathe 2.5s ease-in-out infinite}
+#play-art[data-motion="sleep-wake"] .atelier-head{transform:translateY(-7px) rotate(5deg)}
+#play-art[data-motion="love-lean"] .atelier-head{transform:rotate(12deg) translateY(4px)}
+#play-art[data-motion="love-blink"] .atelier-head{animation:head-blink .7s ease-in-out 1}
+#play-art[data-motion="health-notice"] .atelier-head{transform:translateY(4px) rotate(-5deg)}#play-art[data-motion="health-ready"] .atelier-head{transform:rotate(6deg)}#play-art[data-motion="health-injection"] .atelier-body{animation:health-brace .65s steps(4,end) 1}#play-art[data-motion="health-relief"] .atelier-head{animation:head-nod .45s ease-in-out 2}
+@keyframes health-brace{0%,100%{transform:none}45%,70%{transform:translateX(-2px) scale(.98,1.02)}}
+#play-art[data-motion="play-celebrate"] .atelier-wings{animation:wing-flutter .3s ease-in-out 2}
+.atelier-eyes-shut{opacity:0}.eyes-closed .atelier-eyes{opacity:0}.eyes-closed .atelier-eyes-shut{opacity:1}
+#play-art[data-motion="idle"] .atelier-head{animation:none}
+#play-art .atelier-head{transform-origin:100px 112px}
+#play-art .atelier-body{transform-origin:100px 160px}
+#play-art .atelier-tail{transform-origin:134px 164px}
+#play-art .atelier-feet{transform-origin:100px 176px}
+#play-art[data-motion="love-lean"] .atelier-head{transform:rotate(7deg)}
+#play-art[data-motion="sleep-wake"] .atelier-wings{animation:wing-flutter .65s ease-in-out 1}
+/* Interactions follow the pet's position instead of fixed screen percentages. */
+.care-layer{left:var(--pet-x,50%);right:auto;width:150px;transform:translateX(-50%)}
+.care-layer .care-screen{left:0;width:150px;bottom:18px;height:155px}
+.care-layer .care-sponge{left:60%;bottom:35%}
+.care-layer .care-foam{left:50%;bottom:22%;transform:translateX(-50%);transition:opacity .8s}
+.care-layer[data-phase="bath-rinse"] .care-foam{animation:foam-away .95s forwards}
+@keyframes foam-away{to{opacity:0}}
+.care-layer .care-water{left:40%;bottom:25%}
+.care-layer .care-toy{left:0;bottom:25%}
+.paused .care-layer *{animation-play-state:paused!important}
+#play-art[data-love-variant="1"][data-motion="love-lean"] .atelier-head{transform:rotate(-7deg)}
+/* Shared anatomy and object anchors for all body shapes and ages. */
+#play-art .pet-pose{animation:none!important}
+#play-art .atelier-eyes-shut,.care-cup,.care-sponged,.care-dirt,.care-suds{opacity:0;transition:opacity .3s}
+#play-art.eyes-closed .atelier-eyes{opacity:0}
+#play-art.eyes-closed .atelier-eyes-shut{opacity:1}
+#play-art[data-motion="idle"] .atelier-body{animation:body-breathe 3.6s ease-in-out infinite}
+#play-art[data-motion="idle"] .atelier-eyes{animation:real-blink 5.3s steps(1) infinite}
+#play-art[data-motion="idle"] .atelier-eyes-shut{animation:closed-blink 5.3s steps(1) infinite}
+@keyframes real-blink{0%,94%,100%{opacity:1}96%{opacity:0}}
+@keyframes closed-blink{0%,94%,100%{opacity:0}96%{opacity:1}}
+@keyframes body-breathe{50%{transform:scale(1.012,1.015)}}
+#play-art[data-motion="ear-twitch"] .atelier-ears{animation:ear-flick 1.8s ease-in-out 1;transform-origin:100px 60px}
+@keyframes ear-flick{20%,40%{transform:rotate(3deg)}30%{transform:rotate(-3deg)}}
+#play-art[data-motion="settle"] .atelier-body{transform:translateY(4px) scaleY(.96)}
+#play-art[data-motion="stretch"] .atelier-head{transform:translateY(-5px)}
+#play-art[data-motion="stretch"] .atelier-wings{animation:wing-flutter 1.5s ease-in-out 1}
+#play-art[data-motion^="water-"] .care-cup{opacity:1}
+#play-art[data-motion="water-sip"] .care-cup{animation:cup-sip .38s ease-in-out 3;transform-origin:110px 110px}
+@keyframes cup-sip{50%{transform:rotate(-10deg) translateY(-2px)}}
+#play-art[data-motion="water-lower"] .atelier-head,#play-art[data-motion="water-sip"] .atelier-head{animation:none;transform:translateY(4px) rotate(3deg)}
+#play-art[data-motion="water-sip"] .atelier-snout{animation:sip-pulse .38s ease-in-out 3;transform-origin:100px 104px}
+@keyframes sip-pulse{50%{transform:scaleX(.93)}}
+#play-art[data-motion="bath-notice"] .care-dirt,#play-art[data-motion="bath-sponge"] .care-dirt{opacity:1}
+#play-art[data-motion="bath-sponge"] .care-sponged{opacity:1;animation:sponge-wipe .85s ease-in-out 1}
+@keyframes sponge-wipe{50%{transform:translate(-40px,14px)}}
+#play-art[data-motion="bath-sponge"] .care-suds{opacity:1}
+#play-art[data-motion="bath-rinse"] .care-suds{animation:foam-away .9s forwards}
+#play-art[data-motion="bath-sponge"] .care-dirt{animation:foam-away .85s forwards}
+.care-layer[data-phase="bath-sponge"] .care-sponge,.care-layer .care-foam{display:none}
+#play-art[data-motion="bath-shake"] .atelier-body{animation:shake-body .2s ease-in-out 3}
+@keyframes shake-body{25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+#play-art[data-motion="sleep-yawn"] .atelier-eating-mouth{opacity:1;animation:none;transform:none}
+#play-art[data-motion="sleep-rest"] .atelier-body{animation:body-breathe 3.6s ease-in-out infinite}
+#play-art[data-motion="sleep-rest"] .atelier-head{transform:translateY(10px) rotate(-7deg)}
+#play-art[data-motion="love-lean"][data-touch-side="left"] .atelier-head{transform:rotate(-7deg)}
+#play-art[data-motion="love-lean"][data-touch-side="right"] .atelier-head{transform:rotate(7deg)}
+#play-art[data-motion="love-return"] .atelier-head{transform:none}
+#play-art[data-motion="play-watch"] .atelier-head{transform:rotate(var(--look-direction,5deg))}
+#play-art[data-motion="play-reach"] .atelier-head{transform:translateY(-6px) rotate(var(--look-direction,5deg))}
+#play-art[data-motion="play-reach"] .atelier-feet{transform:translateY(-3px)}
+.care-layer[data-care="play"] .care-toy{display:none}
+.mini-target.used{animation:none;transition:left .28s ease-out,top .28s ease-out;transform:translateX(-50%);opacity:1}
+.paused #play-art *,.paused #create-art *,.paused .mini-target{animation-play-state:paused!important}
+.toy-picker{position:absolute;z-index:9;left:8px;right:8px;bottom:8px;display:flex;gap:12px;justify-content:center;padding:10px;border-radius:24px;background:#ffffffee}.toy-picker button{width:70px;height:70px;border:3px solid #85b5d9;border-radius:20px;background:#e9f7ff;font-size:32px}.toy-picker svg{width:45px;height:45px}.bed{position:absolute;z-index:4;right:6px;bottom:6px;width:72px;height:56px;border:0;background:none;padding:0}.bed svg{width:100%;height:100%}.mini-target.bubbles{background:#bcefff;color:#307ba4;font-size:42px}
+.extras{display:flex;justify-content:center;gap:14px;margin:12px 0}.extras button,.extra-panel button{min-width:58px;min-height:58px;border:3px solid #a6c8e3;border-radius:18px;background:#fff;color:#245481;font-size:31px}.extra-panel{position:relative;padding:16px;background:#f7fcff;border:2px solid #c4dced;border-radius:22px;margin:8px}.extra-panel>div:not(.album-grid){display:flex;justify-content:center;gap:18px;margin:8px 0}.extra-panel .extra-close{position:absolute;right:8px;top:8px;min-width:48px;min-height:48px;font-size:28px}.album-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding-top:48px}.album-card{height:82px;border:3px solid #b6d2e7;border-radius:18px;background:#fff;display:grid;place-items:center}.album-card svg{width:50px;height:50px}.album-card.locked{opacity:.28}.room-rug{position:absolute;z-index:1;left:7px;bottom:5px;width:95px;height:25px;border-radius:50%;background:#ffe3a0;border:3px solid #e8b95e;pointer-events:none}.room-rug[data-style="flower"]{background:#f6c7e7;border-color:#cb8bc6}.bed[data-style="leaf"] path{fill:#9edab0}.room-toy{position:absolute;z-index:4;left:10px;bottom:42px;width:56px;height:56px;border:0;background:none}.room-toy:before{content:"";display:block;width:40px;height:40px;border:3px solid #345778;border-radius:50%;background:conic-gradient(#f48297 0 25%,#ffe491 25% 50%,#84d1ee 50% 75%,#f48297 75%)}.room-toy[data-style="bubbles"]:before{width:27px;height:27px;background:#c6f1ff;box-shadow:20px -12px 0 -3px #c6f1ff}
+.extra-panel button:disabled{opacity:.3;filter:grayscale(1)}#discovery{display:flex;align-items:center;justify-content:center;gap:22px}.discovery-symbol{font-size:58px;animation:discovery-pop .7s ease-out}@keyframes discovery-pop{50%{transform:scale(1.25)}}
+#play-art[data-motion="adult-celebrate"] .atelier-wings{animation:wing-flutter .25s ease-in-out 3}#play-art[data-motion="adult-celebrate"] .atelier-head{animation:head-nod .35s ease-in-out 2}
+#play-art:not([data-motion="idle"]) #fx{display:none}
+#play-screen{position:relative}.area-bar{height:58px;display:flex;justify-content:center;align-items:center}.area-bar button{width:58px;height:56px;border:3px solid #a6c8e3;border-radius:18px;background:#fff;box-shadow:0 3px 0 #a9c8de}.area-bar svg{width:37px;height:37px}.area-map{position:absolute;z-index:15;top:58px;left:8px;right:8px;display:flex;justify-content:center;gap:9px;padding:13px 55px 13px 10px;background:#ffffffed;border:3px solid #a9cce3;border-radius:23px;box-shadow:0 9px 24px #28527855}.area-map button{min-width:58px;width:66px;height:66px;border:3px solid #a6c8e3;border-radius:18px;background:#eef8ff}.area-map button[aria-pressed="true"]{border-color:#23598b;background:#d5efff}.area-map svg{width:46px;height:46px}.area-map #area-close{position:absolute;right:7px;top:16px;width:48px;min-width:48px;height:48px;background:#fff;font-size:31px;color:#22517f}.area-objects{position:absolute;z-index:5;inset:0;pointer-events:none}.area-objects button{position:absolute;display:grid;place-items:center;width:64px;height:64px;padding:4px;border:0;background:#fffc;box-shadow:0 4px 9px #3f718355;border-radius:20px;pointer-events:auto;touch-action:manipulation}.area-objects svg{width:52px;height:52px}.area-objects [data-object="butterfly"]{top:14%;right:7%}.area-objects [data-object="lamp"]{top:15%;left:4%}.area-objects [data-object="food"]{bottom:5%;left:4%}.area-objects [data-object="water"]{bottom:5%;right:4%}.world.lamp-off .scene-art{filter:brightness(.72)}.world.lamp-off{background:#d1d4e9}.toy-picker{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}.toy-picker button{width:100%;min-width:0;height:61px}.toy-picker svg{width:43px;height:43px}.mini-target.kite{background:#e4f2ff}.mini-target.drum{background:#ffe4e8}.mini-target.butterfly{background:#fff0f4}.mini-target .bubble-art{display:block;width:37px;height:37px;border:3px solid #62afce;border-radius:50%;background:#dbf8ff;box-shadow:inset -5px -4px #b1e6f2}.mini-exit{position:absolute;top:6px;left:6px;width:58px;height:58px;border:3px solid #a6c8e3;border-radius:17px;background:#fff;color:#245481;font-size:30px;pointer-events:auto}.mini-target.used{pointer-events:none;opacity:.3;transition:opacity .25s,left .28s,top .28s}.mini-target.used svg{animation:none}
+#play-art[data-motion="kite-watch"] .atelier-head,#play-art[data-motion="butterfly-watch"] .atelier-head{transform:translateY(-5px) rotate(var(--look-direction,5deg))}
+#play-art[data-motion="kite-reach"] .atelier-head,#play-art[data-motion="butterfly-reach"] .atelier-head{transform:translateY(-8px) rotate(var(--look-direction,5deg))}
+#play-art[data-motion="kite-reach"] .atelier-wings,#play-art[data-motion="butterfly-reach"] .atelier-wings{animation:wing-flutter .38s ease-in-out 1}
+#play-art[data-motion="drum-ready"] .atelier-head{transform:translateY(3px)}
+#play-art[data-motion="drum-beat"] .atelier-body{animation:atelier-care .28s ease-in-out 1}
+#play-art[data-motion="drum-beat"] .atelier-wings{animation:wing-flutter .28s ease-in-out 1}
+#play-art[data-motion="dance"] .atelier-head{animation:head-nod .38s ease-in-out 2}
+#play-art[data-motion="dance"] .atelier-wings{animation:wing-flutter .38s ease-in-out 2}
+#play-art[data-motion="sniff"] .atelier-head{transform:translateY(7px) rotate(-4deg)}
+#play-art[data-motion="curious"] .atelier-head{transform:rotate(9deg)}
+#play-art[data-motion="sit"] .atelier-body{transform:translateY(5px) scaleY(.94)}
+#play-art[data-motion="tail-wave"] .atelier-tail{animation:tail-swish .55s ease-in-out 3}
+.area-objects [data-object="butterfly"]{animation:none}.area-objects [data-object="butterfly"] svg{animation:mini-bob 2.5s ease-in-out infinite}
+@media(max-width:350px){.toy-picker{grid-template-columns:repeat(3,1fr)}.area-map{gap:3px;padding-right:52px}.area-map button{min-width:56px;width:58px}}
+.toy-picker{grid-template-columns:repeat(4,minmax(0,1fr));max-height:74%;overflow-y:auto}.toy-picker button{min-height:58px}.room-toy:before{display:none}.room-toy svg{width:55px;height:55px;filter:drop-shadow(0 3px 2px #28537b55)}.bed[data-style="moon"] path{fill:#aebef2}.room-rug[data-style="rainbow"]{background:linear-gradient(90deg,#f8adb9,#ffe2a0,#b1e4c0,#accff2);border-color:#9da6d6}.extra-panel#room-picker>div.room-tabs,.extra-panel#room-picker>div.room-options{display:grid;gap:5px;justify-content:stretch}.room-tabs{grid-template-columns:repeat(4,minmax(0,1fr));padding-top:48px}.room-tabs button,.room-options button{min-width:0!important;min-height:58px!important;display:grid;place-items:center}.room-tabs button[aria-pressed="true"],.room-options button[aria-pressed="true"]{border-color:#245b8e;background:#e4f4ff}.room-tabs svg,.room-options svg{width:42px;height:42px}.room-options{grid-template-columns:repeat(4,minmax(0,1fr));max-height:195px;overflow:auto}.room-swatch{display:block;width:42px;height:42px;border:3px solid #789fbd;border-radius:13px}.album-grid{max-height:42dvh;overflow-y:auto}.album-card svg{width:62px;height:62px}.album-card.locked svg{filter:grayscale(1)}.discovery-symbol svg{width:70px;height:70px}
+#play-art[data-motion="car-watch"] .atelier-head,#play-art[data-motion="rattle-listen"] .atelier-head,#play-art[data-motion="instrument-listen"] .atelier-head{transform:rotate(var(--look-direction,5deg))}
+#play-art[data-motion="car-push"] .atelier-feet{animation:feet-step .24s ease-in-out 2}
+#play-art[data-motion="car-push"] .atelier-head{transform:translateY(5px)}
+#play-art[data-motion="rattle-shake"] .atelier-head{animation:head-nod .25s ease-in-out 2}
+#play-art[data-motion="rattle-shake"] .atelier-wings{animation:wing-flutter .3s ease-in-out 2}
+#play-art[data-motion="book-look"] .atelier-body,#play-art[data-motion="book-page"] .atelier-body{transform:translateY(5px) scaleY(.94)}
+#play-art[data-motion="book-look"] .atelier-head{transform:translateY(5px) rotate(var(--look-direction,5deg))}
+#play-art[data-motion="book-page"] .atelier-head{animation:head-nod .4s ease-in-out 1}
+#play-art[data-motion="plush-want"] .atelier-head{transform:rotate(var(--look-direction,5deg))}
+#play-art[data-motion="plush-hug"] .atelier-head{transform:translateY(6px) rotate(-6deg)}
+#play-art[data-motion="plush-hug"] .atelier-wings{transform:scaleX(.8)}
+#play-art[data-motion="surprise-wonder"] .atelier-head{transform:translateY(-5px)}
+#play-art[data-motion="surprise-open"] .atelier-head{animation:head-nod .3s ease-in-out 1}
+#play-art[data-motion="surprise-open"] .atelier-wings{animation:wing-flutter .28s ease-in-out 2}
+#play-art[data-motion="instrument-play"] .atelier-head{animation:head-nod .25s ease-in-out 2}
+#play-art[data-motion="instrument-play"] .atelier-feet{animation:feet-step .28s ease-in-out 2}
+#play-art[data-motion="proud"] .atelier-head{transform:translateY(-5px)}
+#play-art[data-motion="proud"] .atelier-wings{animation:wing-flutter .6s ease-in-out 2}
+#extras-shade{position:fixed;z-index:18;inset:0;background:#17375a91}.extra-panel#room-picker,.extra-panel#album,.extra-panel#discovery{position:fixed;z-index:19;left:50%;top:50%;transform:translate(-50%,-50%);width:min(calc(100vw - 28px),480px);max-height:82dvh;overflow:auto;margin:0;padding:18px;border:4px solid #9fc7e5;background:#f7fcff;box-shadow:0 18px 48px #163b6599}.extra-panel#album{padding-top:58px}.extra-panel#discovery{min-height:185px}.album-grid{max-height:62dvh;overflow-y:auto}
+.extras button svg{width:38px;height:38px}.extra-panel#activity-panel{position:fixed;z-index:19;left:50%;top:50%;transform:translate(-50%,-50%);width:min(calc(100vw - 28px),440px);max-height:82dvh;overflow:auto;margin:0;padding:70px 18px 18px;border:4px solid #9fc7e5;background:#f7fcff;box-shadow:0 18px 48px #163b6599}.extra-panel#activity-panel>.activity-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;justify-content:stretch}.extra-panel#activity-panel[data-kind="events"]>.activity-options{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.activity-options button{min-width:58px;min-height:78px;display:grid;place-items:center}.activity-options svg{width:58px;height:58px}.activity-nav{display:flex;align-items:center;justify-content:space-between;margin-top:14px}.activity-nav button{min-width:58px;min-height:56px}.activity-dots{display:flex;gap:7px}.activity-dots i{width:12px;height:12px;border:2px solid #6d9ebf;border-radius:50%}.activity-dots i.selected{background:#f3bd5a}
+#event-layer{position:absolute;z-index:6;inset:0;pointer-events:none;overflow:hidden}#event-layer>svg{position:absolute;top:7%;left:50%;transform:translateX(-50%);width:115px;height:115px;filter:drop-shadow(0 5px 8px #234b7644)}#event-layer[data-event="gift"]>svg{top:auto;bottom:11%;left:76%}#event-layer[data-event="night"]>svg,#event-layer[data-event="snow"]>svg{display:none}#event-layer i{position:absolute;left:var(--x);top:-12px;animation:event-fall 2.2s linear infinite;animation-delay:var(--delay)}#event-layer[data-event="rain"] i{width:4px;height:17px;border-radius:4px;background:#7dc1e9}#event-layer[data-event="snow"] i,#event-layer[data-event="night"] i{width:7px;height:7px;border-radius:50%;background:white}#event-layer[data-event="party"] i{width:8px;height:11px;border-radius:3px;background:#f6afd0}#event-layer[data-event="night"] i{animation:none;top:calc(var(--x) * .6)}@keyframes event-fall{to{transform:translateY(470px) rotate(120deg)}}#event-hint{position:absolute;z-index:7;top:15%;left:5%;width:64px;height:64px;border:3px solid #8eb9d7;border-radius:20px;background:#fff7;animation:mini-bob 2s ease-in-out infinite}#event-hint svg{width:50px;height:50px}
+.mini-target.flowers{background:#e4f9e8}.mini-target.stars{background:#fff8d4}.mini-target.tidy{background:#e8f7ff}.mini-target.race{background:#ffe9d3}.mini-target.faces{background:#fff0dc}.sequence-strip{position:absolute;left:25%;top:5%;width:70%;display:flex;gap:5px;justify-content:center}.sequence-strip span{width:58px;height:58px;display:grid;place-items:center;border:3px solid #b8d5e9;border-radius:15px;background:#fff}.sequence-strip span.current{border-color:#e9aa46;background:#fff4d1}.sequence-strip span.done{opacity:.42}.sequence-strip svg{width:47px;height:47px}.sequence-choices,.song-choices{position:absolute;left:5%;bottom:7%;width:90%;display:flex;justify-content:space-around;gap:6px}.sequence-choices button,.song-choices button{min-width:62px;min-height:64px;display:grid;place-items:center;border:3px solid #8eb9d7;border-radius:18px;background:#fff}.sequence-choices svg,.song-choices svg{width:48px;height:48px}.sequence-choices button.try-again{animation:choice-wiggle .35s ease-in-out 1}@keyframes choice-wiggle{25%,75%{transform:translateX(-4px)}50%{transform:translateX(4px)}}.song-choices button{background:var(--song-color)}.dance-notes{display:grid;place-items:center;width:90px;height:90px;margin:auto;animation:mini-bob .5s ease-in-out infinite}.dance-notes svg{width:85px;height:85px}.paint-board{position:absolute;inset:4% 6%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;border:4px solid #91b9d7;border-radius:23px;background:#fffdf3;pointer-events:auto}.paint-board #paint-preview{height:54%;width:100%;display:grid;place-items:center}.paint-board #paint-preview svg{width:100%;height:100%}.paint-colors{display:flex;gap:8px}.paint-colors button{width:56px;height:56px;min-width:56px;border:4px solid #fff;border-radius:50%;box-shadow:0 0 0 2px #89aac4}.paint-colors button[aria-pressed="true"]{box-shadow:0 0 0 4px #1d5586}.paint-board #paint-done{width:58px;height:56px;border:3px solid #a6c8e3;border-radius:16px;background:#e1f3e8;color:#225985;font-size:30px}.mini-exit{z-index:10}
+#play-art[data-motion="flower-watch"] .atelier-head,#play-art[data-motion="tidy-look"] .atelier-head{transform:rotate(var(--look-direction,5deg))}
+#play-art[data-motion="flower-water"] .atelier-head{transform:translateY(4px) rotate(5deg)}#play-art[data-motion="flower-water"] .atelier-wings{animation:wing-flutter .4s ease-in-out 1}
+#play-art[data-motion="star-find"] .atelier-head{transform:translateY(-8px)}#play-art[data-motion="star-find"] .atelier-wings{animation:wing-flutter .35s ease-in-out 1}
+#play-art[data-motion="tidy-pack"] .atelier-body{transform:translateY(5px) rotate(3deg)}#play-art[data-motion="tidy-pack"] .atelier-head{transform:translateY(5px)}
+#play-art[data-motion="race-ready"] .atelier-body{transform:rotate(4deg)}#play-art[data-motion="race-ready"] .atelier-head{transform:rotate(var(--look-direction,5deg))}
+#play-art[data-motion="imitate"] .atelier-head{animation:head-nod .5s ease-in-out 1}
+#play-art[data-motion="dance-step"] .atelier-feet{animation:feet-step .3s ease-in-out 2}#play-art[data-motion="dance-step"] .atelier-head{animation:head-nod .4s ease-in-out 1}
+#play-art[data-motion="dance-spin"] .atelier-head{animation:head-look .55s ease-in-out 1}#play-art[data-motion="dance-spin"] .atelier-tail{animation:tail-swish .45s ease-in-out 1}
+#play-art[data-motion="quiet-blink"] .atelier-eyes{animation:real-blink 1.3s steps(1) 1}#play-art[data-motion="quiet-blink"] .atelier-eyes-shut{animation:closed-blink 1.3s steps(1) 1}
+#play-art[data-motion="look-up"] .atelier-head{transform:translateY(-7px) rotate(-4deg)}
+#play-art[data-motion="greet"] .atelier-head{animation:head-nod .55s ease-in-out 2}#play-art[data-motion="greet"] .atelier-wings{animation:wing-flutter .55s ease-in-out 2}
+#play-art[data-motion="paw-step"] .atelier-feet{animation:feet-step .55s ease-in-out 2}
+#event-hint{animation:none}#event-hint svg{animation:mini-bob 2s ease-in-out infinite}#event-layer[data-event="night"] i{display:none}
+.sequence-choices button,.song-choices button{pointer-events:auto}

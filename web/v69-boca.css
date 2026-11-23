@@ -1,0 +1,5 @@
+/* V69: ajuste vertical independente de tamanho/cor da boca. */
+.mouth-height-adjust{margin:6px 0 8px;padding:7px 0 4px;border-top:1px solid #d7ccd5;}
+.mouth-height-adjust[hidden]{display:none!important;}
+.mouth-height-adjust .mouth-height-hints{width:78%;max-width:330px;margin:-4px auto 3px;display:flex;justify-content:space-between;gap:8px;font-size:10px;color:#706778;font-weight:700;}
+@media(max-width:350px){.mouth-height-adjust .mouth-height-hints{font-size:9px;}}
