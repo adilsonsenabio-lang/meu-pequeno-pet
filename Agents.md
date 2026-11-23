@@ -41,3 +41,5 @@ Jogo de bichinho virtual em português para criança de 4 anos, acessível mesmo
 - Miniaturas do seletor devem manter proporção quadrada.
 - Após alterar o enquadramento, testar Jardim, Noite, Entardecer, Floresta, Cozinha, Quarto e restantes em 320, 390 e 430 px, mantendo o relógio correto da Cozinha.
 - A V84.25 modifica somente CSS, referência de cache e teste. Não muda sprites, comportamento ou saves.
+
+- Em celulares de até 520px, limite a altura da moldura com `#world.world {max-height:calc(100vw - 4px);}` para que o recorte proporcional não esconda a lua, a coruja e os móveis laterais. Preserve o pet em camada independente.

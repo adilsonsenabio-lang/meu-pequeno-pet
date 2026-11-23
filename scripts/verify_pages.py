@@ -21,6 +21,7 @@ assert 'width:max(100cqw, 100cqh);' in scene_css,'Cena deve cobrir a moldura'
 assert 'height:max(100cqw, 100cqh);' in scene_css,'Escala deve ser uniforme'
 assert 'object-fit:cover;' in scene_css,'Sprite deve manter proporção'
 assert 'object-fit:fill;' not in scene_css,'Proibido esticar a pixel art'
+assert '#world.world {max-height:calc(100vw - 4px);}' in scene_css,'Limite de altura evita cortar lua e móveis'
 assert 'scene-v64.css?v=84.25' in html,'Atualizar a versão do CSS para evitar cache antigo'
 
 assets=json.loads(re.search(r'const FILES=(\[.*?\]);',(web/'sw.js').read_text(encoding='utf-8'),re.S).group(1))
