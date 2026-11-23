@@ -41,7 +41,7 @@ hotfix_css=(web/'v84-28-fix.css').read_text(encoding='utf-8')
 sw=(web/'sw.js').read_text(encoding='utf-8')
 pwa=(web/'pwa.js').read_text(encoding='utf-8')
 assert 'v84-28-fix.css?v=84.28' in html
-assert 'V84.28' in html
+assert 'V84.29' in html
 assert 'v8428-christmas-creator 18s' in hotfix_css
 assert '#create-scene-art .v844-sleigh' in hotfix_css
 assert 'bottom:calc(7% + 2px)' in hotfix_css
