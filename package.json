@@ -1,9 +1,9 @@
 {
   "name": "meu-pequeno-pet-github-pwa",
-  "version": "84.24.0",
+  "version": "84.26.0",
   "private": true,
   "type": "module",
-  "description": "Meu Pequeno Pet V84.24 — PWA GitHub Pages, relógio da cozinha corrigido e cenas responsivas.",
+  "description": "Meu Pequeno Pet V84.26 — cenários quadrados sem cortes e escala responsiva do pet.",
   "scripts": {
     "dev": "node scripts/serve.mjs",
     "build": "node scripts/build.mjs",

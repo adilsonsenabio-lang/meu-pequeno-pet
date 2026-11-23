@@ -33,13 +33,12 @@ Jogo de bichinho virtual em português para criança de 4 anos, acessível mesmo
 - Saves de `file://` para GitHub Pages **não migram automaticamente**; orientar exportação/importação no jogo antigo.
 - O GitHub Pages implica hospedagem do código do jogo em um repositório público, se a opção Public for usada.
 
-## Regras permanentes V84.25 — enquadramento de cenário
-- Os 13 fundos são imagens 320×320, sempre com escala uniforme, nunca com largura/altura independentes ou `object-fit:fill`.
-- O recorte para molduras retangulares é feito pelo contêiner; `scene-v64.css` usa um palco interno quadrado dimensionado pelo maior eixo (cqw/cqh) e centralizado.
-- GIF, animais, luminárias, fantasmas, cometas e marcadores de toque devem permanecer dentro do mesmo palco para não sofrer desencontro.
-- A camada do pet permanece independente, sem alterar suas proporções.
-- Miniaturas do seletor devem manter proporção quadrada.
-- Após alterar o enquadramento, testar Jardim, Noite, Entardecer, Floresta, Cozinha, Quarto e restantes em 320, 390 e 430 px, mantendo o relógio correto da Cozinha.
-- A V84.25 modifica somente CSS, referência de cache e teste. Não muda sprites, comportamento ou saves.
-
-- Em celulares de até 520px, limite a altura da moldura com `#world.world {max-height:calc(100vw - 4px);}` para que o recorte proporcional não esconda a lua, a coruja e os móveis laterais. Preserve o pet em camada independente.
+## Regras permanentes V84.26 — cenas e escala do pet
+- Todos os 13 cenários, inclusive Cozinha e Quarto, possuem 320×320 pixels. A moldura de criação e a moldura de jogo são quadradas, mostrando toda a imagem sem faixas.
+- Não usar `object-fit:cover`, `object-fit:fill`, recorte lateral nem escala diferente nos eixos X e Y. Usar `contain` e `aspect-ratio:1/1`.
+- `web/v84-26-layout.css` define exclusivamente as dimensões da moldura e o tamanho responsivo dos pets; é carregado por último.
+- As alturas conflitantes foram retiradas de `game.css`, `retro.css`, `life.css`, `v55-mobile.css`, `v58-ajustes.css` e `v70-criacao-compacta.css`. Não restaurar essas declarações.
+- Pet no jogo: largura 47% da área interna; proporção 168×190; bottom 8%. Pet na criação: largura 61%; proporção 222×236; bottom 7%, centralizado. Camadas e movimento não mudam.
+- `scene-v64.css` conserva a escala e os marcadores no palco 1:1; retirados o zoom V84.25 e os dois backfills bitmap deformados dos cômodos.
+- Miniaturas, coruja, flores, formiga, pássaros, luminárias e efeitos continuam usando coordenadas relativas ao cenário; saves e mecânicas permanecem intactos.
+- Validar visualmente os 13 cenários em criação e jogo em 320, 390 e 430 px, incluindo alturas menores e a posição correta do relógio na Cozinha.

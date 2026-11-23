@@ -56,6 +56,6 @@
 .need-cue{animation:none}.need-cue>svg{animation:cue-float 2s ease-in-out infinite}
 .care-grid button.care-done{animation:care-confirm .7s ease-out}
 @keyframes care-confirm{40%{box-shadow:0 0 0 5px #81c7ab77;transform:translateY(-3px)}}
-@media(max-height:650px){.world{height:42dvh;min-height:245px}.care-grid button{min-height:81px}.care-message{margin-top:7px;font-size:12px}}
-@media(max-height:650px){.pet-wrap{width:180px;height:215px;bottom:24px}.world-effect{bottom:150px}}
+@media(max-height:650px){.care-grid button{min-height:81px}.care-message{margin-top:7px;font-size:12px}}
+@media(max-height:650px){.world-effect{bottom:150px}}
 @media(prefers-reduced-motion:reduce){.game-pet *{animation-duration:inherit!important}.look .head-part,.stretch .head-part,.stretch .arm-left,.stretch .arm-right,.request .head-part{animation:none}.game-pet *{transition-duration:.15s}}

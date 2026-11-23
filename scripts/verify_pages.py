@@ -14,15 +14,25 @@ for scene,srcs in media.items():
   assert (web/src.removeprefix('./')).is_file(),(scene,role,src)
 assert 'GHOST_CYCLE_MS=15000' in (web/'scene-v63-player.js').read_text(encoding='utf-8')
 assert 'v64-ghost-minute 15s' in (web/'scene-v64.css').read_text(encoding='utf-8')
-# V84.25: escala uniforme do Pixel Art e prevenção de regressões no PWA.
+# V84.26: moldura quadrada sem crop e pet de tamanho responsivo.
 scene_css=(web/'scene-v64.css').read_text(encoding='utf-8')
-assert 'container-type:size;' in scene_css,'Cena precisa de cqw/cqh para escala proporcional'
-assert 'width:max(100cqw, 100cqh);' in scene_css,'Cena deve cobrir a moldura'
-assert 'height:max(100cqw, 100cqh);' in scene_css,'Escala deve ser uniforme'
-assert 'object-fit:cover;' in scene_css,'Sprite deve manter proporção'
-assert 'object-fit:fill;' not in scene_css,'Proibido esticar a pixel art'
-assert '#world.world {max-height:calc(100vw - 4px);}' in scene_css,'Limite de altura evita cortar lua e móveis'
-assert 'scene-v64.css?v=84.25' in html,'Atualizar a versão do CSS para evitar cache antigo'
+layout_css=(web/'v84-26-layout.css').read_text(encoding='utf-8')
+assert '.v64-scene-stage{position:absolute;inset:0;width:100%;height:100%;aspect-ratio:1/1;' in scene_css
+assert 'object-fit:contain' in scene_css
+assert 'object-fit:cover' not in scene_css and 'object-fit:fill' not in scene_css
+assert 'width:max(100cqw' not in scene_css
+assert '::before{' not in scene_css
+assert '#world.world,' in layout_css and '#create-screen .create-preview' in layout_css
+assert 'aspect-ratio:1 / 1' in layout_css
+assert '#world #pet-wrap.pet-wrap' in layout_css and 'width:47%' in layout_css
+assert '#create-screen #create-art.create-art' in layout_css and 'width:61%' in layout_css
+assert 'v84-26-layout.css?v=84.26' in html and 'scene-v64.css?v=84.26' in html
+for f in ('v55-mobile.css','v58-ajustes.css'):
+ css=(web/f).read_text(encoding='utf-8')
+ assert '#world.world{height:clamp(' not in css
+ assert '#world.world { height:clamp(' not in css
+ assert '#create-screen .create-preview{height:clamp(' not in css
+ assert '#create-screen .create-preview {height:clamp(' not in css
 
 assets=json.loads(re.search(r'const FILES=(\[.*?\]);',(web/'sw.js').read_text(encoding='utf-8'),re.S).group(1))
 assert len(assets)>=40
@@ -31,4 +41,4 @@ for uri,digest in assets:
  assert len(digest)==16
 assert (web/'manifest.webmanifest').is_file()
 assert 'registerOfflineWorker' in (web/'app.js').read_text(encoding='utf-8')
-print('PASSOU: 13 cenários externos; PWA precache:',len(assets),'arquivos; fantasma 15s; manifesto presente')
+print('PASSOU: 13 cenas, moldura quadrada e pet responsivo; PWA precache:',len(assets),'arquivos; fantasma 15s')

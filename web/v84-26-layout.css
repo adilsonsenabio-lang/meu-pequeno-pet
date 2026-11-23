@@ -1,0 +1,31 @@
+/* V84.26 — única fonte de verdade para a proporção das cenas e do pet.
+   Fundos nativos 320×320, molduras quadradas 1:1. Sem barras, recorte ou
+   esticamento; o pet mantém sua própria camada independente do cenário. */
+#world.world,
+#create-screen .create-preview {
+  width:100%;
+  aspect-ratio:1 / 1;
+  height:auto;
+  min-height:0;
+  max-height:none;
+}
+/* O pet acompanha a largura, com proporções 168×190; left é controlável
+   pelos comandos de caminhada do jogo. */
+#world #pet-wrap.pet-wrap {
+  width:47%;
+  height:auto;
+  aspect-ratio:168 / 190;
+  left:50%;
+  bottom:8%;
+}
+/* Na criação, o pet tem escala um pouco maior, proporção 222×236,
+   âncora no chão e centralização independente do painel de escolhas. */
+#create-screen #create-art.create-art {
+  position:absolute;
+  left:50%;
+  bottom:7%;
+  width:61%;
+  height:auto;
+  aspect-ratio:222 / 236;
+  transform:translateX(-50%);
+}

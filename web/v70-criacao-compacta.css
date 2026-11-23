@@ -13,7 +13,7 @@
 #create-screen .intro h1{font-size:19px;line-height:1.2;margin:0;}
 #create-screen .intro p{font-size:12px;line-height:1.15;margin:2px 0 0;}
 /* A cena diminui um pouco sem mudar o tamanho ou a âncora dos pés do pet. */
-#create-screen .create-preview{height:clamp(265px,39dvh,390px);min-height:0;}
+
 #create-screen .creator{margin-top:9px;padding:10px;}
 #create-screen .creator-title{height:35px;min-height:35px;font-size:16px;}
 #create-screen .creator-title svg{height:24px;width:24px;}
@@ -54,7 +54,7 @@
 #create-screen .creator-nav{margin-top:8px;}
 #create-screen .nav-button{height:54px;}
 @media(max-height:690px){
-  #create-screen .create-preview{height:clamp(245px,38dvh,310px);}
+  
   #create-screen .creator-title{height:33px;min-height:33px;}
   #create-screen #choice-list.two-row-options{--row-height:76px;}
   #create-screen #choice-list.two-row-options .choice-pet{max-height:48px;}
