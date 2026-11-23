@@ -1,9 +1,9 @@
-/* V64 — imagens dos cenários V63 sem deformação vertical ou rolagem horizontal */
+/* V84.25 — cenários sem distorção e sem faixas vazias. */
 #scene-art.scene-art,#create-scene-art.create-scene-art {background:var(--v64-scene-sky,#cedfe3);overflow:hidden}
 .v64-scene-stage{position:absolute;bottom:0;left:0;width:100%;height:auto;aspect-ratio:1/1;image-rendering:pixelated;pointer-events:none}
 .v64-scene-frame{display:block;width:100%;height:100%;object-fit:contain;image-rendering:pixelated;user-select:none;pointer-events:none}
 .v64-gaze-marker{position:absolute;width:6px;height:6px;transform:translate(-50%,-50%);background:transparent;pointer-events:none;z-index:1}
-/* A parte superior das telas altas recebe céu correspondente, sem esticar o sprite. */
+/* Os marcadores de cena permanecem na mesma escala que os GIFs. */
 #play-art[data-motion="look-target"] .atelier-head{transition:transform .16s steps(3,end);transform-origin:100px 113px}
 #play-art[data-motion="look-target"] .pixel-pupil{transition:transform .12s steps(2,end)}
 @media(prefers-reduced-motion:reduce){#play-art[data-motion="look-target"] .atelier-head{transition:none}}
@@ -45,19 +45,47 @@
 }
 @media(prefers-reduced-motion:reduce){.v77-orbit-comet{animation-play-state:paused}}
 
-/* V79 final — elimina o recorte superior causado pela arte 320x320 numa janela mais baixa. */
-/* Cores e proporções do pet não são afetadas; os marcadores seguem a escala real da cena. */
-#scene-art.scene-art,#create-scene-art.create-scene-art {container-type:inline-size;}
-.choice-pet.v64-scene-choice {container-type:inline-size;}
-/* V84.24: no letterbox at the top of tall rooms or scenes. */
+/* V84.25 — enquadramento proporcional dos cenários 320×320.
+   A moldura é o recorte; todo o cenário (GIF + overlays + marcadores) permanece
+   dentro do mesmo quadrado, sem alongar árvores, móveis, animais ou luzes.
+   Em telas retangulares o excedente é recortado, nunca uma barra vazia.
+   cqw/cqh consultam a caixa real, inclusive após rotação/redimensionamento. */
+#scene-art.scene-art,
+#create-scene-art.create-scene-art {
+  container-type:size;
+  overflow:hidden;
+}
 #scene-art .v64-scene-stage,
-#create-scene-art .v64-scene-stage{inset:0;width:100%;height:100%;aspect-ratio:auto;}
-.v64-scene-stage {height:100%;aspect-ratio:auto;}
-.v64-scene-frame {object-fit:fill;}
-.choice-pet.v64-scene-choice /* V84.24: no letterbox at the top of tall rooms or scenes. */
-#scene-art .v64-scene-stage,
-#create-scene-art .v64-scene-stage{inset:0;width:100%;height:100%;aspect-ratio:auto;}
-.v64-scene-stage {height:100%;aspect-ratio:auto;}
+#create-scene-art .v64-scene-stage {
+  position:absolute;
+  left:50%;
+  top:50%;
+  bottom:auto;
+  width:max(100cqw, 100cqh);
+  height:max(100cqw, 100cqh);
+  aspect-ratio:1 / 1;
+  transform:translate(-50%, -50%);
+}
+.v64-scene-frame {
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center center;
+  image-rendering:pixelated;
+}
+/* Miniaturas têm janela quadrada própria: não herdam o crop do jogo. */
+.choice-pet.v64-scene-choice {
+  container-type:inline-size;
+}
+.choice-pet.v64-scene-choice .v64-scene-stage,
+#choice-list .v66-scene-choice .v64-scene-stage {
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  aspect-ratio:1 / 1;
+  transform:none;
+}
 
 /* V84.4 – Christmas sleigh: 9s crossing, 30s fully absent, then returns. */
 .v844-sleigh{position:absolute;left:-24%;top:9%;width:16%;height:auto;object-fit:contain;image-rendering:pixelated;pointer-events:none;z-index:2;opacity:0;animation:v844-sleigh-trip 60s linear infinite;transform-origin:center center}

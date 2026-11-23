@@ -32,3 +32,12 @@ Jogo de bichinho virtual em português para criança de 4 anos, acessível mesmo
 - Não anunciar URL público antes de existir repositório e deploy confirmado.
 - Saves de `file://` para GitHub Pages **não migram automaticamente**; orientar exportação/importação no jogo antigo.
 - O GitHub Pages implica hospedagem do código do jogo em um repositório público, se a opção Public for usada.
+
+## Regras permanentes V84.25 — enquadramento de cenário
+- Os 13 fundos são imagens 320×320, sempre com escala uniforme, nunca com largura/altura independentes ou `object-fit:fill`.
+- O recorte para molduras retangulares é feito pelo contêiner; `scene-v64.css` usa um palco interno quadrado dimensionado pelo maior eixo (cqw/cqh) e centralizado.
+- GIF, animais, luminárias, fantasmas, cometas e marcadores de toque devem permanecer dentro do mesmo palco para não sofrer desencontro.
+- A camada do pet permanece independente, sem alterar suas proporções.
+- Miniaturas do seletor devem manter proporção quadrada.
+- Após alterar o enquadramento, testar Jardim, Noite, Entardecer, Floresta, Cozinha, Quarto e restantes em 320, 390 e 430 px, mantendo o relógio correto da Cozinha.
+- A V84.25 modifica somente CSS, referência de cache e teste. Não muda sprites, comportamento ou saves.
