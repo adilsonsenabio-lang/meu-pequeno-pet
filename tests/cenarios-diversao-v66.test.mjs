@@ -40,7 +40,7 @@ test('V66: etapa antiga de criação migra para nova posição sem apagar escolh
  let recovered=loadCreatorSession(storage,key);
  assert.equal(recovered.step,0);assert.equal(recovered.draft.scene,'beach');
  storage.setItem(key,JSON.stringify({version:1,draft,step:5,creatingNew:false}));
- recovered=loadCreatorSession(storage,key);assert.equal(recovered.step,7);
+ recovered=loadCreatorSession(storage,key);assert.equal(recovered.step,8);
  saveCreatorSession(storage,key,draft,0,false);
  recovered=loadCreatorSession(storage,key);assert.equal(recovered.step,0);
 });

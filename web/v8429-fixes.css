@@ -58,3 +58,10 @@
 /* O SVG do pet já posiciona a sombra na sola para cada fase. */
 #create-screen .create-preview:has(#create-art .pixel-pet)::after,
 #world #pet-wrap.pet-wrap:has(.pixel-pet)::after{content:none}
+
+#create-screen .hand-position-adjust:not([hidden]){
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+#create-screen .hand-position-adjust input{width:100%}

@@ -1,4 +1,6 @@
 // Personagem modular em pixel art 2D. Coordenadas inteiras no palco de 200 × 200.
+import {handPosition} from './core.js?v=74';
+
 const ink='#273249';
 const r=(x,y,w,h,c)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}"/>`;
 const b=(x,y,w,h,c)=>r(x-3,y-3,w+6,h+6,ink)+r(x,y,w,h,c);
@@ -292,12 +294,26 @@ function neckBridge(c,stage){
  const bottom=stage==='adult'?138:stage==='child'?141:144;
  return `<g class="pixel-neck">${r(92,y,16,bottom-y,c.p)}${r(93,y+2,4,bottom-y-5,shade(c.p,22))}${r(105,y+4,3,bottom-y-7,shade(c.p,-25))}</g>`;
 }
-function shellHands(s,c,stage,scale){
- const x=102-Math.floor(bodyWidth(s,stage)/2);
- const y=stage==='child'?142:139;
- const outline='M25 15H34V22H31V28H28V34H24V39H12V36H7V31H13V33H18V29H14V26H10V23H15V21H21V17H25Z';
- // Espelha a Conchinha no eixo diagonal que passa pelo encaixe no tronco.
- const art=`<g transform="matrix(0 -1 -1 0 18 29)">${shape(outline,c.p)}${r(16,23,7,3,shade(c.p,40))}${r(21,31,4,4,shade(c.p,-35))}${r(15,35,8,2,shade(c.p,-35))}</g>`;
+const HANDS={
+ drop:{palm:'V27H28V33H24V38H12V35H8V28H11V24H16V20H21V17H25',light:[[12,28,3,4],[16,24,5,3]],shadow:[[21,34,4,2]]},
+ bear:{palm:'V27H32V35H28V39H23V37H20V42H14V38H11V41H5V37H3V29H7V25H12V22H16V20H21V17H25',light:[[16,24,5,2]],pad:[[6,34,3,3],[15,37,3,3],[24,33,3,3],[12,28,7,5]]},
+ star:{palm:'V24H36V29H32V34H28V39H24V42H11V38H7V29H10V24H15V21H16V20H21V17H25',light:[[11,31,3,5],[15,25,5,2]],accent:[[19,28,2,9],[16,31,8,3],[17,29,6,7]]},
+ fan:{palm:'V25H29V30H27V34H24V30H22V36H19V41H14V35H11V38H5V35H3V29H7V25H12V22H16V20H21V17H25',light:[[7,29,4,3],[12,25,6,3]],shadow:[[14,33,5,2]]},
+ shell:{palm:'V28H28V34H24V39H12V36H7V31H13V33H18V29H14V26H10V23H15V21H21V17H25',light:[[16,23,7,3]],shadow:[[21,31,4,4],[15,35,8,2]]},
+ fist:{palm:'V25H32V31H28V35H12V32H7V24H10V20H21V17H25',light:[[11,23,5,3],[16,21,5,2]],shadow:[[13,28,7,2],[20,26,3,4]]},
+ heart:{palm:'V25H33V34H29V40H24V43H12V40H7V36H4V28H8V24H13V22H16V20H21V17H25',light:[[8,29,4,4]],pad:[[12,28,5,3],[20,28,5,3],[12,31,13,4],[14,35,9,2],[17,37,3,2]]},
+ dragon:{palm:'V26H28V31H24V35H21V38H17V35H14V41H9V38H6V32H9V27H13V23H16V20H21V17H25',light:[[13,26,5,3]],shadow:[[20,29,4,3]],pad:[[9,34,4,5],[17,33,4,4]]}
+};
+function handArt(s,c,stage,options){
+ const {x:distance,y:height}=handPosition(options.handPosition);
+ const x=102-Math.floor(bodyWidth(s,stage)/2)-distance;
+ const y=(stage==='child'?142:139)+height;
+ const key=Object.hasOwn(HANDS,options.hands)?options.hands:'shell';
+ const model=HANDS[key];
+ const scale=partScale(options.partSizes,'hands');
+ const outline=`M25 15H34V22H31${model.palm}Z`;
+ const transform=key==='shell'?'matrix(0 -1 -1 0 18 29)':'translate(-29 -18)';
+ const art=`<g transform="${transform}">${shape(outline,c.p)}${rows(model.light,shade(c.p,40))}${rows(model.shadow||[],shade(c.p,-35))}${rows(model.pad||[],key==='dragon'?'#fff4c9':shade(c.p,115))}${rows(model.accent||[],'#ffc43d')}</g>`;
  const hand=`<g transform="translate(${x} ${y})"><g class="pixel-hand-joint"><g transform="scale(${scale})">${art}</g></g></g>`;
  return `<g class="pixel-paw-left">${hand}</g><g class="pixel-paw-right" transform="translate(200 0) scale(-1 1)">${hand}</g>`;
 }
@@ -425,7 +441,7 @@ export function pixelPet(s,c,o={}){
  // A boca permanece ancorada à cabeça, inclusive durante inclinação/olhar e crescimento.
  const mouthShift=typeof o.mouthOffset==='number'&&Number.isFinite(o.mouthOffset)?Math.max(-8,Math.min(8,Math.round(o.mouthOffset))):0;
  const eyesArt=eyes(s,mood,tint('eyes'));
- const bodyPart=`<g class="atelier-body">${body(s,c,stage)}<g class="pixel-outfit">${outfitArt(o.outfit,s,stage)}</g>${shellHands(s,tone('hands'),stage,partScale(o.partSizes,'hands'))}</g>`;
+ const bodyPart=`<g class="atelier-body">${body(s,c,stage)}<g class="pixel-outfit">${outfitArt(o.outfit,s,stage)}</g>${handArt(s,tone('hands'),stage,o)}</g>`;
  const headPart=`<g class="atelier-head"><g class="atelier-ears">${scaled('ears',ears(s,tone('ears')),100,74)}</g>${headShape(s,c)}<g class="atelier-markings">${marks(s,c)}</g><g class="atelier-hair">${hair(s,c)}</g><g class="atelier-eyes">${scaled('eyes',eyesArt,100,88)}</g><g class="atelier-eyes-shut">${rows([[76,89,16,4],[109,89,16,4]],ink)}</g><g class="atelier-snout" transform="translate(0 -2) translate(100 108) scale(.78) translate(-100 -108)">${scaled('snout',snout(s,tone('snout'),mood),100,108)}</g><g class="atelier-mouth" transform="translate(0 ${-9+mouthShift})" data-mouth-offset="${mouthShift}">${scaled('mouth',mouthArt(s,c,mood,tint('mouth')),100,125)}</g><g class="atelier-eating-mouth">${b(91,106,18,17,'#713d4e')+r(95,117,10,4,'#e58ea2')}</g><g class="atelier-accessory">${scaled('accessory',accessory(s,tone('accessory')),100,97)}</g><g class="care-cup">${b(107,108,17,20,'#e5eff0')+r(109,116,13,3,'#76c5d3')}</g><g class="care-sponged">${b(121,89,17,15,c.a)}</g><g class="care-dirt">${r(68,101,7,7,'#80684f')+r(125,102,7,7,'#80684f')}</g><g class="care-suds">${r(68,109,11,8,'#fff')+r(125,109,11,8,'#fff')}</g></g>`;
  return `<g class="pixel-pet" shape-rendering="crispEdges"><ellipse cx="100" cy="${stage==='baby'?190:192}" rx="36" ry="3" fill="#15282a" opacity=".3"/><g class="atelier-tail">${scaled('tail',tail(s,tone('tail')),132,150)}</g><g class="atelier-wings">${scaled('wings',wings(s,tone('wings')),100,125)}</g><g class="atelier-neck">${neckBridge(c,stage)}</g>${bodyPart}<g class="atelier-feet">${feet(s,c,stage)}<g class="pixel-shoes">${shoeArt(o.shoes,stage)}</g></g><g transform="translate(0 ${headLift}) translate(100 120) scale(${headScale}) translate(-100 -120)">${headPart}</g></g>`;
 }

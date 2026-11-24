@@ -23,7 +23,7 @@ export const OPTIONS={
   wings:['dragon','angel','fairy','bat','phoenix','tiny','butterfly','fin','none'],
   body:['egg','round','slim','chubby','tall','short','pear','drop'],
   feet:['round','claws','hooves','duck','boots','flipper','paws','bird'],
-  hands:['shell'],
+  hands:['drop','bear','star','fan','shell','fist','heart','dragon'],
   ears:['cat','dog','bunny','bear','horns','unicorn','antlers','elf','bat','mouse','antenna','ram','fox','floppy','spiky','deer','none'],
   head:['round','wide','tall','square','cheeks','heart','fox','mini'],
   markings:['blush','spots','stripes','freckles','forehead','swirl','brows','tuxedo','bolt','confetti','whiskers','bandage','plain'],
@@ -56,11 +56,20 @@ export const MIN_PART_SCALE=.85,MAX_PART_SCALE=1.20;
 // Posição vertical opcional da boca, em unidades do desenho SVG. Saves antigos: zero.
 export const MIN_MOUTH_OFFSET=-8,MAX_MOUTH_OFFSET=8;
 export function mouthOffset(value){return typeof value==='number'&&Number.isFinite(value)?Math.max(MIN_MOUTH_OFFSET,Math.min(MAX_MOUTH_OFFSET,Math.round(value))):0;}
+export const HAND_POSITION_LIMITS={x:5,y:10};
+export function handPosition(value){
+ const position=(axis)=>Number.isFinite(value?.[axis])?clamp(Math.round(value[axis]),-HAND_POSITION_LIMITS[axis],HAND_POSITION_LIMITS[axis]):0;
+ return {x:position('x'),y:position('y')};
+}
 export function validAppearance(a){
  if(!a||!Object.entries(OPTIONS).every(([key,values])=>a[key]===undefined?!['color','tail','wings','ears','markings','accessory'].includes(key):values.includes(a[key])||LEGACY[key]?.includes(a[key])))return false;
  if(a.partSizes!==undefined&&(!a.partSizes||typeof a.partSizes!=='object'||Array.isArray(a.partSizes)||Object.entries(a.partSizes).some(([k,v])=>!CUSTOM_PARTS.includes(k)||typeof v!=='number'||!Number.isFinite(v)||v<MIN_PART_SCALE||v>MAX_PART_SCALE)))return false;
  if(a.partColors!==undefined&&(!a.partColors||typeof a.partColors!=='object'||Array.isArray(a.partColors)||Object.entries(a.partColors).some(([k,v])=>!CUSTOM_PARTS.includes(k)||!Object.hasOwn(PART_PALETTE,v))))return false;
  if(a.mouthOffset!==undefined&&(!Number.isInteger(a.mouthOffset)||a.mouthOffset<MIN_MOUTH_OFFSET||a.mouthOffset>MAX_MOUTH_OFFSET))return false;
+ if(a.handPosition!==undefined){
+  const {x,y}=handPosition(a.handPosition);
+  if(a.handPosition?.x!==x||a.handPosition?.y!==y)return false;
+ }
  return true;
 }
 export function validateSave(s){
