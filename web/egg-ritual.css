@@ -50,7 +50,7 @@
   transform-origin: 60px 75px;
 }
 .egg-orbit ellipse { fill: none; stroke: #fff3c2; stroke-dasharray: 2 5; }
-.egg-crack, .egg-shell-edge { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.egg-crack, .egg-crack-branch, .egg-shell-edge { fill: none; stroke-linecap: round; stroke-linejoin: round; }
 .egg-crack {
   stroke: #fff1a8;
   stroke-width: 4;
@@ -59,6 +59,19 @@
   filter: drop-shadow(0 0 3px #b76fea);
 }
 .egg-shell-edge { stroke: #472762; stroke-width: 4; }
+.egg-crack-branch {
+  stroke: #ffde9e;
+  stroke-width: 2.6;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  opacity: 0;
+  filter: drop-shadow(0 0 2px #a349da);
+}
+.egg-crack-branch.lit {
+  stroke-dashoffset: 0;
+  opacity: 1;
+  transition: stroke-dashoffset 210ms ease-out;
+}
 .egg-tap-shell { transform-origin: 60px 140px; }
 .egg-tap-dots circle { fill: #42365f; stroke: #fff0bf; stroke-width: 1.2; }
 .egg-tap-dots .lit { fill: #ffe384; filter: drop-shadow(0 0 2px #ffd870); }
@@ -99,7 +112,7 @@
 [data-hatch="gather"] .egg-aura { animation: hatch-nightfall 850ms ease-out both; }
 [data-hatch="gather"] .egg-crack { opacity: 1; transition: stroke-dashoffset 120ms ease-out; }
 
-.egg-opening .egg-intact, .egg-opening .egg-crack { visibility: hidden; }
+.egg-opening .egg-tap-shell { visibility: hidden; }
 .egg-opening .egg-piece-bottom { opacity: 1; }
 .egg-opening .egg-piece-top { transform-origin: 60px 65px; }
 [data-hatch="open"] .egg-piece-top { animation: hatch-shell-lift 520ms ease-out both; }
@@ -158,6 +171,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   #egg { animation: none; }
+  .egg-crack-branch.lit { transition: none; }
   @keyframes hatch-tap-ring { from { opacity: .95; } to { opacity: 0; } }
   @keyframes hatch-tap-ring-outer { from { opacity: .55; transform: scale(2); } to { opacity: 0; transform: scale(2); } }
   @keyframes hatch-tap-spark {

@@ -327,6 +327,7 @@ function resetEggTaps(){
   egg.style.removeProperty('--egg-crack-offset');
   egg.setAttribute('aria-label',`Toque ${EGG_TAPS} vezes para abrir o ovo`);
   for(const dot of $('.egg-tap-dots').children)dot.classList.remove('lit');
+  for(const branch of $('#egg-crack-branches').children)branch.classList.remove('lit');
   $('.egg-tap-sparks').replaceChildren();
   egg.disabled=false;
 }
@@ -1143,6 +1144,8 @@ function bind(){
     const progress=eggTaps/EGG_TAPS;
     egg.style.setProperty('--egg-crack-offset',100*(1-progress));
     $('.egg-tap-dots').children[eggTaps-1].classList.add('lit');
+    const branch=$('#egg-crack-branches').children[eggTaps-1];
+    branch.classList.add('lit');
     egg.setAttribute('aria-label',`Abrir o ovo. ${eggTaps} de ${EGG_TAPS} toques`);
     const chime=440+eggTaps*31;
     sound([146+eggTaps*5],{type:'triangle',volume:.085,duration:.085});
@@ -1157,9 +1160,8 @@ function bind(){
       {transform:`scale(.99,1.025) rotate(${-angle*.45}deg)`,offset:.45},
       {transform:'none'}
     ],{duration:220,easing:'ease-out'});
-    const fissure=$('#egg-fissure');
     const sparkLayer=$('.egg-tap-sparks');
-    const point=fissure.getPointAtLength(fissure.getTotalLength()*progress);
+    const point=branch.getPointAtLength(branch.getTotalLength());
     const origin=point.matrixTransform(shell.getCTM()).matrixTransform(sparkLayer.getCTM().inverse());
     const sparks=sparkBurst(sparkLayer,origin,true);
     if(eggTaps<EGG_TAPS)return;
