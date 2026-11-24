@@ -4,6 +4,7 @@
   height: auto;
   aspect-ratio: 120 / 148;
   isolation: isolate;
+  touch-action: manipulation;
 }
 
 #egg .egg-art { display: block; overflow: visible; }
@@ -54,15 +55,19 @@
   stroke: #fff1a8;
   stroke-width: 4;
   stroke-dasharray: 100;
+  stroke-dashoffset: var(--egg-crack-offset,100);
   filter: drop-shadow(0 0 3px #b76fea);
 }
 .egg-shell-edge { stroke: #472762; stroke-width: 4; }
+.egg-intact { transform-origin: 60px 140px; }
+.egg-tap-dots circle { fill: #42365f; stroke: #fff0bf; stroke-width: 1.2; }
+.egg-tap-dots .lit { fill: #ffe384; filter: drop-shadow(0 0 2px #ffd870); }
+.egg-opening .egg-tap-dots { visibility: hidden; }
+.egg-tap-sparks circle { fill: #fff2aa; animation: hatch-tap-spark 340ms ease-out both; }
 
 [data-hatch="gather"] .egg-orbit { animation: hatch-gather 850ms ease-out both; }
 [data-hatch="gather"] .egg-aura { animation: hatch-nightfall 850ms ease-out both; }
-[data-hatch="crack"] .egg-orbit, [data-hatch="crack"] .egg-aura { opacity: 1; }
-[data-hatch="crack"] .egg-crack { animation: hatch-crack 780ms ease-out both; }
-[data-hatch="crack"] .egg-intact { transform-origin: 60px 140px; animation: hatch-knocks 780ms ease-out both; }
+[data-hatch="gather"] .egg-crack { opacity: 1; transition: stroke-dashoffset 120ms ease-out; }
 
 .egg-opening .egg-intact, .egg-opening .egg-crack { visibility: hidden; }
 .egg-opening .egg-piece-bottom { opacity: 1; }
@@ -81,16 +86,9 @@
   from { opacity: 0; transform: rotate(-100deg) scale(1.65); }
   to { opacity: 1; }
 }
-@keyframes hatch-crack {
-  0%, 16% { opacity: 0; stroke-dashoffset: 100; }
-  27%, 50% { opacity: 1; stroke-dashoffset: 72; }
-  71%, 100% { opacity: 1; stroke-dashoffset: 0; }
-}
-@keyframes hatch-knocks {
-  12% { transform: rotate(-7deg); }
-  25%, 43% { transform: none; }
-  58% { transform: rotate(7deg); }
-  76%, 100% { transform: none; }
+@keyframes hatch-tap-spark {
+  from { opacity: 1; }
+  to { opacity: 0; transform: translate(var(--spark-x),var(--spark-y)); }
 }
 @keyframes hatch-inner-light {
   from { opacity: .8; }
@@ -118,7 +116,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #egg, [data-hatch="crack"] .egg-intact { animation: none; }
+  #egg { animation: none; }
+  @keyframes hatch-tap-spark {
+    0%, 45% { opacity: 1; transform: translate(var(--spark-x),var(--spark-y)); }
+    to { opacity: 0; transform: translate(var(--spark-x),var(--spark-y)); }
+  }
   #world[data-hatch="gather"] .egg-veil,
   [data-hatch="gather"] :is(.egg-orbit,.egg-aura) { animation-duration: 420ms; }
   @keyframes hatch-gather { from { opacity: 0; } to { opacity: 1; } }

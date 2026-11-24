@@ -86,6 +86,8 @@ const ACTIVE_SAVE_KEY=TEST_MODE?`${SAVE_KEY}.test`:SAVE_KEY;
 const DRAFT_KEY=creatorKey(ACTIVE_SAVE_KEY);
 let save=null,draft={...DEFAULT_APPEARANCE,scene:'garden'},step=0,previewArt,playArt,scene='garden';
 let status='loading',flow=0,currentX=50,lastTick=Date.now(),tickTimer=null,sleepTimer=null,lastSleepTick=0,audioContext=null,returnStatus='ready';
+const EGG_TAPS=10;
+let eggTaps=0;
 let ambientTimer=null,ambientIndex=0,committedFlow=-1;
 let lastAmbientGesture='';
 let sceneClock=0,sceneWatchIndex=0,sceneLookUntil=0,sceneLookMarker=null,sceneGazeLast=0,sceneGazeLoopStarted=false;
@@ -114,9 +116,8 @@ function sound(notes=[520]){
   try{
     audioContext??=new (window.AudioContext||window.webkitAudioContext)();
     if(audioContext.state==='suspended')audioContext.resume();
-    notes.forEach((note,i)=>{
-      const [freq,delay]=Array.isArray(note)?note:[note,i*.11];
-      const start=audioContext.currentTime+delay,osc=audioContext.createOscillator(),gain=audioContext.createGain();
+    notes.forEach((freq,i)=>{
+      const start=audioContext.currentTime+i*.11,osc=audioContext.createOscillator(),gain=audioContext.createGain();
       osc.type='sine';osc.frequency.setValueAtTime(freq,start);gain.gain.setValueAtTime(.0001,start);gain.gain.exponentialRampToValueAtTime(.045,start+.015);gain.gain.exponentialRampToValueAtTime(.0001,start+.19);osc.connect(gain).connect(audioContext.destination);osc.start(start);osc.stop(start+.2);
     });
   }catch{}
@@ -318,7 +319,34 @@ async function changeArea(next){
   if(save.phase!=='egg'&&!await moveTo(50,token))return;
   setMotion(playArt,'idle');setStatus('ready');
 }
+function resetEggTaps(){
+  const egg=$('#egg');
+  eggTaps=0;
+  delete $('#world').dataset.hatch;
+  egg.classList.remove('egg-opening');
+  egg.style.removeProperty('--egg-crack-offset');
+  egg.setAttribute('aria-label',`Toque ${EGG_TAPS} vezes para abrir o ovo`);
+  for(const dot of $('.egg-tap-dots').children)dot.classList.remove('lit');
+  $('.egg-tap-sparks').replaceChildren();
+  egg.disabled=false;
+}
+function hatchTapSparks(point){
+  const layer=$('.egg-tap-sparks');
+  const burst=document.createElementNS(layer.namespaceURI,'g');
+  burst.setAttribute('transform',`translate(${point.x} ${point.y})`);
+  for(const [x,y,r] of [[-16,-15,2],[5,-23,1.7],[18,-10,2.3],[-9,13,1.4],[11,11,1.6]]){
+    const spark=document.createElementNS(layer.namespaceURI,'circle');
+    spark.setAttribute('r',r);
+    spark.style.setProperty('--spark-x',`${x}px`);
+    spark.style.setProperty('--spark-y',`${y}px`);
+    burst.append(spark);
+  }
+  layer.append(burst);
+  burst.addEventListener('animationend',()=>burst.remove(),{once:true});
+  return burst.getAnimations({subtree:true})[0]?.finished.catch(()=>{});
+}
 function showScreen(){
+  resetEggTaps();
   stopSleepTimer();
   stopAirMotion(false);actionGroup=null;renderActionGroups();
   window.scrollTo(0,0);
@@ -328,6 +356,7 @@ function showScreen(){
   $('#creation-cancel').hidden=!(save&&creatingNew);
   if(save&&!creatingNew){renderGrowth();if(save.sleeping){setStatus('sleeping');setMotion(playArt,'sleep-rest');startSleepTimer();}else setStatus('ready');}
   else {setStatus('creating');renderCreator();}
+  if(save?.phase==='egg'&&!creatingNew)say(`Dê ${EGG_TAPS} toques no ovo para conhecer seu amigo!`);
 }
 function drawAlbum(){
   const labels={butterfly:'Borboleta',...ALBUM_LABELS};
@@ -468,7 +497,7 @@ function finishCreation(){
     clearCreatorSession(localStorage,DRAFT_KEY);
     const converted=toSave(selectionOf(draft).sel,selectionOf(draft).col,'baby',draft.scene||'garden');save={...createSave(Date.now(),{...converted.appearance,outfit:draft.outfit||'none',shoes:draft.shoes||'none',hands:draft.hands,handPosition:handPosition(draft.handPosition),partPositions:{...draft.partPositions},partSizes:{...(draft.partSizes||{})},partColors:{...(draft.partColors||{})},mouthOffset:mouthOffset(draft.mouthOffset)}),scene:converted.scene};creatingNew=false;
     const url=new URL(location.href);url.searchParams.delete('criar');history.replaceState(null,'',url);
-    write();setStatus('ready');showScreen();say('Toque no ovo para conhecer seu amigo!');sound([440,590]);
+    write();setStatus('ready');showScreen();sound([440,590]);
   };
   if(save&&creatingNew)askConfirm('Criar outro pet?','O progresso do pet atual será substituído. Faça um backup antes se quiser guardá-lo.',commit);
   else commit();
@@ -1087,6 +1116,25 @@ function bind(){
     if(status!=='ready'||save?.phase!=='egg')return;
     const egg=$('#egg');
     const world=$('#world');
+    eggTaps++;
+    if(eggTaps===1)world.dataset.hatch='gather';
+    const progress=eggTaps/EGG_TAPS;
+    egg.style.setProperty('--egg-crack-offset',100*(1-progress));
+    $('.egg-tap-dots').children[eggTaps-1].classList.add('lit');
+    egg.setAttribute('aria-label',`Abrir o ovo. ${eggTaps} de ${EGG_TAPS} toques`);
+    const fissure=$('#egg-fissure');
+    const sparks=hatchTapSparks(fissure.getPointAtLength(fissure.getTotalLength()*progress));
+    sound(eggTaps===1?[294,392,587]:[294+eggTaps*22]);
+
+    const shell=$('.egg-intact');
+    const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+    shell.getAnimations().forEach(motion=>motion.cancel());
+    const angle=eggTaps%2===0?5:-5;
+    const knock=reduced?null:shell.animate([
+      {transform:'none'}, {transform:`rotate(${angle}deg)`,offset:.33}, {transform:'none'}
+    ],{duration:220,easing:'ease-out'});
+    if(eggTaps<EGG_TAPS)return;
+
     const token=++flow;
     const playHatchStage=async(stage,element,animation,notes)=>{
       world.dataset.hatch=stage;
@@ -1098,8 +1146,9 @@ function bind(){
     setStatus('acting');
     egg.disabled=true;
     try {
-      if(!await playHatchStage('gather',$('.egg-orbit'),'hatch-gather',[392,587,784]))return;
-      if(!await playHatchStage('crack',$('.egg-crack'),'hatch-crack',[[196,.094],[247,.452]]))return;
+      const gather=$('.egg-orbit').getAnimations().find(effect=>effect.animationName==='hatch-gather');
+      await Promise.all([gather?.finished.catch(()=>{}),knock?.finished.catch(()=>{}),sparks]);
+      if(token!==flow)return;
       egg.classList.add('egg-opening');
       if(!await playHatchStage('open',$('.egg-piece-top'),'hatch-shell-lift',[330,494,659]))return;
 
@@ -1111,10 +1160,8 @@ function bind(){
       if(!await playHatchStage('born',playArt,'hatch-baby-rise',[523,659,784,1047]))return;
       if(!await playHatchStage('daylight',$('.egg-veil'),'hatch-daylight',[784,1047]))return;
     } finally {
-      delete world.dataset.hatch;
-      egg.classList.remove('egg-opening');
+      resetEggTaps();
       egg.hidden=save?.phase!=='egg';
-      egg.disabled=false;
     }
     if(token!==flow)return;
     setMotion(playArt,'idle');
