@@ -81,11 +81,61 @@
 @keyframes pixel-eyes-idle{0%,94%,100%{opacity:1}96%{opacity:0}}
 .paused #play-art .pixel-pet *,.paused .scene-decoration .pixel-item *,.paused .album-card .pixel-item *,.paused #toy-picker .pixel-item *,.paused #activity-panel .pixel-item *{animation-play-state:paused!important}
 @media(prefers-reduced-motion:reduce){#play-art .pixel-pet *,.scene-decoration .pixel-item *,.album-card .pixel-item *,#toy-picker .pixel-item *,#activity-panel .pixel-item *{animation:none!important}}
-#play-art[data-motion="love-lean"] .pixel-paw-left .pixel-hand-joint {
+#play-art:is([data-motion="love-lean"],[data-motion="wave"]) .pixel-paw-left .pixel-hand-joint {
   transform-origin: 0 0;
   animation: pixel-hand-wave 820ms ease-in-out;
 }
 @keyframes pixel-hand-wave {
   0%, 100% { transform: rotate(0deg); }
   42%, 60% { transform: rotate(105deg); }
+}
+
+#play-art:is([data-motion="ambient-tilt-left"],[data-motion="ambient-tilt-right"]) .atelier-head{
+  transform-origin:100px 113px;
+  animation:ambient-head-tilt 1.45s ease-in-out;
+  --ambient-head-angle:-5deg;
+}
+#play-art[data-motion="ambient-tilt-right"] .atelier-head{--ambient-head-angle:5deg}
+#play-art:is([data-motion="ambient-breathe"],[data-motion="ambient-stretch"]) .pet-pose{
+  transform-origin:100px 186px;
+  animation:ambient-breath 1.65s ease-in-out;
+  --ambient-breath-x:.988;
+  --ambient-breath-y:1.025;
+}
+#play-art[data-motion="ambient-stretch"] .pet-pose{
+  --ambient-breath-x:.974;
+  --ambient-breath-y:1.043;
+}
+#play-art[data-motion="ambient-ears"] .atelier-ears{animation:ambient-ear-twitch 1.35s ease-in-out}
+#play-art[data-motion="ambient-tail"] .atelier-tail{
+  transform-origin:133px 150px;
+  animation:ambient-tail-sway 1.55s ease-in-out;
+}
+#play-art[data-motion="ambient-paw"] :is(.pixel-foot-left,.pixel-shoe-left){
+  animation:ambient-lift-paw 1.3s ease-in-out;
+}
+@keyframes ambient-head-tilt{
+  0%,100%{transform:rotate(0)}
+  38%,62%{transform:rotate(var(--ambient-head-angle))}
+}
+@keyframes ambient-breath{
+  0%,100%{transform:scale(1)}
+  45%,58%{transform:scale(var(--ambient-breath-x),var(--ambient-breath-y))}
+}
+@keyframes ambient-ear-twitch{
+  0%,32%,100%{transform:rotate(0)}
+  48%{transform:rotate(-5deg)}
+  66%{transform:rotate(3deg)}
+}
+@keyframes ambient-tail-sway{
+  0%,100%{transform:rotate(0)}
+  32%{transform:rotate(-7deg)}
+  64%{transform:rotate(5deg)}
+}
+@keyframes ambient-lift-paw{
+  0%,100%{transform:translateY(0)}
+  42%,64%{transform:translateY(-3px)}
+}
+@media (prefers-reduced-motion:reduce){
+  #play-art[data-motion="wave"] .pixel-paw-left .pixel-hand-joint{transform:rotate(105deg)}
 }

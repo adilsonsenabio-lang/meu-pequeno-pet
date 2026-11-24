@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Meu Pequeno Pet V84.29 — luminárias transparentes animadas, coruja orientada e sombras dos animais e pet.",
   "scripts": {
-    "dev": "node scripts/serve.mjs",
+    "dev": "node scripts/build.mjs && node scripts/serve.mjs",
     "build": "node scripts/build.mjs",
     "test": "node --test tests/*.test.mjs",
     "android:sync": "npm run build && npx cap sync android",

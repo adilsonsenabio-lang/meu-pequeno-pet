@@ -87,6 +87,7 @@ const DRAFT_KEY=creatorKey(ACTIVE_SAVE_KEY);
 let save=null,draft={...DEFAULT_APPEARANCE,scene:'garden'},step=0,previewArt,playArt,scene='garden';
 let status='loading',flow=0,currentX=50,lastTick=Date.now(),tickTimer=null,sleepTimer=null,lastSleepTick=0,audioContext=null,returnStatus='ready';
 let ambientTimer=null,ambientIndex=0,committedFlow=-1;
+let lastAmbientGesture='';
 let sceneClock=0,sceneWatchIndex=0,sceneLookUntil=0,sceneLookMarker=null,sceneGazeLast=0,sceneGazeLoopStarted=false;
 let chosenToy='ball',authorizedPlayToken=-1;
 let area='garden',lampOn=true;
@@ -170,6 +171,8 @@ function syncNeedButtons(){
 function setStatus(next){
   status=next;const available=['ready','ambient'].includes(next);
   $('#world').dataset.state=next;
+  const waveButton=$('#area-objects [data-object="wave"]');
+  if(waveButton)waveButton.disabled=!available||save?.phase==='egg';
   $('#care-grid').querySelectorAll('button').forEach(b=>b.disabled=(!available&&!(next==='sleeping'&&(b.dataset.care==='sleep'||b.id==='action-back')))||save?.phase==='egg');
   $('#parents-open').disabled=!available&&next!=='creating'&&next!=='sleeping';
   const sb=document.querySelector('[data-care="sleep"]');if(sb){
@@ -294,7 +297,9 @@ function renderArea(){
   $('#bed').hidden=save?.phase==='egg'||area!=='bedroom';
   $('#room-rug').hidden=save?.phase==='egg'||area!=='bedroom';
   $('#room-toy').hidden=save?.phase==='egg'||area!=='bedroom';
-  $('#area-objects').innerHTML=save?.phase==='egg'?'':area==='garden'?'':area==='bedroom'?`<button type="button" data-object="lamp" aria-label="Acender ou apagar o abajur" aria-pressed="${lampOn}">${OBJECT_ART.lamp}</button>`:`<button type="button" data-object="food" aria-label="Alimentar o pet">${OBJECT_ART.food}</button><button type="button" data-object="water" aria-label="Dar água ao pet">${OBJECT_ART.water}</button>`;
+  $('#area-objects').innerHTML=save?.phase==='egg'||area==='garden'?'':area==='bedroom'
+    ?`<button type="button" data-object="lamp" aria-label="Acender ou apagar o abajur" aria-pressed="${lampOn}">${OBJECT_ART.lamp}</button>`
+    :`<button type="button" data-object="wave" aria-label="Acenar" ${['ready','ambient'].includes(status)?'':'disabled'}>${OBJECT_ART.wave}</button>`;
   renderDecorations();
   $('#world').classList.toggle('lamp-off',area==='bedroom'&&!lampOn);
   $('#area-map').querySelectorAll('[data-area]').forEach(button=>button.setAttribute('aria-pressed',button.dataset.area===area));
@@ -887,6 +892,21 @@ function cancelAmbient(){
   currentX=parseFloat(getComputedStyle(wrap).left)/world.clientWidth*100;
   wrap.style.transition='none';wrap.style.left=`${currentX}%`;void wrap.offsetWidth;wrap.style.transition='';
   flow++;$('#pet-wrap').classList.remove('moving');setMotion(playArt,'idle');setStatus('ready');}
+function ambientGesture(){
+  const options=['ambient-tilt-left','ambient-tilt-right','ambient-breathe','ambient-paw','ambient-stretch'];
+  if(save.appearance.ears!=='none')options.push('ambient-ears');
+  if(save.appearance.tail!=='none')options.push('ambient-tail');
+  const choices=options.filter(motion=>motion!==lastAmbientGesture);
+  lastAmbientGesture=choices[Math.floor(Math.random()*choices.length)];
+  return lastAmbientGesture;
+}
+async function wavePet(){
+  if(!save||save.phase==='egg'||!['ready','ambient'].includes(status)||$('#pet-wrap').classList.contains('airborne'))return;
+  if(status==='ambient')cancelAmbient();
+  const token=++flow;
+  setStatus('reacting');setMotion(playArt,'wave');say('Oi!');
+  if(await hold(900,token)){setMotion(playArt,'idle');setStatus('ready');}
+}
 function scheduleAmbient(){
   if(ambientTimer)clearTimeout(ambientTimer);
   ambientTimer=setTimeout(async()=>{
@@ -898,6 +918,7 @@ function scheduleAmbient(){
       if(mode%3===1)watched=await watchVisibleTarget(token,mode);
       else if(!requesting&&mode===2)await moveTo(currentX<50?62:38,token);
       else if(requesting&&mode%3===0)setMotion(playArt,lowestNeed(save)==='energy'?'sleep-yawn':'request');
+      else if(Math.random()<.7)setMotion(playArt,ambientGesture());
       else setMotion(playArt,['look','stretch','walk','ear-twitch','settle','sniff','curious','sit','tail-wave',area==='garden'?'butterfly-watch':area==='kitchen'?'sniff':'dance',save.phase==='baby'?'quiet-blink':'book-look',save.phase==='baby'?'paw-step':'plush-hug',save.phase==='adult'?'proud':'curious','quiet-blink','look-up','greet',save.phase==='baby'?'paw-step':'dance-step','sleep-yawn'][mode]);
       if(watched&&token===flow){
         const kind=watched.className?.baseVal||watched.className||'';
@@ -907,7 +928,7 @@ function scheduleAmbient(){
       if(await hold(watched?850:mode===7?2500:1800,token)){resetGaze();setMotion(playArt,'idle');setStatus('ready');}
     }
     if(!document.hidden)scheduleAmbient();
-  },12000+Math.random()*6000);
+  },7000+Math.random()*7000);
 }
 function cancelFlow(){
   stopGaze();
@@ -992,11 +1013,12 @@ function bind(){
   $('#area-open').addEventListener('click',()=>{if(['ready','ambient'].includes(status))$('#area-map').hidden=false;});
   $('#area-map').addEventListener('click',event=>{if(event.target.closest('#area-close')){$('#area-map').hidden=true;return;}const button=event.target.closest('[data-area]');if(button)changeArea(button.dataset.area);});
   $('#area-objects').addEventListener('click',event=>{
-    const object=event.target.closest('[data-object]');if(!object||status!=='ready')return;
-    aimPetAt(event.clientX,event.clientY,false);
+    const object=event.target.closest('[data-object]');if(!object)return;
     const type=object.dataset.object;
+    if(type==='wave'){wavePet();return;}
+    if(status!=='ready')return;
+    aimPetAt(event.clientX,event.clientY,false);
     if(type==='lamp'){lampOn=!lampOn;renderArea();sound([lampOn?640:360]);return;}
-    if(type==='food'||type==='water')doCare(type);
   });
   $('#discovery-close').addEventListener('click',()=>{$('#discovery').hidden=true;$('#extras-shade').hidden=true;setStatus('ready');});
   $('#room-open').addEventListener('click',()=>{if(status==='ambient')cancelAmbient();if(status!=='ready'||save?.phase==='egg')return;roomCategory='bed';renderRoomChoices();$('#extras-shade').hidden=false;$('#room-picker').hidden=false;setStatus('room');});
