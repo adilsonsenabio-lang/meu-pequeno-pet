@@ -1,5 +1,5 @@
 /* Autosave independente do rascunho. O save V56 continua válido. */
-import {OPTIONS,DEFAULT_APPEARANCE,SCENES,CUSTOM_PARTS,PART_PALETTE,MIN_PART_SCALE,MAX_PART_SCALE,handPosition} from './core.js?v=58';
+import {OPTIONS,DEFAULT_APPEARANCE,SCENES,CUSTOM_PARTS,PART_PALETTE,MIN_PART_SCALE,MAX_PART_SCALE,PART_POSITION_LIMITS,handPosition,partPosition} from './core.js?v=58';
 export function creatorKey(saveKey){return `${saveKey}.criacao`;}
 export function saveCreatorSession(storage,key,draft,step,creatingNew){
  const payload={version:5,draft,step,creatingNew:!!creatingNew};
@@ -26,6 +26,12 @@ export function loadCreatorSession(storage,key){
  const offset=payload.draft.mouthOffset;
  if(Number.isInteger(offset)&&offset>=-8&&offset<=8)draft.mouthOffset=offset;
  if(payload.draft.handPosition)draft.handPosition=handPosition(payload.draft.handPosition);
+ const positions=payload.draft.partPositions;
+ if(positions&&typeof positions==='object'&&!Array.isArray(positions)){
+  draft.partPositions=Object.fromEntries(Object.entries(positions)
+   .filter(([key])=>key!=='hands'&&Object.hasOwn(PART_POSITION_LIMITS,key))
+   .map(([key,value])=>[key,partPosition(key,value)]));
+ }
  // Reordenação V68: etapa salva nas V57–V67 aponta para a mesma ABA,
  // não para a posição numérica antiga. O rascunho e as escolhas são preservados.
  const lastStep=payload.version>=3?16:15;

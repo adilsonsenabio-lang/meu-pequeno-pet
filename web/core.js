@@ -56,11 +56,18 @@ export const MIN_PART_SCALE=.85,MAX_PART_SCALE=1.20;
 // Posição vertical opcional da boca, em unidades do desenho SVG. Saves antigos: zero.
 export const MIN_MOUTH_OFFSET=-8,MAX_MOUTH_OFFSET=8;
 export function mouthOffset(value){return typeof value==='number'&&Number.isFinite(value)?Math.max(MIN_MOUTH_OFFSET,Math.min(MAX_MOUTH_OFFSET,Math.round(value))):0;}
-export const HAND_POSITION_LIMITS={x:5,y:10};
-export function handPosition(value){
- const position=(axis)=>Number.isFinite(value?.[axis])?clamp(Math.round(value[axis]),-HAND_POSITION_LIMITS[axis],HAND_POSITION_LIMITS[axis]):0;
+export const PART_POSITION_LIMITS={
+ hands:{x:[-5,5],y:[-10,10]},
+ wings:{x:[-5,5],y:[-10,10]},
+ feet:{x:[-5,5],y:[-10,4]},
+ tail:{x:[-5,5],y:[-10,10]}
+};
+export function partPosition(key,value){
+ const limits=PART_POSITION_LIMITS[key];
+ const position=axis=>Number.isFinite(value?.[axis])?clamp(Math.round(value[axis]),...limits[axis]):0;
  return {x:position('x'),y:position('y')};
 }
+export const handPosition=value=>partPosition('hands',value);
 export function validAppearance(a){
  if(!a||!Object.entries(OPTIONS).every(([key,values])=>a[key]===undefined?!['color','tail','wings','ears','markings','accessory'].includes(key):values.includes(a[key])||LEGACY[key]?.includes(a[key])))return false;
  if(a.partSizes!==undefined&&(!a.partSizes||typeof a.partSizes!=='object'||Array.isArray(a.partSizes)||Object.entries(a.partSizes).some(([k,v])=>!CUSTOM_PARTS.includes(k)||typeof v!=='number'||!Number.isFinite(v)||v<MIN_PART_SCALE||v>MAX_PART_SCALE)))return false;
@@ -69,6 +76,14 @@ export function validAppearance(a){
  if(a.handPosition!==undefined){
   const {x,y}=handPosition(a.handPosition);
   if(a.handPosition?.x!==x||a.handPosition?.y!==y)return false;
+ }
+ if(a.partPositions!==undefined){
+  if(!a.partPositions||typeof a.partPositions!=='object'||Array.isArray(a.partPositions))return false;
+  for(const [key,value] of Object.entries(a.partPositions)){
+   if(key==='hands'||!Object.hasOwn(PART_POSITION_LIMITS,key))return false;
+   const {x,y}=partPosition(key,value);
+   if(value?.x!==x||value?.y!==y)return false;
+  }
  }
  return true;
 }

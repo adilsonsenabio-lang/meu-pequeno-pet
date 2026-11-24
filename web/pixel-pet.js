@@ -1,11 +1,12 @@
 // Personagem modular em pixel art 2D. Coordenadas inteiras no palco de 200 × 200.
-import {handPosition} from './core.js?v=74';
+import {handPosition,partPosition} from './core.js?v=74';
 
 const ink='#273249';
 const r=(x,y,w,h,c)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}"/>`;
 const b=(x,y,w,h,c)=>r(x-3,y-3,w+6,h+6,ink)+r(x,y,w,h,c);
 const shape=(d,c,outline=ink)=>`<path d="${d}" fill="${c}" stroke="${outline}" stroke-width="3" stroke-linejoin="miter"/>`;
 const rows=(spans,c)=>spans.map(([x,y,w,h])=>r(x,y,w,h,c)).join('');
+const offsetArt=(art,x,y)=>art&&(x||y)?`<g transform="translate(${x} ${y})">${art}</g>`:art;
 const shade=(hex,amount)=>{const n=parseInt(hex.slice(1),16);return '#'+[16,8,0].map(bit=>Math.max(0,Math.min(255,Math.round(((n>>bit)&255)+amount))).toString(16).padStart(2,'0')).join('')};
 const id=(ids,n)=>ids[n]||ids[0];
 const earIds=['cat','dog','bunny','bear','horns','unicorn','antlers','elf','bat','mouse','antenna','ram','fox','floppy','spiky','deer'];
@@ -215,7 +216,7 @@ const wingPaths={
  leaf:'M70 125H62V117H55V107H48V101H43V112H39V123H41V135H48V143H58V145H65V137H70Z',
  crystal:'M70 125H64V112H59V100H53V110H48V105H42V119H37V128H43V138H53V145H61V138H70Z',
  flame:'M70 124H63V115H58V101H53V114H47V108H45V122H38V116H40V132H37V139H44V146H55V150H64V142H70Z'};
-function wings(s,c){const k=p(s,'wings');if(k==='none')return '';
+function wings(s,c,position){const k=p(s,'wings');if(k==='none')return '';
  const path=wingPaths[k];if(!path)return '';
  const color=['angel','fairy','butterfly','dragonfly','crystal'].includes(k)?c.s:c.a;
  let detail=rows([[48,119,5,4],[56,127,6,3]],shade(color,35));
@@ -225,7 +226,8 @@ function wings(s,c){const k=p(s,'wings');if(k==='none')return '';
  if(k==='leaf')detail+=rows([[48,117,3,18],[51,128,10,3]],shade(color,-40));
  if(k==='crystal')detail+=rows([[51,109,3,22],[55,119,5,3]],'#fff9ef');
  const joined=r(65,120,19,12,color)+shape(path,color)+detail;
- return `<g class="pixel-wing-left"><g class="pixel-wing-pose">${joined}</g></g><g class="pixel-wing-right" transform="translate(200 0) scale(-1 1)"><g class="pixel-wing-pose">${joined}</g></g>`;
+ const wing=offsetArt(`<g class="pixel-wing-pose">${joined}</g>`,-position.x,position.y);
+ return `<g class="pixel-wing-left">${wing}</g><g class="pixel-wing-right" transform="translate(200 0) scale(-1 1)">${wing}</g>`;
 }
 const tailPaths={
  cat:'M130 146H153V142H160V128H156V120H163V117H171V123H174V142H170V151H162V157H130Z',
@@ -317,7 +319,7 @@ function handArt(s,c,stage,options){
  const hand=`<g transform="translate(${x} ${y})"><g class="pixel-hand-joint"><g transform="scale(${scale})">${art}</g></g></g>`;
  return `<g class="pixel-paw-left">${hand}</g><g class="pixel-paw-right" transform="translate(200 0) scale(-1 1)">${hand}</g>`;
 }
-function feet(s,c,stage){
+function feet(s,c,stage,position){
  const y=stage==='baby'?184:186;
  const k=s.feet<0?'none':s.feet;
  if(k==='none')return '';
@@ -332,9 +334,10 @@ function feet(s,c,stage){
   if(k===11)z+=r(x===67?65:128,y-4,7,8,c.s);
   return z;
  };
- return `<g class="pixel-foot-left">${one(67)}</g><g class="pixel-foot-right">${one(107)}</g>`;
+ return offsetArt(`<g class="pixel-foot-left">${one(67)}</g>`,-position.x,position.y)
+  +offsetArt(`<g class="pixel-foot-right">${one(107)}</g>`,position.x,position.y);
 }
-function shoeArt(kind,stage){
+function shoeArt(kind,stage,position){
  if(!kind||kind==='none')return '';
  const y=stage==='baby'?178:180;
  const colors={shoes:'#e99dbb',sneakers:'#74a6c6',heels:'#d57d9f',boots:'#a787bc',slippers:'#e8c5a4',sandals:'#d99373',rainboots:'#e1a85f',rollers:'#8795ca',highTops:'#81b6ad',ballet:'#dca3bd',flipflops:'#7cb6a4',loafers:'#8e6f63',snowboots:'#b5b3ce'};
@@ -353,7 +356,8 @@ function shoeArt(kind,stage){
   if(kind==='flipflops')shoe=r(x,y+10,27,4,ink)+r(x+2,y+8,23,3,colors[kind])+r(x+10,y+3,4,6,'#f6deb1')+r(x+5,y+3,5,3,'#f6deb1')+r(x+14,y+3,6,3,'#f6deb1');
   if(kind==='loafers')shoe=shape(`M${x+1} ${y+5}H${x+7}V${y+1}H${x+21}V${y+7}H${x+27}V${y+12}H${x+1}Z`,colors[kind])+r(x+7,y+5,14,3,'#d6b889')+r(x+1,y+11,26,2,'#4c4141');
   if(kind==='snowboots')shoe=shape(`M${x+5} ${y-8}H${x+21}V${y+5}H${x+27}V${y+12}H${x}V${y+4}H${x+5}Z`,colors[kind])+r(x+4,y-7,18,4,'#f9e7d9')+r(x+5,y+1,16,4,'#f4e6d8')+r(x+1,y+11,24,3,'#735a6d');
-  z+=`<g class="pixel-shoe-${x===67?'left':'right'}">${shoe}</g>`;
+  const left=x===67;
+  z+=offsetArt(`<g class="pixel-shoe-${left?'left':'right'}">${shoe}</g>`,left?-position.x:position.x,position.y);
  }return z;
 }
 function accessory(s,c){const k=p(s,'accessory');if(k==='none')return '';
@@ -440,8 +444,12 @@ export function pixelPet(s,c,o={}){
  const scaled=(k,art,x,y)=>partGroup(art,o.partSizes,k,x,y);
  // A boca permanece ancorada à cabeça, inclusive durante inclinação/olhar e crescimento.
  const mouthShift=typeof o.mouthOffset==='number'&&Number.isFinite(o.mouthOffset)?Math.max(-8,Math.min(8,Math.round(o.mouthOffset))):0;
+ const tailOffset=partPosition('tail',o.partPositions?.tail);
+ const wingOffset=partPosition('wings',o.partPositions?.wings);
+ const feetOffset=partPosition('feet',o.partPositions?.feet);
+ const tailArt=offsetArt(`<g class="atelier-tail">${scaled('tail',tail(s,tone('tail')),132,150)}</g>`,tailOffset.x,tailOffset.y);
  const eyesArt=eyes(s,mood,tint('eyes'));
  const bodyPart=`<g class="atelier-body">${body(s,c,stage)}<g class="pixel-outfit">${outfitArt(o.outfit,s,stage)}</g>${handArt(s,tone('hands'),stage,o)}</g>`;
  const headPart=`<g class="atelier-head"><g class="atelier-ears">${scaled('ears',ears(s,tone('ears')),100,74)}</g>${headShape(s,c)}<g class="atelier-markings">${marks(s,c)}</g><g class="atelier-hair">${hair(s,c)}</g><g class="atelier-eyes">${scaled('eyes',eyesArt,100,88)}</g><g class="atelier-eyes-shut">${rows([[76,89,16,4],[109,89,16,4]],ink)}</g><g class="atelier-snout" transform="translate(0 -2) translate(100 108) scale(.78) translate(-100 -108)">${scaled('snout',snout(s,tone('snout'),mood),100,108)}</g><g class="atelier-mouth" transform="translate(0 ${-9+mouthShift})" data-mouth-offset="${mouthShift}">${scaled('mouth',mouthArt(s,c,mood,tint('mouth')),100,125)}</g><g class="atelier-eating-mouth">${b(91,106,18,17,'#713d4e')+r(95,117,10,4,'#e58ea2')}</g><g class="atelier-accessory">${scaled('accessory',accessory(s,tone('accessory')),100,97)}</g><g class="care-cup">${b(107,108,17,20,'#e5eff0')+r(109,116,13,3,'#76c5d3')}</g><g class="care-sponged">${b(121,89,17,15,c.a)}</g><g class="care-dirt">${r(68,101,7,7,'#80684f')+r(125,102,7,7,'#80684f')}</g><g class="care-suds">${r(68,109,11,8,'#fff')+r(125,109,11,8,'#fff')}</g></g>`;
- return `<g class="pixel-pet" shape-rendering="crispEdges"><ellipse cx="100" cy="${stage==='baby'?190:192}" rx="36" ry="3" fill="#15282a" opacity=".3"/><g class="atelier-tail">${scaled('tail',tail(s,tone('tail')),132,150)}</g><g class="atelier-wings">${scaled('wings',wings(s,tone('wings')),100,125)}</g><g class="atelier-neck">${neckBridge(c,stage)}</g>${bodyPart}<g class="atelier-feet">${feet(s,c,stage)}<g class="pixel-shoes">${shoeArt(o.shoes,stage)}</g></g><g transform="translate(0 ${headLift}) translate(100 120) scale(${headScale}) translate(-100 -120)">${headPart}</g></g>`;
+ return `<g class="pixel-pet" shape-rendering="crispEdges"><ellipse cx="100" cy="${(stage==='baby'?190:192)+feetOffset.y}" rx="${36+feetOffset.x}" ry="3" fill="#15282a" opacity=".3"/>${tailArt}<g class="atelier-wings">${scaled('wings',wings(s,tone('wings'),wingOffset),100,125)}</g><g class="atelier-neck">${neckBridge(c,stage)}</g>${bodyPart}<g class="atelier-feet">${feet(s,c,stage,feetOffset)}<g class="pixel-shoes">${shoeArt(o.shoes,stage,feetOffset)}</g></g><g transform="translate(0 ${headLift}) translate(100 120) scale(${headScale}) translate(-100 -120)">${headPart}</g></g>`;
 }

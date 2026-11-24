@@ -1,7 +1,7 @@
 import {ALBUM_LABELS,albumSprite} from './album-v73.js?v=73';
 import {sceneMarkup,sceneFill,updateSceneMarkers,prioritySceneMarkers,SCENE_KEYS,SCENE_LABELS} from './scene-v63-player.js?v=84.29';
 import {sceneTallExtension} from './scene-details-v60.js';
-import {CUSTOM_PARTS,PART_PALETTE,MIN_PART_SCALE,MAX_PART_SCALE,MIN_MOUTH_OFFSET,MAX_MOUTH_OFFSET,mouthOffset,handPosition,CARE,canPlay,MIN_ENERGY_TO_PLAY,OPTIONS,DEFAULT_APPEARANCE,ROOM_OPTIONS,MOMENTS,TOYS,AREAS,ACTIVITIES,EVENTS,nextDiscovery,noteMoment,toyAvailable,activityAvailable,createSave,hatch,advance,applyCare,beginSleep,restSleep,endSleep,noteInteraction,renamePet,lowestNeed,maybeEvolve,needStatus} from './core.js?v=74';
+import {CUSTOM_PARTS,PART_PALETTE,MIN_PART_SCALE,MAX_PART_SCALE,MIN_MOUTH_OFFSET,MAX_MOUTH_OFFSET,mouthOffset,handPosition,partPosition,PART_POSITION_LIMITS,CARE,canPlay,MIN_ENERGY_TO_PLAY,OPTIONS,DEFAULT_APPEARANCE,ROOM_OPTIONS,MOMENTS,TOYS,AREAS,ACTIVITIES,EVENTS,nextDiscovery,noteMoment,toyAvailable,activityAvailable,createSave,hatch,advance,applyCare,beginSleep,restSleep,endSleep,noteInteraction,renamePet,lowestNeed,maybeEvolve,needStatus} from './core.js?v=74';
 import {SAVE_KEY,loadSave,persist,exportBackup,importBackup,resetSave} from './storage.js?v=59';
 import {creatorKey,saveCreatorSession,loadCreatorSession,clearCreatorSession} from './creator-session.js?v=69';
 import {PARTS,KEYS,LAB,IDS,COLORS,SCENES,item,svg,fromSave,toSave,moodFromNeeds,PET_CSS,SCENE_NAMES,fx,SFX,Ambient,ACT,AU} from './atelier.js?v=59';
@@ -43,7 +43,7 @@ const selectionOf=appearance=>fromSave(appearance);
 function drawPet(host,appearance,phase,mood='happy'){
   const {sel,col}=selectionOf(appearance);
   stopPetFrames(host);
-  host.innerHTML=svg(`<g class="pet-pose pet m-${mood}">${pixelPet(sel,col,{stage:stageOf(phase),mood,outfit:appearance.outfit,shoes:appearance.shoes,partSizes:appearance.partSizes,partColors:appearance.partColors,mouthOffset:appearance.mouthOffset,hands:appearance.hands,handPosition:appearance.handPosition})}</g><g id="fx"></g>`);
+  host.innerHTML=svg(`<g class="pet-pose pet m-${mood}">${pixelPet(sel,col,{stage:stageOf(phase),mood,outfit:appearance.outfit,shoes:appearance.shoes,partSizes:appearance.partSizes,partColors:appearance.partColors,mouthOffset:appearance.mouthOffset,hands:appearance.hands,handPosition:appearance.handPosition,partPositions:appearance.partPositions})}</g><g id="fx"></g>`);
   host.querySelector('svg').setAttribute('aria-hidden','true');
 }
 function setMotion(host,motion){
@@ -331,7 +331,7 @@ function drawAlbum(){
     return `<button type="button" class="album-card ${available?'found':'locked'}" data-album-moment="${moment}" aria-label="${labels[moment]}" ${available?'':'disabled'}><span class="album-object" data-decoration-kind="${moment}">${decorationArt(moment)}</span></button>`;
   }).join('');
 }
-function decorationArt(kind){if(['birth','young','adult'].includes(kind)){const {sel,col}=selectionOf(save.appearance);return svg(pixelPet(sel,col,{stage:stageOf(kind==='birth'?'baby':kind),mood:'happy',outfit:save.appearance.outfit,shoes:save.appearance.shoes,partSizes:save.appearance.partSizes,partColors:save.appearance.partColors,mouthOffset:save.appearance.mouthOffset,hands:save.appearance.hands,handPosition:save.appearance.handPosition}));}return albumSprite(kind)||TOY_ART[kind]||ACTIVITY_ART[kind]||EVENT_ART[kind]||({butterfly:OBJECT_ART.butterfly,bedroom:OBJECT_ART.lamp,kitchen:OBJECT_ART.food,decor:roomOptionArt('bed',save.room?.bed||'cloud')})[kind]||item(({food:'food',water:'water',bath:'bath',play:'play'})[kind]||'play');}
+function decorationArt(kind){if(['birth','young','adult'].includes(kind)){const {sel,col}=selectionOf(save.appearance);return svg(pixelPet(sel,col,{stage:stageOf(kind==='birth'?'baby':kind),mood:'happy',outfit:save.appearance.outfit,shoes:save.appearance.shoes,partSizes:save.appearance.partSizes,partColors:save.appearance.partColors,mouthOffset:save.appearance.mouthOffset,hands:save.appearance.hands,handPosition:save.appearance.handPosition,partPositions:save.appearance.partPositions}));}return albumSprite(kind)||TOY_ART[kind]||ACTIVITY_ART[kind]||EVENT_ART[kind]||({butterfly:OBJECT_ART.butterfly,bedroom:OBJECT_ART.lamp,kitchen:OBJECT_ART.food,decor:roomOptionArt('bed',save.room?.bed||'cloud')})[kind]||item(({food:'food',water:'water',bath:'bath',play:'play'})[kind]||'play');}
 function renderDecorations(){const layer=$('#decorations');if(!layer)return;layer.innerHTML=(save?.decorations||[]).map((d,index)=>d.area===area?`<button type="button" class="scene-decoration ${selectedDecoration===index?'selected':''}" data-decoration-index="${index}" data-decoration-kind="${d.kind}" aria-label="Selecionar lembrança" aria-pressed="${selectedDecoration===index}" style="left:${d.x}%;top:${d.y}%"><span class="decoration-art">${decorationArt(d.kind)}</span></button>`:'').join('');const hidden=selectedDecoration===null||!save?.decorations?.[selectedDecoration]||save.decorations[selectedDecoration].area!==area;for(const id of ['decoration-remove','decoration-use']){const button=$('#'+id);if(button)button.hidden=hidden;}const cancel=$('#decoration-cancel');if(cancel)cancel.hidden=hidden&&!chosenDecoration;}
 function updateDecoration(index,x,y,remove=false){
  if(!save?.decorations?.[index]||save.decorations[index].area!==area)return false;
@@ -409,10 +409,15 @@ function miniArt(key,value){
   const candidate={...draft,[key]:value};
   const {sel,col}=selectionOf(candidate);
   const crop=key==='eyes'?'65 57 70 52':key==='snout'?'63 74 74 50':key==='mouth'?'73 82 54 43':key==='markings'?'53 45 94 66':key==='ears'?'38 20 124 94':key==='shoes'?'56 158 88 38':key==='outfit'?'51 108 98 75':key==='hands'?'39 126 122 43':null;
-  return `<span class="choice-pet" aria-hidden="true">${svg(pixelPet(sel,col,{stage:'baby',outfit:candidate.outfit,shoes:candidate.shoes,partSizes:candidate.partSizes,partColors:candidate.partColors,mouthOffset:candidate.mouthOffset,hands:candidate.hands,handPosition:candidate.handPosition}),crop||'0 0 200 200')}</span>`;
+  return `<span class="choice-pet" aria-hidden="true">${svg(pixelPet(sel,col,{stage:'baby',outfit:candidate.outfit,shoes:candidate.shoes,partSizes:candidate.partSizes,partColors:candidate.partColors,mouthOffset:candidate.mouthOffset,hands:candidate.hands,handPosition:candidate.handPosition,partPositions:candidate.partPositions}),crop||'0 0 200 200')}</span>`;
 }
-function renderHandPosition(){
-  const {x,y}=handPosition(draft.handPosition);
+const draftPartPosition=key=>partPosition(key,key==='hands'?draft.handPosition:draft.partPositions?.[key]);
+function renderPartPosition(key){
+  const {x,y}=draftPartPosition(key);
+  for(const axis of ['x','y']){
+    const input=$('#hand-position-'+axis);
+    [input.min,input.max]=PART_POSITION_LIMITS[key][axis];
+  }
   $('#hand-position-x').value=String(x);
   $('#hand-position-y').value=String(y);
   $('#hand-position-x-label').textContent=x<0?`\u2192\u2190 ${-x} px`:x>0?`\u2190\u2192 ${x} px`:'Centro';
@@ -430,20 +435,23 @@ function renderCreator(){
   }).join('');
   list.scrollTop=previousScroll; // Não perde a posição das escolhas ao alterar o visual da peça.
   // Escolhas por ícones: as crianças não precisam ler para ajustar o visual.
-  const adjust=$('#creator-adjust');adjust.hidden=!CUSTOM_PARTS.includes(c.key)||draft[c.key]==='none';
+  const sizeAdjust=CUSTOM_PARTS.includes(c.key)&&draft[c.key]!=='none';
+  const positionAdjust=Object.hasOwn(PART_POSITION_LIMITS,c.key)&&draft[c.key]!=='none';
+  const adjust=$('#creator-adjust');adjust.hidden=!sizeAdjust&&!positionAdjust;
+  $('#part-size-adjust').hidden=!sizeAdjust;
   // V84.17: Boca usa apenas as cores originais da sprite; tamanho e altura permanecem configuráveis.
-  const mouthColorFilter=c.key==='mouth';
-  adjust.querySelector('.colors-head').hidden=mouthColorFilter;
-  $('#part-colors').hidden=mouthColorFilter;
+  const showColors=sizeAdjust&&c.key!=='mouth';
+  adjust.querySelector('.colors-head').hidden=!showColors;
+  $('#part-colors').hidden=!showColors;
   const mouthAdjust=$('#mouth-height-adjust');mouthAdjust.hidden=c.key!=='mouth'||draft.mouth==='none';
   if(!mouthAdjust.hidden){const value=mouthOffset(draft.mouthOffset);$('#mouth-height').value=String(value);$('#mouth-height-label').textContent=value<0?`↑ ${Math.abs(value)} px`:value>0?`↓ ${value} px`:'Centro';}
-  const handsAdjust=$('#hand-position-adjust');handsAdjust.hidden=c.key!=='hands';
-  if(!handsAdjust.hidden)renderHandPosition();
-  if(!adjust.hidden){
+  $('#hand-position-adjust').hidden=!positionAdjust;
+  if(positionAdjust)renderPartPosition(c.key);
+  if(sizeAdjust){
     const value=draft.partSizes?.[c.key]??1;
     $('#part-size').value=String(value);
     $('#part-size-label').textContent=`${Math.round(value*100)}%`;
-    const colors=$('#part-colors');colors.innerHTML=mouthColorFilter?'':Object.entries(PART_PALETTE).map(([name,hex])=>`<button type="button" class="part-color ${name==='base'?'part-default':''}" data-part-color="${name}" style="${hex?`--part-swatch:${hex}`:''}" title="${({base:'Original',pink:'Rosa',blue:'Azul',mint:'Menta',gold:'Dourado',purple:'Lilás',cream:'Creme',brown:'Marrom'})[name]}" aria-label="${name==='base'?'Cor original':name}" aria-pressed="${(draft.partColors?.[c.key]||'base')===name}">${name==='base'?'↩':''}</button>`).join('');
+    const colors=$('#part-colors');colors.innerHTML=!showColors?'':Object.entries(PART_PALETTE).map(([name,hex])=>`<button type="button" class="part-color ${name==='base'?'part-default':''}" data-part-color="${name}" style="${hex?`--part-swatch:${hex}`:''}" title="${({base:'Original',pink:'Rosa',blue:'Azul',mint:'Menta',gold:'Dourado',purple:'Lilás',cream:'Creme',brown:'Marrom'})[name]}" aria-label="${name==='base'?'Cor original':name}" aria-pressed="${(draft.partColors?.[c.key]||'base')===name}">${name==='base'?'↩':''}</button>`).join('');
   }
   $('#create-back').disabled=step===0;
   $('#create-next use').setAttribute('href',step===categories.length-1?'#i-check':'#i-next');
@@ -452,7 +460,7 @@ function renderCreator(){
 function finishCreation(){
   const commit=()=>{
     clearCreatorSession(localStorage,DRAFT_KEY);
-    const converted=toSave(selectionOf(draft).sel,selectionOf(draft).col,'baby',draft.scene||'garden');save={...createSave(Date.now(),{...converted.appearance,outfit:draft.outfit||'none',shoes:draft.shoes||'none',hands:draft.hands,handPosition:handPosition(draft.handPosition),partSizes:{...(draft.partSizes||{})},partColors:{...(draft.partColors||{})},mouthOffset:mouthOffset(draft.mouthOffset)}),scene:converted.scene};creatingNew=false;
+    const converted=toSave(selectionOf(draft).sel,selectionOf(draft).col,'baby',draft.scene||'garden');save={...createSave(Date.now(),{...converted.appearance,outfit:draft.outfit||'none',shoes:draft.shoes||'none',hands:draft.hands,handPosition:handPosition(draft.handPosition),partPositions:{...draft.partPositions},partSizes:{...(draft.partSizes||{})},partColors:{...(draft.partColors||{})},mouthOffset:mouthOffset(draft.mouthOffset)}),scene:converted.scene};creatingNew=false;
     const url=new URL(location.href);url.searchParams.delete('criar');history.replaceState(null,'',url);
     write();setStatus('ready');showScreen();say('Toque no ovo para conhecer seu amigo!');sound([440,590]);
   };
@@ -807,7 +815,7 @@ function startPainting(token){
   const container=$('#mini-targets');container.hidden=false;
   let color=save.drawingColor||save.appearance.color||'pink';if(!COLORS[color])color='pink';
   container.innerHTML=`<div class="paint-board"><div id="paint-preview"></div><div class="paint-colors">${['pink','blue','green','yellow'].map(key=>`<button type="button" data-paint="${key}" aria-label="Pintar de ${key}" style="background:${COLORS[key][0]}"></button>`).join('')}</div><button id="paint-done" type="button" aria-label="Terminar pintura">✓</button></div><button class="mini-exit" type="button" aria-label="Voltar aos cuidados">←</button>`;
-  const draw=()=>{const {sel,col}=selectionOf({...save.appearance,color,colors:COLORS[color]});$('#paint-preview').innerHTML=svg(pixelPet(sel,col,{stage:stageOf(save.phase),mood:'happy',outfit:save.appearance.outfit,shoes:save.appearance.shoes,partSizes:save.appearance.partSizes,partColors:save.appearance.partColors,mouthOffset:save.appearance.mouthOffset,hands:save.appearance.hands,handPosition:save.appearance.handPosition}));container.querySelectorAll('[data-paint]').forEach(button=>button.setAttribute('aria-pressed',button.dataset.paint===color));};draw();
+  const draw=()=>{const {sel,col}=selectionOf({...save.appearance,color,colors:COLORS[color]});$('#paint-preview').innerHTML=svg(pixelPet(sel,col,{stage:stageOf(save.phase),mood:'happy',outfit:save.appearance.outfit,shoes:save.appearance.shoes,partSizes:save.appearance.partSizes,partColors:save.appearance.partColors,mouthOffset:save.appearance.mouthOffset,hands:save.appearance.hands,handPosition:save.appearance.handPosition,partPositions:save.appearance.partPositions}));container.querySelectorAll('[data-paint]').forEach(button=>button.setAttribute('aria-pressed',button.dataset.paint===color));};draw();
   container.querySelector('.mini-exit').onclick=()=>cancelFlow();
   container.querySelectorAll('[data-paint]').forEach(button=>button.onclick=()=>{if(token!==flow)return;color=button.dataset.paint;draw();sound([550]);});
   $('#paint-done').onclick=()=>{if(token!==flow)return;save={...save,drawingColor:color};write();finishActivity(token,'paint');};
@@ -921,7 +929,7 @@ function drawWardrobe(){
  const panel=$('#wardrobe-panel'),kind=wardrobeKind,chosen=save.appearance[kind]||'none';
  panel.innerHTML=`<button type="button" id="wardrobe-close" class="extra-close" aria-label="Voltar">×</button><div class="wardrobe-preview" aria-hidden="true"></div><div class="wardrobe-choices">${OPTIONS[kind].map(value=>{
   const candidate={...save.appearance,[kind]:value},{sel,col}=selectionOf(candidate),label=wardrobeNames[kind][value];
-  const art=svg(pixelPet(sel,col,{stage:stageOf(save.phase),mood:'happy',outfit:candidate.outfit,shoes:candidate.shoes,partSizes:candidate.partSizes,partColors:candidate.partColors,mouthOffset:candidate.mouthOffset,hands:candidate.hands,handPosition:candidate.handPosition}));
+  const art=svg(pixelPet(sel,col,{stage:stageOf(save.phase),mood:'happy',outfit:candidate.outfit,shoes:candidate.shoes,partSizes:candidate.partSizes,partColors:candidate.partColors,mouthOffset:candidate.mouthOffset,hands:candidate.hands,handPosition:candidate.handPosition,partPositions:candidate.partPositions}));
   return `<button type="button" data-wardrobe="${value}" aria-label="${label}" aria-pressed="${value===chosen}">${art}<span>${label}</span></button>`;
  }).join('')}</div>`;
  drawPet(panel.querySelector('.wardrobe-preview'),save.appearance,save.phase,'happy');
@@ -1032,11 +1040,12 @@ function bind(){
     drawPet(previewArt,draft,'baby');setMotion(previewArt,'idle');stopPetFrames(previewArt);
   });
   $('#hand-position-adjust').addEventListener('input',event=>{
-    if(status!=='creating'||categories[step]?.key!=='hands')return;
-    const axis=event.target.dataset.handAxis;
-    if(axis!=='x'&&axis!=='y')return;
-    draft.handPosition=handPosition({...draft.handPosition,[axis]:Number(event.target.value)});
-    saveDraft();renderHandPosition();
+    const key=categories[step]?.key,axis=event.target.dataset.partAxis;
+    if(status!=='creating'||!Object.hasOwn(PART_POSITION_LIMITS,key)||(axis!=='x'&&axis!=='y'))return;
+    const position=partPosition(key,{...draftPartPosition(key),[axis]:Number(event.target.value)});
+    if(key==='hands')draft.handPosition=position;
+    else draft.partPositions={...draft.partPositions,[key]:position};
+    saveDraft();renderPartPosition(key);
     drawPet(previewArt,draft,'baby');setMotion(previewArt,'idle');stopPetFrames(previewArt);
   });
   $('#part-colors').addEventListener('click',event=>{
