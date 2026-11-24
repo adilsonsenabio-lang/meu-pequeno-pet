@@ -330,26 +330,32 @@ function resetEggTaps(){
   $('.egg-tap-sparks').replaceChildren();
   egg.disabled=false;
 }
-function hatchTapSparks(point,shell){
-  const layer=$('.egg-tap-sparks');
-  const origin=point.matrixTransform(shell.getCTM()).matrixTransform(layer.getCTM().inverse());
+function sparkBurst(layer,{x,y},eggBurst=false){
   const burst=document.createElementNS(layer.namespaceURI,'g');
-  burst.setAttribute('transform',`translate(${origin.x} ${origin.y})`);
+  burst.setAttribute('transform',`translate(${x} ${y})`);
   const ring=document.createElementNS(layer.namespaceURI,'circle');
   ring.classList.add('egg-tap-ring');
   ring.setAttribute('r',9);
-  burst.append(ring);
-  const spread=[
-    [-57,-36,3.8],[-42,-55,2.3],[-20,-64,3],[-4,-75,2.1],[20,-64,4.2],[39,-51,2.3],
-    [58,-36,3.5],[68,-13,2.1],[55,15,2.6],[-55,12,2.4],[-66,-10,3],[35,-22,1.7]
-  ];
-  const turn=eggTaps%2===0?1:-1;
-  for(const [x,y,r] of spread){
+  const outerRing=ring.cloneNode();
+  outerRing.classList.add('egg-tap-ring-outer');
+  burst.append(ring,outerRing);
+
+  const count=eggBurst?22:16;
+  const rotation=Math.random()*Math.PI*2;
+  const reach=eggBurst?102:82;
+  for(let i=0;i<count;i++){
+    const angle=rotation+i*2*Math.PI/count;
+    const distance=reach*(i%2===0?.91:.60)+Math.random()*12;
+    const dx=Math.cos(angle)*distance;
+    const dy=Math.sin(angle)*distance-(eggBurst?24:0);
+    const radius=i%4===0?6:i%2===0?3.6:2.4;
+    const tip=radius*1.6;
+    const shoulder=radius*.22;
     const spark=document.createElementNS(layer.namespaceURI,'path');
     spark.classList.add('egg-flying-spark');
-    spark.setAttribute('d',`M0 ${-r*1.4} ${r} 0 0 ${r*1.4} ${-r} 0Z`);
-    spark.style.setProperty('--spark-x',`${x*turn}px`);
-    spark.style.setProperty('--spark-y',`${y}px`);
+    spark.setAttribute('d',`M0 ${-tip} Q${shoulder} ${-shoulder} ${radius} 0 Q${shoulder} ${shoulder} 0 ${tip} Q${-shoulder} ${shoulder} ${-radius} 0 Q${-shoulder} ${-shoulder} 0 ${-tip}Z`);
+    spark.style.setProperty('--spark-x',`${dx}px`);
+    spark.style.setProperty('--spark-y',`${dy}px`);
     burst.append(spark);
   }
   layer.append(burst);
@@ -1124,6 +1130,10 @@ function bind(){
   $('#create-back').addEventListener('click',()=>{if(step>0){step--;renderCreator();}});
   $('#creation-cancel').addEventListener('click',()=>{if(!save)return;clearCreatorSession(localStorage,DRAFT_KEY);creatingNew=false;const url=new URL(location.href);url.searchParams.delete('criar');history.replaceState(null,'',url);showScreen();});
   $('#create-next').addEventListener('click',()=>{if(step<categories.length-1){step++;renderCreator();sound([520]);}else finishCreation();});
+  document.addEventListener('click',event=>{
+    if(!event.detail||$('#play-screen').hidden||document.querySelector('dialog[open]'))return;
+    sparkBurst($('#screen-tap-sparks'),{x:event.clientX,y:event.clientY});
+  },{capture:true});
   $('#egg').addEventListener('click',async()=>{
     if(status!=='ready'||save?.phase!=='egg')return;
     const egg=$('#egg');
@@ -1148,7 +1158,10 @@ function bind(){
       {transform:'none'}
     ],{duration:220,easing:'ease-out'});
     const fissure=$('#egg-fissure');
-    const sparks=hatchTapSparks(fissure.getPointAtLength(fissure.getTotalLength()*progress),shell);
+    const sparkLayer=$('.egg-tap-sparks');
+    const point=fissure.getPointAtLength(fissure.getTotalLength()*progress);
+    const origin=point.matrixTransform(shell.getCTM()).matrixTransform(sparkLayer.getCTM().inverse());
+    const sparks=sparkBurst(sparkLayer,origin,true);
     if(eggTaps<EGG_TAPS)return;
 
     const token=++flow;

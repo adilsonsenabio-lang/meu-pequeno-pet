@@ -63,19 +63,36 @@
 .egg-tap-dots circle { fill: #42365f; stroke: #fff0bf; stroke-width: 1.2; }
 .egg-tap-dots .lit { fill: #ffe384; filter: drop-shadow(0 0 2px #ffd870); }
 .egg-opening .egg-tap-dots { visibility: hidden; }
-.egg-flying-spark {
-  fill: #fff2aa;
-  stroke: #57437a;
-  stroke-width: .65;
-  animation: hatch-tap-spark 680ms cubic-bezier(.14,.68,.3,1) both;
+#screen-tap-sparks {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 30;
+  pointer-events: none;
+  overflow: hidden;
 }
-.egg-flying-spark:nth-child(3n) { fill: #f4b0ff; animation-duration: 560ms; }
-.egg-flying-spark:nth-child(4n) { fill: #b5fff4; animation-duration: 750ms; }
-.egg-tap-sparks .egg-tap-ring {
+.egg-flying-spark {
+  fill: #ffe68b;
+  stroke: #503569;
+  stroke-width: .8;
+  paint-order: stroke fill;
+  animation: hatch-tap-spark 740ms cubic-bezier(.14,.68,.3,1) both;
+}
+.egg-flying-spark:nth-child(3n) { fill: #ffadf6; animation-duration: 620ms; }
+.egg-flying-spark:nth-child(4n) { fill: #9affec; animation-duration: 820ms; }
+.egg-flying-spark:nth-child(5n) { fill: #fff8e1; }
+.egg-tap-ring {
   fill: none;
   stroke: #fff2bc;
   stroke-width: 2.4;
   animation: hatch-tap-ring 340ms ease-out both;
+}
+.egg-tap-ring-outer {
+  stroke: #ed9cff;
+  stroke-width: 1.8;
+  stroke-dasharray: 2.4 3.3;
+  animation: hatch-tap-ring-outer 500ms ease-out both;
 }
 
 [data-hatch="gather"] .egg-orbit { animation: hatch-gather 850ms ease-out both; }
@@ -107,7 +124,12 @@
 }
 @keyframes hatch-tap-ring {
   from { opacity: .95; transform: scale(.35); }
-  to { opacity: 0; transform: scale(2.4); }
+  to { opacity: 0; transform: scale(3.4); }
+}
+@keyframes hatch-tap-ring-outer {
+  0%, 12% { opacity: 0; transform: scale(.65); }
+  28% { opacity: .9; }
+  100% { opacity: 0; transform: scale(5.2) rotate(50deg); }
 }
 @keyframes hatch-inner-light {
   from { opacity: .8; }
@@ -137,6 +159,7 @@
 @media (prefers-reduced-motion: reduce) {
   #egg { animation: none; }
   @keyframes hatch-tap-ring { from { opacity: .95; } to { opacity: 0; } }
+  @keyframes hatch-tap-ring-outer { from { opacity: .55; transform: scale(2); } to { opacity: 0; transform: scale(2); } }
   @keyframes hatch-tap-spark {
     0%, 45% { opacity: 1; transform: translate(calc(var(--spark-x)*.55),calc(var(--spark-y)*.55)); }
     to { opacity: 0; transform: translate(calc(var(--spark-x)*.55),calc(var(--spark-y)*.55)); }
