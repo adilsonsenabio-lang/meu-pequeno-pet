@@ -238,7 +238,7 @@ function renderGrowth(){
   scene=save.scene||'garden';renderArea();
   $('#phase-name').textContent=save.name?`${save.name} · ${phaseLabel[save.phase]}`:phaseLabel[save.phase];
   $('#growth-dots').innerHTML=growthCharm(save.phase);
-  $('#egg').hidden=save.phase!=='egg';$('#pet-wrap').hidden=save.phase==='egg';
+  $('#egg').hidden=save.phase!=='egg'&&!$('#egg').classList.contains('egg-opening');$('#pet-wrap').hidden=save.phase==='egg';
   $('#pet-wrap').dataset.phase=save.phase;
   $('#egg').style.setProperty('--egg-color',colorHex[save.appearance.color]);
   const mark=selectionOf(save.appearance).col.a;
@@ -1084,9 +1084,37 @@ function bind(){
   $('#create-next').addEventListener('click',()=>{if(step<categories.length-1){step++;renderCreator();sound([520]);}else finishCreation();});
   $('#egg').addEventListener('click',async()=>{
     if(status!=='ready'||save?.phase!=='egg')return;
-    const token=++flow;setStatus('acting');$('#egg').classList.add('hatching');sound([390,510,690]);await sleep(920);
+    const egg=$('#egg');
+    const token=++flow;
+    const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+    setStatus('acting');
+    egg.disabled=true;
+    try {
+      egg.classList.add('egg-awakening');
+      sound([392,523,659]);
+      await sleep(reduced?260:720);
+      if(token!==flow)return;
+
+      egg.classList.add('egg-opening');
+      await sleep(reduced?120:240);
+      if(token!==flow)return;
+
+      save=hatch(save).save;
+      write();
+      renderGrowth();
+      setMotion(playArt,'happy');
+      sound([523,659,784,1047]);
+      say('Olá, amiguinho!');
+      await sleep(reduced?220:520);
+    } finally {
+      egg.classList.remove('egg-awakening','egg-opening');
+      egg.hidden=save?.phase!=='egg';
+      egg.disabled=false;
+    }
     if(token!==flow)return;
-    const result=hatch(save);save=result.save;write();$('#egg').classList.remove('hatching');renderGrowth();setStatus('ready');setMotion(playArt,'happy');say('Olá, amiguinho!');await sleep(1200);if(token===flow)setMotion(playArt,'idle');
+    setStatus('ready');
+    await sleep(700);
+    if(token===flow&&status==='ready')setMotion(playArt,'idle');
   });
   $('#care-grid').addEventListener('click',event=>{if(event.target.closest('#action-back')){closeActionGroup();return;}const button=event.target.closest('[data-care]');if(!button)return;if(button.dataset.care==='play'&&['ready','ambient'].includes(status)){if(status==='ambient')cancelAmbient();$('#toy-picker').hidden=false;return;}doCare(button.dataset.care);});
   $('#scene-object').addEventListener('click',event=>{if($('#scene-object').classList.contains('visible')&&status==='ready')doCare('food');event.stopPropagation();});
