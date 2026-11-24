@@ -56,7 +56,8 @@ for f in ('v55-mobile.css','v58-ajustes.css'):
  assert '#create-screen .create-preview {height:clamp(' not in css
 
 # V84.29: sprites realmente transparentes e quadros reescritos durante deploy.
-from PIL import Image, ImageOps
+from PIL import Image, ImageChops, ImageOps, ImageStat
+from generate_v8429 import isolate_birds
 assets_v8429=web/'assets/v8429'
 for key in ('night','sunset'):
  base=Image.open(assets_v8429/f'{key}_approved_base.png').convert('RGBA')
@@ -72,32 +73,30 @@ for key in ('night','sunset','desert','forest'):
 owl_right=Image.open(assets_v8429/'night_owl_right.png').convert('RGBA')
 owl_left=Image.open(assets_v8429/'night_owl_left.png').convert('RGBA')
 assert owl_right.size==owl_left.size==(480,192)
-for i in range(40):
- x,y=(i%10)*48,(i//10)*48
- box=(x,y,x+48,y+48)
- right=owl_right.crop(box)
- assert right.getpixel((0,0))[3]==0 and right.getchannel('A').getbbox()
- beak=[x for y in range(48) for x in range(48) if right.getpixel((x,y))==(239,189,98,255)]
- assert beak and min(beak)>32,i
- assert ImageOps.mirror(right).tobytes()==owl_left.crop(box).tobytes(),i
-flight=[]
+with Image.open(web.parent/'assets-src/v8429/night-gif.gif') as original:
+ frames=[]
+ for i in range(40):
+  original.seek(i)
+  frames.append(original.convert('RGBA'))
+poses=isolate_birds(frames,'night')
+positions=[pose[0][1] for pose in poses]
 with Image.open(web/'assets/scenes/night-gif.gif') as night:
- for i in range(night.n_frames):
+ for i,(x,y) in enumerate(positions):
+  sx,sy=(i%10)*48,(i//10)*48
+  box=(sx,sy,sx+48,sy+48)
+  left,right=owl_left.crop(box),owl_right.crop(box)
+  assert left.getpixel((0,0))[3]==0 and left.getchannel('A').getbbox()
+  assert left.tobytes()==poses[i%10][0][0].tobytes(),i
+  assert ImageOps.mirror(left).tobytes()==right.tobytes(),i
+  next_x=next(positions[(i+step)%40][0] for step in range(1,40)
+              if positions[(i+step)%40][0]!=x)
+  expected,other=(right,left) if next_x>x else (left,right)
   night.seek(i)
-  pixels=night.convert('RGB').load()
-  beak=[(x,y) for y in range(80,142) for x in range(20,300) if pixels[x,y]==(239,189,98)]
-  assert len(beak)==14,i
-  bx,by=round(median(x for x,y in beak)),round(median(y for x,y in beak))
-  face=[x for y in range(by-12,by+9) for x in range(bx-20,bx+21) if pixels[x,y]==(239,226,181)]
-  assert face and abs(bx-median(face))>=8,i
-  facing_right=bx>median(face)
-  # Recover the sprite anchor independently of which edge carries the beak.
-  anchor=min(x for x,y in beak)-(35 if facing_right else 8)
-  flight.append((anchor,facing_right))
-for i,(anchor,facing_right) in enumerate(flight):
- next_anchor=next(flight[(i+step)%len(flight)][0] for step in range(1,len(flight))
-                  if flight[(i+step)%len(flight)][0]!=anchor)
- assert facing_right==(next_anchor>anchor),i
+  baked=night.crop((x,y,x+48,y+48)).convert('RGB')
+  common=ImageChops.multiply(left.getchannel('A'),right.getchannel('A'))
+  expected_error=sum(ImageStat.Stat(ImageChops.difference(baked,expected.convert('RGB')),common).sum)
+  opposite_error=sum(ImageStat.Stat(ImageChops.difference(baked,other.convert('RGB')),common).sum)
+  assert expected_error<opposite_error,i
 birds=Image.open(assets_v8429/'sunset_birds_flap.png').convert('RGBA')
 assert birds.size==(384,96)
 for y in (0,48):

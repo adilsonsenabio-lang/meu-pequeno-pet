@@ -8,7 +8,8 @@ const storage=()=>{const m=new Map();return {setItem:(k,v)=>m.set(k,String(v)),g
 test('V68 ordem de criacao: cenário, cores e boca',async()=>{
  const app=await read('app.js'); const m=app.match(/const categories=([^\n]+);/);assert.ok(m);
  const keys=[...m[1].matchAll(/\{key:'([^']+)'/g)].map(([,key])=>key);
- assert.deepEqual(keys.slice(0,5),['scene','color','mouth','hands','body']);
+ assert.deepEqual(keys.slice(0,5),['scene','color','mouth','body','head']);
+ assert.match(m[1],/'tail','wings','hands','accessory'/);
 });
 test('V68 cílios maiores, visíveis e independentes do movimento da pupila',async()=>{
  const pix=await read('pixel-pet.js');const c=pix.match(/if\(k==='lashes'\)\{([\s\S]*?)\n  \}/);
@@ -19,18 +20,20 @@ test('V68 cílios maiores, visíveis e independentes do movimento da pupila',asy
 });
 test('V68 migração rascunho V66/67 para aba correta',()=>{
  const db=storage(),key=creatorKey('pet'),draft={...DEFAULT_APPEARANCE,scene:'beach',mouth:'heart',eyes:'lashes'};
- for(const [oldStep,newStep] of [[0,0],[1,4],[2,5],[3,1],[4,6],[5,7],[6,8],[7,2],[8,9],[15,16]]){
+ for(const [oldStep,newStep] of [[0,0],[1,3],[2,4],[3,1],[4,5],[5,6],[6,7],[7,2],[8,8],[15,16]]){
   db.setItem(key,JSON.stringify({version:2,draft,step:oldStep,creatingNew:false}));
   const got=loadCreatorSession(db,key);assert.equal(got.step,newStep);assert.equal(got.draft.mouth,'heart');assert.equal(got.draft.scene,'beach');
  }
- for(const [oldStep,newStep] of [[3,4],[15,16],[16,3]]){
+ for(const [oldStep,newStep] of [[3,3],[15,16],[16,13]]){
   db.setItem(key,JSON.stringify({version:3,draft,step:oldStep}));
   assert.equal(loadCreatorSession(db,key).step,newStep);
  }
  const hands={hands:'dragon',handPosition:{x:4,y:-6}};
- saveCreatorSession(db,key,{...draft,...hands},3,false);
- const saved=JSON.parse(db.getItem(key));assert.equal(saved.version,4);
- const got=loadCreatorSession(db,key);assert.equal(got.step,3);
+ db.setItem(key,JSON.stringify({version:4,draft:{...draft,...hands},step:3}));
+ assert.equal(loadCreatorSession(db,key).step,13);
+ saveCreatorSession(db,key,{...draft,...hands},13,false);
+ const saved=JSON.parse(db.getItem(key));assert.equal(saved.version,5);
+ const got=loadCreatorSession(db,key);assert.equal(got.step,13);
  assert.equal(got.draft.hands,hands.hands);
  assert.deepEqual(got.draft.handPosition,hands.handPosition);
 });
