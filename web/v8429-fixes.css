@@ -54,3 +54,7 @@
    em vez de pular junto com a sprite do corpo. */
 #world #pet-wrap.pet-wrap.flying::after,
 #world #pet-wrap.pet-wrap.jumping::after{opacity:.24}
+
+/* O SVG do pet já posiciona a sombra na sola para cada fase. */
+#create-screen .create-preview:has(#create-art .pixel-pet)::after,
+#world #pet-wrap.pet-wrap:has(.pixel-pet)::after{content:none}

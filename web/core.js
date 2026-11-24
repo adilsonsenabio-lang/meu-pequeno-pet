@@ -23,6 +23,7 @@ export const OPTIONS={
   wings:['dragon','angel','fairy','bat','phoenix','tiny','butterfly','fin','none'],
   body:['egg','round','slim','chubby','tall','short','pear','drop'],
   feet:['round','claws','hooves','duck','boots','flipper','paws','bird'],
+  hands:['shell'],
   ears:['cat','dog','bunny','bear','horns','unicorn','antlers','elf','bat','mouse','antenna','ram','fox','floppy','spiky','deer','none'],
   head:['round','wide','tall','square','cheeks','heart','fox','mini'],
   markings:['blush','spots','stripes','freckles','forehead','swirl','brows','tuxedo','bolt','confetti','whiskers','bandage','plain'],
@@ -32,7 +33,7 @@ export const OPTIONS={
   mouth:['smile','open','cat','heart','surprised','teeth','tongue','serious','grin','smirk','kiss','wave','tiny','fangs','laugh','pout','soft','none'],
   accessory:['star','crown','halo','bow','party','glasses','flower','bell','sunglasses','none']
 };
-export const DEFAULT_APPEARANCE={color:'pink',outfit:'none',shoes:'none',tail:'dragon',wings:'none',body:'round',feet:'claws',ears:'horns',head:'round',markings:'plain',hair:'none',eyes:'big',snout:'dragon',mouth:'smile',accessory:'star'};
+export const DEFAULT_APPEARANCE={color:'pink',outfit:'none',shoes:'none',tail:'dragon',wings:'none',body:'round',hands:'shell',feet:'claws',ears:'horns',head:'round',markings:'plain',hair:'none',eyes:'big',snout:'dragon',mouth:'smile',accessory:'star'};
 export const SCENES=['garden','sunset','night','beach','desert','clouds','forest','snow','space','sea','halloween','christmas'];
 export const ROOM_OPTIONS={bed:['cloud','leaf','moon'],rug:['sun','flower','rainbow'],toy:['ball','bubbles','kite','drum','car','rattle','book','plush','surprise','instrument'],wall:['lavender','mint','peach']};
 export const MOMENTS=['birth','food','water','bath','play','young','adult','bedroom','kitchen','butterfly','ball','bubbles','decor','kite','drum','car','rattle','book','plush','surprise','instrument','flowers','stars','sequence','dance','paint','tidy','race','faces','rain','rainbow','night','snow','gift','party','costume'];
@@ -49,7 +50,7 @@ export function createSave(now=Date.now(),appearance=DEFAULT_APPEARANCE){
   return {version:VERSION,createdAt:now,updatedAt:now,phase:'egg',scene:'garden',area:'garden',room:{bed:'cloud',rug:'sun',toy:'ball',wall:'lavender'},moments:[],discoveries:[],name:'',appearance:{...appearance},needs:{...Object.fromEntries(NEEDS.map(n=>[n,80])),health:100},activeMs:0,careKinds:[],actionCount:0,lastActionAt:{},lastInteractionAt:now,milestones:[]};
 }
 export function canPlay(s){return Boolean(s&&s.phase!=='egg'&&!s.sleeping&&Number(s.needs?.energy)>=MIN_ENERGY_TO_PLAY);}
-export const CUSTOM_PARTS=['tail','wings','ears','eyes','snout','mouth','accessory'];
+export const CUSTOM_PARTS=['tail','wings','ears','eyes','snout','mouth','accessory','hands'];
 export const PART_PALETTE={base:null,pink:'#ff8fa8',blue:'#7fd3ff',mint:'#6fe0cf',gold:'#ffcf40',purple:'#c9a7ff',cream:'#fff4c9',brown:'#a8714a'};
 export const MIN_PART_SCALE=.85,MAX_PART_SCALE=1.20;
 // Posição vertical opcional da boca, em unidades do desenho SVG. Saves antigos: zero.

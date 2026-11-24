@@ -1,5 +1,5 @@
 /* Autosave independente do rascunho. O save V56 continua válido. */
-import {OPTIONS,DEFAULT_APPEARANCE,SCENES} from './core.js?v=58';
+import {OPTIONS,DEFAULT_APPEARANCE,SCENES,CUSTOM_PARTS,PART_PALETTE,MIN_PART_SCALE,MAX_PART_SCALE} from './core.js?v=58';
 export function creatorKey(saveKey){return `${saveKey}.criacao`;}
 export function saveCreatorSession(storage,key,draft,step,creatingNew){
  const payload={version:3,draft,step,creatingNew:!!creatingNew};
@@ -15,10 +15,10 @@ export function loadCreatorSession(storage,key){
  if(SCENES.includes(payload.draft.scene))draft.scene=payload.draft.scene;
  for(const keyName of ['partSizes','partColors'])if(payload.draft[keyName]&&typeof payload.draft[keyName]==='object'&&!Array.isArray(payload.draft[keyName])){
   const source=payload.draft[keyName],accepted={};
-  for(const key of ['tail','wings','ears','eyes','snout','mouth']){
+  for(const key of CUSTOM_PARTS){
    const value=source[key];
-   if(keyName==='partSizes'&&typeof value==='number'&&value>=.85&&value<=1.2)accepted[key]=value;
-   if(keyName==='partColors'&&['base','pink','blue','mint','gold','purple','cream','brown'].includes(value))accepted[key]=value;
+   if(keyName==='partSizes'&&typeof value==='number'&&value>=MIN_PART_SCALE&&value<=MAX_PART_SCALE)accepted[key]=value;
+   if(keyName==='partColors'&&Object.hasOwn(PART_PALETTE,value))accepted[key]=value;
   }
   draft[keyName]=accepted;
  }
@@ -27,7 +27,8 @@ export function loadCreatorSession(storage,key){
  if(Number.isInteger(offset)&&offset>=-8&&offset<=8)draft.mouthOffset=offset;
  // Reordenação V68: etapa salva nas V57–V67 aponta para a mesma ABA,
  // não para a posição numérica antiga. O rascunho e as escolhas são preservados.
- const oldStep=Number.isInteger(payload.step)&&payload.step>=0&&payload.step<=15?payload.step:0;
+ const lastStep=payload.version===3?16:15;
+ const oldStep=Number.isInteger(payload.step)&&payload.step>=0&&payload.step<=lastStep?payload.step:0;
  const previousOrder=['scene','body','head','color','ears','eyes','snout','mouth','markings','hair','feet','tail','wings','accessory','outfit','shoes'];
  const currentOrder=['scene','color','mouth','body','head','ears','eyes','snout','markings','hair','feet','tail','wings','accessory','outfit','shoes'];
  const priorIndex=payload.version===1?(oldStep===15?0:oldStep+1):oldStep;

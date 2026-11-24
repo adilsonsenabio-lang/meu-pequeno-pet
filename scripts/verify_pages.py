@@ -55,7 +55,7 @@ for f in ('v55-mobile.css','v58-ajustes.css'):
  assert '#create-screen .create-preview {height:clamp(' not in css
 
 # V84.29: sprites realmente transparentes e quadros reescritos durante deploy.
-from PIL import Image
+from PIL import Image, ImageOps
 assets_v8429=web/'assets/v8429'
 for key in ('night','sunset'):
  base=Image.open(assets_v8429/f'{key}_approved_base.png').convert('RGBA')
@@ -68,6 +68,21 @@ for key in ('night','sunset','desert','forest'):
  big=Image.open(web/'assets/scenes'/f'{key}-gif.gif')
  mini=Image.open(web/'assets/scenes'/f'{key}-preview.gif')
  assert big.n_frames==40 and mini.n_frames==40,(key,big.n_frames,mini.n_frames)
+owl_right=Image.open(assets_v8429/'night_owl_right.png').convert('RGBA')
+owl_left=Image.open(assets_v8429/'night_owl_left.png').convert('RGBA')
+assert owl_right.size==owl_left.size==(480,192)
+for i in range(40):
+ x,y=(i%10)*48,(i//10)*48
+ box=(x,y,x+48,y+48)
+ right=owl_right.crop(box)
+ assert right.getpixel((0,0))[3]==0 and right.getchannel('A').getbbox()
+ assert ImageOps.mirror(right).tobytes()==owl_left.crop(box).tobytes(),i
+birds=Image.open(assets_v8429/'sunset_birds_flap.png').convert('RGBA')
+assert birds.size==(384,96)
+for y in (0,48):
+ poses=[birds.crop((x,y,x+48,y+48)) for x in range(0,384,48)]
+ assert all(pose.getpixel((0,0))[3]==0 for pose in poses)
+ assert len({pose.tobytes() for pose in poses})>=6
 assert 'v8429-fixes.css?v=84.29' in html
 assert 'V84.29' in html
 scene_js=(web/'scene-v63-player.js').read_text(encoding='utf-8')

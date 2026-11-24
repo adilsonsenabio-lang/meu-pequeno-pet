@@ -4,12 +4,14 @@ e animações, corrige a coruja na volta e sombras dos animais. Determinístico.
 Executado no GitHub Actions antes do precache, sem alterar saves do usuário.
 """
 from pathlib import Path
-from PIL import Image, ImageDraw, ImageFilter
+from collections import Counter
+from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageOps
 import statistics
 ROOT=Path(__file__).resolve().parents[1]
 SC=ROOT/'web/assets/scenes'
 ASSETS=ROOT/'web/assets/v8429'
 BACK=ROOT/'assets-src/v63/cenarios'
+FLIGHT_SOURCE=ROOT/'assets-src/v8429'
 ASSETS.mkdir(parents=True,exist_ok=True)
 
 def lantern(kind):
@@ -61,32 +63,99 @@ def contact_shadow(frame,x,y,rx,fill):
     ImageDraw.Draw(shadow).ellipse((int(x-rx),y-3,int(x+rx),y+3),fill=fill)
     return Image.alpha_composite(frame,shadow.filter(ImageFilter.GaussianBlur(1.8)))
 
-def mirrored_owl(frame,bg,i):
-    if i<=20:return frame
-    q=max(0,min(1,(40-i)/20))
-    q=q*q*(3-2*q)
-    center=57.5+220*q
-    rgb=frame.convert('RGB')
-    bk=bg.convert('RGB')
-    coords=[]
-    for y in range(80,150):
-        for x in range(max(0,round(center-35)),min(320,round(center+36))):
-            a=rgb.getpixel((x,y));b=bk.getpixel((x,y))
-            if max(abs(a[c]-b[c]) for c in range(3))>45:coords.append((x,y))
-    if len(coords)<100:return frame
-    box=(max(0,min(x for x,y in coords)-2),max(0,min(y for x,y in coords)-2),
-         min(320,max(x for x,y in coords)+3),min(150,max(y for x,y in coords)+3))
-    crop=frame.crop(box);original_bg=bg.crop(box)
-    mask=Image.new('L',crop.size,0)
-    for yy in range(crop.height):
-        for xx in range(crop.width):
-            a=crop.getpixel((xx,yy));b=original_bg.getpixel((xx,yy))
-            delta=max(abs(a[c]-b[c]) for c in range(3))
-            mask.putpixel((xx,yy),min(255,max(0,(delta-12)*8)))
-    crop.putalpha(mask)
-    restore(frame,bg,box)
-    frame.alpha_composite(crop.transpose(Image.Transpose.FLIP_LEFT_RIGHT),box[:2])
-    return frame
+BIRD_CELL=48
+
+def sprite_sheet(name,frames,columns):
+    rows=(len(frames)+columns-1)//columns
+    sheet=Image.new('RGBA',(BIRD_CELL*columns,BIRD_CELL*rows))
+    for i,sprite in enumerate(frames):
+        sheet.paste(sprite,(i%columns*BIRD_CELL,i//columns*BIRD_CELL))
+    sheet.save(ASSETS/f'{name}.png',optimize=True)
+
+def isolate_birds(frames,name):
+    """Separate the large moving silhouettes from the stationary sky."""
+    area=(20,80,300,141) if name=='night' else (200,35,320,94)
+    skies=[frame.crop(area).convert('RGB') for frame in frames]
+    sky=Image.new('RGB',skies[0].size)
+    sky.putdata([Counter(pixels).most_common(1)[0][0]
+                 for pixels in zip(*(list(image.getdata()) for image in skies))])
+    sky=sky.convert('RGBA')
+    count=1 if name=='night' else 2
+    extracted=[]
+    for frame,region in zip(frames,skies):
+        diff=ImageChops.difference(region,sky.convert('RGB'))
+        pixels=diff.load()
+        pending={(x,y) for y in range(diff.height) for x in range(diff.width) if max(pixels[x,y])>24}
+        components=[]
+        while pending:
+            point=pending.pop()
+            component=[point]
+            for x,y in component:
+                for neighbor in ((x+1,y),(x-1,y),(x,y+1),(x,y-1)):
+                    if neighbor in pending:
+                        pending.remove(neighbor)
+                        component.append(neighbor)
+            if len(component)>200:
+                components.append(component)
+        assert len(components)==count,(name,len(extracted),[len(c) for c in components])
+        birds=[]
+        for component in sorted(components,key=lambda points:min(x for x,y in points)):
+            mask=Image.new('L',diff.size)
+            for x,y in component:
+                mask.putpixel((x,y),255)
+            edge=mask.filter(ImageFilter.MaxFilter(3))
+            for y in range(diff.height):
+                for x in range(diff.width):
+                    if edge.getpixel((x,y)) and max(pixels[x,y])>8:
+                        mask.putpixel((x,y),255)
+            left,top,right,bottom=mask.getbbox()
+            x=(left+right-BIRD_CELL)//2
+            y=(top+bottom-BIRD_CELL)//2
+            sprite=region.convert('RGBA')
+            sprite.putalpha(mask)
+            birds.append((sprite.crop((x,y,x+BIRD_CELL,y+BIRD_CELL)),(x+area[0],y+area[1])))
+            frame.paste(sky,area[:2],mask)
+        extracted.append(birds)
+    return extracted
+
+def mirrored_owl(frames,birds):
+    wing_cycle=[poses[0][0] for poses in birds[:10]]
+    outbound=[wing_cycle[i%len(wing_cycle)] for i in range(len(frames))]
+    inbound=[ImageOps.mirror(sprite) for sprite in outbound]
+    sprite_sheet('night_owl_right',outbound,10)
+    sprite_sheet('night_owl_left',inbound,10)
+    for i,(frame,poses) in enumerate(zip(frames,birds)):
+        frame.alpha_composite((outbound if i<20 else inbound)[i],poses[0][1])
+
+def sunset_flaps(sprite):
+    # Keep the body and beak fixed. Separate the nearer, larger wing at its shoulder.
+    mask=Image.new('L',sprite.size)
+    ImageDraw.Draw(mask).polygon(((5,8),(16,8),(16,15),(19,18),(20,21),(21,24),
+                                 (20,26),(16,28),(10,28),(5,23)),fill=255)
+    wing=sprite.copy()
+    wing.putalpha(ImageChops.multiply(sprite.getchannel('A'),mask))
+    body=sprite.copy()
+    body.putalpha(ImageChops.subtract(sprite.getchannel('A'),mask))
+    patch=Image.new('RGBA',sprite.size)
+    ImageDraw.Draw(patch).polygon(((18,23),(21,21),(24,22),(24,27),(20,30),(16,28)),
+                                 fill='#fce1a1',outline='#39334c')
+    patch.alpha_composite(body)
+    result=[]
+    for degrees in (0,22,47,62,45,18,0,-15):
+        frame=patch.copy()
+        frame.alpha_composite(wing.rotate(degrees,Image.Resampling.NEAREST,center=(20,24)))
+        result.append(frame)
+    return result
+
+def animate_sunset_birds(frames,birds):
+    flaps=[sunset_flaps(sprite) for sprite,_ in birds[0]]
+    sprite_sheet('sunset_birds_flap',[sprite for bird in flaps for sprite in bird],8)
+    for i,(frame,poses) in enumerate(zip(frames,birds)):
+        for j,(_,position) in enumerate(poses):
+            sprite=flaps[j][(i*2+j*3)%len(flaps[j])]
+            if 10<=i<30:
+                sprite=ImageOps.mirror(sprite)
+            frame.alpha_composite(sprite,position)
 
 def object_x(frame,bg,kind):
     pix=frame.convert('RGB');background=bg.convert('RGB')
@@ -100,30 +169,28 @@ def object_x(frame,bg,kind):
     return statistics.median(points) if len(points)>=20 else 281
 
 def scene(name):
-    im=Image.open(SC/f'{name}-gif.gif')
+    source=FLIGHT_SOURCE if name in ('night','sunset') else SC
+    im=Image.open(source/f'{name}-gif.gif')
     path=BACK/f'{name}_fundo.png'
     have_original=path.is_file()
     bg=Image.open(path if have_original else SC/f'{name}-still.png').convert('RGBA')
-    im.seek(0);owl_left=im.convert('RGBA')
-    im.seek(20);owl_right=im.convert('RGBA')
     images=[];times=[]
     assert im.n_frames==40 and im.size==(320,320),(name,im.n_frames,im.size)
     for i in range(40):
         im.seek(i);f=im.convert('RGBA')
-        if name=='night':
-            clean_lamp(f,name,bg,have_original)
-            if i>20:
-                q=max(0,min(1,(40-i)/20));center=57.5+220*q*q*(3-2*q)
-                ref=bg if have_original else (owl_left if center>100 else owl_right)
-                f=mirrored_owl(f,ref,i)
-        elif name=='sunset':
+        if name in ('night','sunset'):
             clean_lamp(f,name,bg,have_original)
         elif name in ('desert','forest'):
             x=object_x(f,bg,name)
             if name=='desert':f=contact_shadow(f,x,296,12,(81,53,38,67))
             else:f=contact_shadow(f,x,298,13,(27,62,47,81))
-        images.append(f.convert('RGB'))
+        images.append(f)
         times.append(im.info.get('duration',145))
+    if name in ('night','sunset'):
+        birds=isolate_birds(images,name)
+        animation=mirrored_owl if name=='night' else animate_sunset_birds
+        animation(images,birds)
+    images=[frame.convert('RGB') for frame in images]
     common=images[0].quantize(colors=255,method=Image.Quantize.MEDIANCUT,dither=Image.Dither.NONE)
     frames=[f.quantize(palette=common,dither=Image.Dither.NONE) for f in images]
     frames[0].save(SC/f'{name}-gif.gif',save_all=True,append_images=frames[1:],
