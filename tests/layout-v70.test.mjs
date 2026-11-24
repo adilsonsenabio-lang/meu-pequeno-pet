@@ -5,7 +5,7 @@ import {CUSTOM_PARTS,OPTIONS} from '../web/core.js';
 const read=name=>readFile(new URL('../web/'+name,import.meta.url),'utf8');
 test('V70: somente categorias com ajustes recebem 2 fileiras internas',async()=>{
  const [app,css]=await Promise.all([read('app.js'),read('v70-criacao-compacta.css')]);
- assert.deepEqual([...CUSTOM_PARTS].sort(),['accessory','ears','eyes','mouth','snout','tail','wings'].sort());
+ assert.deepEqual([...CUSTOM_PARTS].sort(),['accessory','ears','eyes','hands','mouth','snout','tail','wings'].sort());
  assert.match(app,/list\.classList\.toggle\('two-row-options',CUSTOM_PARTS\.includes\(c\.key\)\)/);
  assert.match(css,/#create-screen #choice-list\.two-row-options/);
  assert.match(css,/max-height:calc\(var\(--row-height\)\*2 \+ var\(--row-gap\)\)/);
