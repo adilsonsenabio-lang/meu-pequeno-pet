@@ -25,8 +25,8 @@ assert 'width:max(100cqw' not in scene_css
 assert '::before{' not in scene_css
 assert '#world.world,' in layout_css and '#create-screen .create-preview' in layout_css
 assert 'aspect-ratio:1 / 1' in layout_css
-assert '#world #pet-wrap.pet-wrap' in layout_css and 'width:47%' in layout_css
-assert '#create-screen #create-art.create-art' in layout_css and 'width:61%' in layout_css
+assert re.search(r'#world #pet-wrap\.pet-wrap\s*\{[^}]*width:42\.3%', layout_css)
+assert re.search(r'#create-screen #create-art\.create-art\s*\{[^}]*width:54\.9%', layout_css)
 assert 'v84-26-layout.css?v=84.27' in html and 'scene-v64.css?v=84.27' in html
 # V84.27: trenó da criação e sombra de contato próxima aos pés.
 assert '#create-scene-art .v844-sleigh' in scene_css

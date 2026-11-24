@@ -1,0 +1,128 @@
+#egg {
+  bottom: 8%;
+  width: 39%;
+  height: auto;
+  aspect-ratio: 120 / 148;
+  isolation: isolate;
+}
+
+#egg .egg-art { display: block; overflow: visible; }
+#egg:focus-visible { outline: 3px solid #6847a3; border-radius: 45%; }
+#egg:disabled { cursor: default; pointer-events: none; }
+#egg .tap-hint { pointer-events: none; }
+
+.egg-veil {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 69%, #eabaf577 0%, #7658ac89 32%, #221839e8 76%);
+}
+
+.egg-veil::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 6%;
+  width: 64%;
+  height: 16%;
+  transform: translateX(-50%);
+  border: 2px solid #fff0bb;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, #ffcb9c88, #bd87ef33 65%, transparent 70%);
+  box-shadow: 0 0 18px #ebadff, inset 0 0 15px #f3c2ff;
+}
+
+#world[data-hatch] .egg-veil { opacity: 1; }
+#world[data-hatch="gather"] .egg-veil { animation: hatch-nightfall 850ms ease-out both; }
+#world[data-hatch="daylight"] .egg-veil { animation: hatch-daylight 530ms ease-in-out both; }
+#world[data-hatch] #egg { animation: none; }
+#world[data-hatch] .tap-hint { visibility: hidden; }
+
+.egg-aura, .egg-orbit, .egg-crack, .egg-piece, .egg-sparks { opacity: 0; }
+.egg-aura { fill: #d89aff; filter: blur(14px); }
+.egg-orbit, .egg-sparks {
+  fill: #fff3c2;
+  stroke: #9a66bc;
+  stroke-width: 1;
+  transform-origin: 60px 75px;
+}
+.egg-orbit ellipse { fill: none; stroke: #fff3c2; stroke-dasharray: 2 5; }
+.egg-crack, .egg-shell-edge { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.egg-crack {
+  stroke: #fff1a8;
+  stroke-width: 4;
+  stroke-dasharray: 100;
+  filter: drop-shadow(0 0 3px #b76fea);
+}
+.egg-shell-edge { stroke: #472762; stroke-width: 4; }
+
+[data-hatch="gather"] .egg-orbit { animation: hatch-gather 850ms ease-out both; }
+[data-hatch="gather"] .egg-aura { animation: hatch-nightfall 850ms ease-out both; }
+[data-hatch="crack"] .egg-orbit, [data-hatch="crack"] .egg-aura { opacity: 1; }
+[data-hatch="crack"] .egg-crack { animation: hatch-crack 780ms ease-out both; }
+[data-hatch="crack"] .egg-intact { transform-origin: 60px 140px; animation: hatch-knocks 780ms ease-out both; }
+
+.egg-opening .egg-intact, .egg-opening .egg-crack { visibility: hidden; }
+.egg-opening .egg-piece-bottom { opacity: 1; }
+.egg-opening .egg-piece-top { transform-origin: 60px 65px; }
+[data-hatch="open"] .egg-piece-top { animation: hatch-shell-lift 520ms ease-out both; }
+[data-hatch="open"] .egg-aura { animation: hatch-inner-light 520ms ease-out both; }
+[data-hatch="born"] .egg-piece-bottom { transform-origin: 60px 123px; animation: hatch-shell-roll 780ms ease-out both; }
+[data-hatch="born"] .egg-sparks { animation: hatch-stars 1240ms ease-out both; }
+[data-hatch="daylight"] .egg-piece-bottom { opacity: 0; }
+[data-hatch="born"] #play-art { transform-origin: center 86%; animation: hatch-baby-rise 1240ms ease-out both; }
+#world[data-hatch="born"] #play-art[data-motion="wave"] .pixel-hand-joint { animation-delay: 370ms; }
+
+@keyframes hatch-nightfall { from { opacity: 0; } to { opacity: 1; } }
+@keyframes hatch-daylight { from { opacity: 1; } to { opacity: 0; } }
+@keyframes hatch-gather {
+  from { opacity: 0; transform: rotate(-100deg) scale(1.65); }
+  to { opacity: 1; }
+}
+@keyframes hatch-crack {
+  0%, 16% { opacity: 0; stroke-dashoffset: 100; }
+  27%, 50% { opacity: 1; stroke-dashoffset: 72; }
+  71%, 100% { opacity: 1; stroke-dashoffset: 0; }
+}
+@keyframes hatch-knocks {
+  12% { transform: rotate(-7deg); }
+  25%, 43% { transform: none; }
+  58% { transform: rotate(7deg); }
+  76%, 100% { transform: none; }
+}
+@keyframes hatch-inner-light {
+  from { opacity: .8; }
+  to { opacity: 0; }
+}
+@keyframes hatch-shell-lift {
+  from { opacity: 1; }
+  52% { opacity: 1; transform: translate(-16px,-56px) rotate(-29deg); }
+  to { opacity: 0; transform: translate(-75px,-16px) rotate(-100deg); }
+}
+@keyframes hatch-shell-roll {
+  0%, 29% { opacity: 1; }
+  72% { opacity: 1; transform: translate(42px,10px) rotate(27deg); }
+  to { opacity: 0; transform: translate(53px,17px) rotate(45deg); }
+}
+@keyframes hatch-stars {
+  from { opacity: 0; transform: scale(.6); }
+  30%, 58% { opacity: 1; }
+  to { opacity: 0; transform: scale(1.7); }
+}
+@keyframes hatch-baby-rise {
+  from { opacity: 0; transform: translateY(22%) scale(.76); }
+  26% { opacity: 1; transform: translateY(-13%) scale(1.03,.97); }
+  39%, 100% { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #egg, [data-hatch="crack"] .egg-intact { animation: none; }
+  #world[data-hatch="gather"] .egg-veil,
+  [data-hatch="gather"] :is(.egg-orbit,.egg-aura) { animation-duration: 420ms; }
+  @keyframes hatch-gather { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes hatch-shell-lift { from { opacity: 1; transform: translate(-17px,-22px); } to { opacity: 0; transform: translate(-17px,-22px); } }
+  @keyframes hatch-baby-rise { from { opacity: 0; } 30%,100% { opacity: 1; } }
+  [data-hatch="born"] .egg-piece-bottom, [data-hatch="born"] .egg-sparks { animation: hatch-inner-light 600ms ease-out both; }
+}

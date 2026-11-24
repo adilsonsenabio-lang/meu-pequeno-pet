@@ -38,7 +38,7 @@ Jogo de bichinho virtual em português para criança de 4 anos, acessível mesmo
 - Não usar `object-fit:cover`, `object-fit:fill`, recorte lateral nem escala diferente nos eixos X e Y. Usar `contain` e `aspect-ratio:1/1`.
 - `web/v84-26-layout.css` define exclusivamente as dimensões da moldura e o tamanho responsivo dos pets; é carregado por último.
 - As alturas conflitantes foram retiradas de `game.css`, `retro.css`, `life.css`, `v55-mobile.css`, `v58-ajustes.css` e `v70-criacao-compacta.css`. Não restaurar essas declarações.
-- Pet no jogo: largura 47% da área interna; proporção 168×190; bottom 8%. Pet na criação: largura 61%; proporção 222×236; bottom 7%, centralizado. Camadas e movimento não mudam.
+- Pet no jogo tem largura de 42,3% da área interna, proporção 168×190 e base a 8%. Na criação, fica centralizado com largura de 54,9%, proporção 222×236 e base a 7%.
 - `scene-v64.css` conserva a escala e os marcadores no palco 1:1; retirados o zoom V84.25 e os dois backfills bitmap deformados dos cômodos.
 - Miniaturas, coruja, flores, formiga, pássaros, luminárias e efeitos continuam usando coordenadas relativas ao cenário; saves e mecânicas permanecem intactos.
 - Validar visualmente os 13 cenários em criação e jogo em 320, 390 e 430 px, incluindo alturas menores e a posição correta do relógio na Cozinha.

@@ -114,8 +114,9 @@ function sound(notes=[520]){
   try{
     audioContext??=new (window.AudioContext||window.webkitAudioContext)();
     if(audioContext.state==='suspended')audioContext.resume();
-    notes.forEach((freq,i)=>{
-      const start=audioContext.currentTime+i*.11,osc=audioContext.createOscillator(),gain=audioContext.createGain();
+    notes.forEach((note,i)=>{
+      const [freq,delay]=Array.isArray(note)?note:[note,i*.11];
+      const start=audioContext.currentTime+delay,osc=audioContext.createOscillator(),gain=audioContext.createGain();
       osc.type='sine';osc.frequency.setValueAtTime(freq,start);gain.gain.setValueAtTime(.0001,start);gain.gain.exponentialRampToValueAtTime(.045,start+.015);gain.gain.exponentialRampToValueAtTime(.0001,start+.19);osc.connect(gain).connect(audioContext.destination);osc.start(start);osc.stop(start+.2);
     });
   }catch{}
@@ -1085,36 +1086,39 @@ function bind(){
   $('#egg').addEventListener('click',async()=>{
     if(status!=='ready'||save?.phase!=='egg')return;
     const egg=$('#egg');
+    const world=$('#world');
     const token=++flow;
-    const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const playHatchStage=async(stage,element,animation,notes)=>{
+      world.dataset.hatch=stage;
+      sound(notes);
+      const motion=element.getAnimations().find(effect=>effect.animationName===animation);
+      await motion?.finished.catch(()=>{});
+      return token===flow;
+    };
     setStatus('acting');
     egg.disabled=true;
     try {
-      egg.classList.add('egg-awakening');
-      sound([392,523,659]);
-      await sleep(reduced?260:720);
-      if(token!==flow)return;
-
+      if(!await playHatchStage('gather',$('.egg-orbit'),'hatch-gather',[392,587,784]))return;
+      if(!await playHatchStage('crack',$('.egg-crack'),'hatch-crack',[[196,.094],[247,.452]]))return;
       egg.classList.add('egg-opening');
-      await sleep(reduced?120:240);
-      if(token!==flow)return;
+      if(!await playHatchStage('open',$('.egg-piece-top'),'hatch-shell-lift',[330,494,659]))return;
 
       save=hatch(save).save;
       write();
       renderGrowth();
-      setMotion(playArt,'happy');
-      sound([523,659,784,1047]);
-      say('Olá, amiguinho!');
-      await sleep(reduced?220:520);
+      setMotion(playArt,'wave');
+      say('Nasci! Oi, amiguinho!');
+      if(!await playHatchStage('born',playArt,'hatch-baby-rise',[523,659,784,1047]))return;
+      if(!await playHatchStage('daylight',$('.egg-veil'),'hatch-daylight',[784,1047]))return;
     } finally {
-      egg.classList.remove('egg-awakening','egg-opening');
+      delete world.dataset.hatch;
+      egg.classList.remove('egg-opening');
       egg.hidden=save?.phase!=='egg';
       egg.disabled=false;
     }
     if(token!==flow)return;
+    setMotion(playArt,'idle');
     setStatus('ready');
-    await sleep(700);
-    if(token===flow&&status==='ready')setMotion(playArt,'idle');
   });
   $('#care-grid').addEventListener('click',event=>{if(event.target.closest('#action-back')){closeActionGroup();return;}const button=event.target.closest('[data-care]');if(!button)return;if(button.dataset.care==='play'&&['ready','ambient'].includes(status)){if(status==='ambient')cancelAmbient();$('#toy-picker').hidden=false;return;}doCare(button.dataset.care);});
   $('#scene-object').addEventListener('click',event=>{if($('#scene-object').classList.contains('visible')&&status==='ready')doCare('food');event.stopPropagation();});
