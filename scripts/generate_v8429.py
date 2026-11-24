@@ -5,7 +5,7 @@ Executado no GitHub Actions antes do precache, sem alterar saves do usuário.
 """
 from pathlib import Path
 from collections import Counter
-from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageOps
+from PIL import Image, ImageChops, ImageColor, ImageDraw, ImageFilter, ImageOps
 import statistics
 ROOT=Path(__file__).resolve().parents[1]
 SC=ROOT/'web/assets/scenes'
@@ -118,14 +118,47 @@ def isolate_birds(frames,name):
         extracted.append(birds)
     return extracted
 
+OWL_BEAK='#efbd62'
+OWL_FACE='#efe2b5'
+
+def owl_facing_right(sprite):
+    """Keep the wing pose and give the original owl a readable profile."""
+    owl=sprite.copy()
+    draw=ImageDraw.Draw(owl)
+    draw.polygon(((15,11),(34,11),(34,24),(31,28),(20,30),(16,26),(14,21)),fill=(0,0,0,0))
+    ink='#202641'
+    draw.polygon(((15,13),(20,13),(20,11),(23,11),(26,14),(30,14),(32,11),(35,11),
+                  (35,17),(37,19),(37,23),(40,23),(40,26),(37,26),(37,28),
+                  (33,28),(33,30),(22,30),(22,28),(18,28),(18,25),(16,25),
+                  (16,22),(14,22),(14,16)),fill=ink)
+    draw.polygon(((16,14),(20,14),(20,13),(23,13),(26,16),(31,16),(33,13),(34,13),
+                  (34,18),(36,20),(36,26),(32,26),(32,29),(22,29),(22,27),
+                  (19,27),(19,24),(17,24),(17,21),(15,21),(15,17)),fill='#8999bd')
+    draw.polygon(((21,17),(27,17),(27,16),(31,16),(31,18),(34,18),(34,21),(36,21),
+                  (36,25),(32,25),(32,27),(27,27),(27,28),(22,28),(22,25),
+                  (20,25),(20,20),(21,20)),fill=OWL_FACE)
+    draw.line(((22,19),(24,18),(27,18)),fill='#fff0cd',width=2)
+    draw.line(((17,17),(18,16),(20,16)),fill='#bdc5d6')
+    draw.point(((18,21),(19,23),(20,26),(17,19)),fill='#c3b99f')
+    draw.rectangle((28,20,32,24),fill='#38384f')
+    draw.rectangle((29,21,33,23),fill=ink)
+    draw.rectangle((31,20,32,21),fill='#fff5d9')
+    draw.polygon(((35,23),(38,23),(38,24),(39,24),(37,26),(35,26)),fill=OWL_BEAK)
+    draw.line(((35,26),(36,26)),fill='#b98453')
+    return owl
+
 def mirrored_owl(frames,birds):
-    wing_cycle=[poses[0][0] for poses in birds[:10]]
+    wing_cycle=[owl_facing_right(poses[0][0]) for poses in birds[:10]]
     outbound=[wing_cycle[i%len(wing_cycle)] for i in range(len(frames))]
     inbound=[ImageOps.mirror(sprite) for sprite in outbound]
     sprite_sheet('night_owl_right',outbound,10)
     sprite_sheet('night_owl_left',inbound,10)
-    for i,(frame,poses) in enumerate(zip(frames,birds)):
-        frame.alpha_composite((outbound if i<20 else inbound)[i],poses[0][1])
+    positions=[poses[0][1] for poses in birds]
+    for i,(frame,(x,y)) in enumerate(zip(frames,positions)):
+        # Compare actual positions. At the turn, use the next non-stationary frame.
+        next_x=next(positions[(i+step)%len(frames)][0] for step in range(1,len(frames))
+                    if positions[(i+step)%len(frames)][0]!=x)
+        frame.alpha_composite((outbound if next_x>x else inbound)[i],(x,y))
 
 def sunset_flaps(sprite):
     # Keep the body and beak fixed. Separate the nearer, larger wing at its shoulder.
@@ -168,6 +201,17 @@ def object_x(frame,bg,kind):
                 points.append(x)
     return statistics.median(points) if len(points)>=20 else 281
 
+def scene_palette(first_frame,name):
+    reserved=(OWL_BEAK,OWL_FACE) if name=='night' else ()
+    colors=255-len(reserved)
+    palette=first_frame.quantize(colors=colors,method=Image.Quantize.MEDIANCUT,dither=Image.Dither.NONE)
+    if reserved:
+        entries=palette.getpalette()[:colors*3]
+        for color in reserved:
+            entries.extend(ImageColor.getrgb(color))
+        palette.putpalette(entries)
+    return palette
+
 def scene(name):
     source=FLIGHT_SOURCE if name in ('night','sunset') else SC
     im=Image.open(source/f'{name}-gif.gif')
@@ -191,13 +235,13 @@ def scene(name):
         animation=mirrored_owl if name=='night' else animate_sunset_birds
         animation(images,birds)
     images=[frame.convert('RGB') for frame in images]
-    common=images[0].quantize(colors=255,method=Image.Quantize.MEDIANCUT,dither=Image.Dither.NONE)
+    common=scene_palette(images[0],name)
     frames=[f.quantize(palette=common,dither=Image.Dither.NONE) for f in images]
     frames[0].save(SC/f'{name}-gif.gif',save_all=True,append_images=frames[1:],
         duration=times,loop=0,disposal=2,optimize=False)
     images[0].save(SC/f'{name}-still.png',optimize=True)
     thumbs=[f.resize((120,120),Image.Resampling.NEAREST) for f in images]
-    pal=thumbs[0].quantize(colors=255,method=Image.Quantize.MEDIANCUT,dither=Image.Dither.NONE)
+    pal=scene_palette(thumbs[0],name)
     thumbs=[f.quantize(palette=pal,dither=Image.Dither.NONE) for f in thumbs]
     thumbs[0].save(SC/f'{name}-preview.gif',save_all=True,append_images=thumbs[1:],
         duration=times,loop=0,disposal=2,optimize=False)

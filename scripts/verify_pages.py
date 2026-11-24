@@ -2,6 +2,7 @@
 """Quick static invariants of a Pages/PWA build; no external services required."""
 from pathlib import Path
 import re,json
+from statistics import median
 web=Path(__file__).resolve().parents[1]/'web'
 html=(web/'index.html').read_text(encoding='utf-8')
 m=re.search(r'<script id="v64-scene-media" type="application/json">(.*?)</script>',html,re.S)
@@ -76,7 +77,27 @@ for i in range(40):
  box=(x,y,x+48,y+48)
  right=owl_right.crop(box)
  assert right.getpixel((0,0))[3]==0 and right.getchannel('A').getbbox()
+ beak=[x for y in range(48) for x in range(48) if right.getpixel((x,y))==(239,189,98,255)]
+ assert beak and min(beak)>32,i
  assert ImageOps.mirror(right).tobytes()==owl_left.crop(box).tobytes(),i
+flight=[]
+with Image.open(web/'assets/scenes/night-gif.gif') as night:
+ for i in range(night.n_frames):
+  night.seek(i)
+  pixels=night.convert('RGB').load()
+  beak=[(x,y) for y in range(80,142) for x in range(20,300) if pixels[x,y]==(239,189,98)]
+  assert len(beak)==14,i
+  bx,by=round(median(x for x,y in beak)),round(median(y for x,y in beak))
+  face=[x for y in range(by-12,by+9) for x in range(bx-20,bx+21) if pixels[x,y]==(239,226,181)]
+  assert face and abs(bx-median(face))>=8,i
+  facing_right=bx>median(face)
+  # Recover the sprite anchor independently of which edge carries the beak.
+  anchor=min(x for x,y in beak)-(35 if facing_right else 8)
+  flight.append((anchor,facing_right))
+for i,(anchor,facing_right) in enumerate(flight):
+ next_anchor=next(flight[(i+step)%len(flight)][0] for step in range(1,len(flight))
+                  if flight[(i+step)%len(flight)][0]!=anchor)
+ assert facing_right==(next_anchor>anchor),i
 birds=Image.open(assets_v8429/'sunset_birds_flap.png').convert('RGBA')
 assert birds.size==(384,96)
 for y in (0,48):
