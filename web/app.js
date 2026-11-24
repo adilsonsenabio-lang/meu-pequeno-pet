@@ -111,14 +111,14 @@ currentX=Math.max(20,Math.min(80,Number.isFinite(save?.viewX)?save.viewX:50));
 chosenToy=TOYS.includes(save?.playToy)?save.playToy:'ball';
 area=AREAS.includes(save?.area)?save.area:'garden';
 
-function sound(notes=[520]){
+function sound(notes=[520],{type='sine',spacing=.11,volume=.045,duration=.19}={}){
   if(!soundEnabled)return;
   try{
     audioContext??=new (window.AudioContext||window.webkitAudioContext)();
     if(audioContext.state==='suspended')audioContext.resume();
     notes.forEach((freq,i)=>{
-      const start=audioContext.currentTime+i*.11,osc=audioContext.createOscillator(),gain=audioContext.createGain();
-      osc.type='sine';osc.frequency.setValueAtTime(freq,start);gain.gain.setValueAtTime(.0001,start);gain.gain.exponentialRampToValueAtTime(.045,start+.015);gain.gain.exponentialRampToValueAtTime(.0001,start+.19);osc.connect(gain).connect(audioContext.destination);osc.start(start);osc.stop(start+.2);
+      const start=audioContext.currentTime+i*spacing,osc=audioContext.createOscillator(),gain=audioContext.createGain();
+      osc.type=type;osc.frequency.setValueAtTime(freq,start);gain.gain.setValueAtTime(.0001,start);gain.gain.exponentialRampToValueAtTime(volume,start+.015);gain.gain.exponentialRampToValueAtTime(.0001,start+duration);osc.connect(gain).connect(audioContext.destination);osc.start(start);osc.stop(start+duration+.01);
     });
   }catch{}
 }
@@ -334,7 +334,11 @@ function hatchTapSparks(point){
   const layer=$('.egg-tap-sparks');
   const burst=document.createElementNS(layer.namespaceURI,'g');
   burst.setAttribute('transform',`translate(${point.x} ${point.y})`);
-  for(const [x,y,r] of [[-16,-15,2],[5,-23,1.7],[18,-10,2.3],[-9,13,1.4],[11,11,1.6]]){
+  const ring=document.createElementNS(layer.namespaceURI,'circle');
+  ring.classList.add('egg-tap-ring');
+  ring.setAttribute('r',9);
+  burst.append(ring);
+  for(const [x,y,r] of [[-26,-17,2],[-12,-29,1.5],[5,-31,2],[25,-16,2.3],[31,3,1.5],[-20,14,1.4],[11,22,1.6]]){
     const spark=document.createElementNS(layer.namespaceURI,'circle');
     spark.setAttribute('r',r);
     spark.style.setProperty('--spark-x',`${x}px`);
@@ -1124,14 +1128,18 @@ function bind(){
     egg.setAttribute('aria-label',`Abrir o ovo. ${eggTaps} de ${EGG_TAPS} toques`);
     const fissure=$('#egg-fissure');
     const sparks=hatchTapSparks(fissure.getPointAtLength(fissure.getTotalLength()*progress));
-    sound(eggTaps===1?[294,392,587]:[294+eggTaps*22]);
+    const chime=440+eggTaps*31;
+    sound([146+eggTaps*5],{type:'triangle',volume:.085,duration:.085});
+    sound([chime,chime*1.5],{spacing:.052,volume:.062,duration:.15});
 
-    const shell=$('.egg-intact');
+    const shell=$('.egg-tap-shell');
     const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
     shell.getAnimations().forEach(motion=>motion.cancel());
     const angle=eggTaps%2===0?5:-5;
     const knock=reduced?null:shell.animate([
-      {transform:'none'}, {transform:`rotate(${angle}deg)`,offset:.33}, {transform:'none'}
+      {transform:`scale(1.035,.97) rotate(${angle}deg)`},
+      {transform:`scale(.99,1.025) rotate(${-angle*.45}deg)`,offset:.45},
+      {transform:'none'}
     ],{duration:220,easing:'ease-out'});
     if(eggTaps<EGG_TAPS)return;
 

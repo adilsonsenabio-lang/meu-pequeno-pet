@@ -59,11 +59,18 @@
   filter: drop-shadow(0 0 3px #b76fea);
 }
 .egg-shell-edge { stroke: #472762; stroke-width: 4; }
-.egg-intact { transform-origin: 60px 140px; }
+.egg-tap-shell { transform-origin: 60px 140px; }
 .egg-tap-dots circle { fill: #42365f; stroke: #fff0bf; stroke-width: 1.2; }
 .egg-tap-dots .lit { fill: #ffe384; filter: drop-shadow(0 0 2px #ffd870); }
 .egg-opening .egg-tap-dots { visibility: hidden; }
 .egg-tap-sparks circle { fill: #fff2aa; animation: hatch-tap-spark 340ms ease-out both; }
+.egg-tap-sparks circle:nth-child(3n) { fill: #f1b1ff; }
+.egg-tap-sparks .egg-tap-ring {
+  fill: none;
+  stroke: #fff2bc;
+  stroke-width: 2.4;
+  animation-name: hatch-tap-ring;
+}
 
 [data-hatch="gather"] .egg-orbit { animation: hatch-gather 850ms ease-out both; }
 [data-hatch="gather"] .egg-aura { animation: hatch-nightfall 850ms ease-out both; }
@@ -89,6 +96,10 @@
 @keyframes hatch-tap-spark {
   from { opacity: 1; }
   to { opacity: 0; transform: translate(var(--spark-x),var(--spark-y)); }
+}
+@keyframes hatch-tap-ring {
+  from { opacity: .95; transform: scale(.35); }
+  to { opacity: 0; transform: scale(2.4); }
 }
 @keyframes hatch-inner-light {
   from { opacity: .8; }
@@ -117,6 +128,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   #egg { animation: none; }
+  @keyframes hatch-tap-ring { from { opacity: .95; } to { opacity: 0; } }
   @keyframes hatch-tap-spark {
     0%, 45% { opacity: 1; transform: translate(var(--spark-x),var(--spark-y)); }
     to { opacity: 0; transform: translate(var(--spark-x),var(--spark-y)); }
