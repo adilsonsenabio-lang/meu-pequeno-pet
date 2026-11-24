@@ -5,10 +5,10 @@ import {createSave,hatch,advance,applyCare,restSleep,beginSleep,validateSave,NEE
 const b=()=>hatch(createSave(100000),100000).save;
 const approx=(a,b)=>assert.ok(Math.abs(a-b)<0.000001,`${a} != ${b}`);
 const source=name=>readFile(new URL('../web/'+name,import.meta.url),'utf8');
-test('V74: desgaste das sete necessidades é exatamente 35% maior que V73, mais saúde',()=>{
- assert.equal(NEED_DECAY_MULTIPLIER,1.35);
+test('as sete necessidades caem mais rápido, com o mesmo ritmo de perda passiva de saúde',()=>{
+ assert.equal(NEED_DECAY_MULTIPLIER,2);
  const start=b(),duration=10000;const next=advance(start,duration,110000,false).save;
- for(const [key,rate] of Object.entries(NEED_DECAY_PER_SECOND))approx(start.needs[key]-next.needs[key],rate*1.35*10);
+ for(const [key,rate] of Object.entries(NEED_DECAY_PER_SECOND))approx(start.needs[key]-next.needs[key],rate*2*10);
  approx(start.needs.health-next.needs.health,.010*1.35*10);
  const unhealthy={...start,needs:{...start.needs,energy:25,health:90}};
  const worsened=advance(unhealthy,duration,110000,false).save;

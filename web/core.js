@@ -1,8 +1,8 @@
 export const VERSION=1;
 export const NEEDS=['food','water','clean','potty','energy','affection','fun','health'];
 export const NEED_DECAY_PER_SECOND=Object.freeze({food:.11,water:.12,clean:.075,potty:.09,energy:.095,affection:.08,fun:.11});
-// Multiplicador em relação à V73: 35% mais desgaste de todas as necessidades.
-export const NEED_DECAY_MULTIPLIER=1.35;
+// O ritmo dos cuidados é independente da perda passiva de saúde.
+export const NEED_DECAY_MULTIPLIER=2;
 // Energia tem piso de 20% no desgaste, portanto exigir 30% permite bloqueio real.
 export const MIN_ENERGY_TO_PLAY=30;
 export const CARE={
@@ -101,7 +101,7 @@ export function advance(s,deltaMs,now=Date.now(),evolve=true){
     const current=needs[key]??100;
     // Saúde cai lentamente e piora se o pet estiver mal cuidado.
     const bad=['food','water','clean','energy'].some(need=>(s.needs[need]??100)<30);
-    const perSecond=(key==='health'?(bad?.045:.010):NEED_DECAY_PER_SECOND[key])*NEED_DECAY_MULTIPLIER;
+    const perSecond=key==='health'?(bad?.06075:.0135):NEED_DECAY_PER_SECOND[key]*NEED_DECAY_MULTIPLIER;
     needs[key]=clamp(current-perSecond*elapsed/1000,key==='health'?0:20,100);
   }
   const next={...s,needs,activeMs:s.activeMs+elapsed,updatedAt:now};

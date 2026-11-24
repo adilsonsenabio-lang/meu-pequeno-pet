@@ -253,9 +253,12 @@ function tail(s,c){const k=p(s,'tail');if(k==='none')return '';const path=tailPa
  if(k==='dog')z+=r(163,134,7,5,c.s);
  return z;
 }
-function body(s,c,stage){
+function bodyWidth(s,stage){
  const widths=[56,64,48,78,53,70,73,61,76,50,67,75];
- const wide=Math.max(46,Math.min(88,(widths[s.body]||64)+(stage==='adult'?9:stage==='child'?3:-5)));
+ return Math.max(46,Math.min(88,(widths[s.body]||64)+(stage==='adult'?9:stage==='child'?3:-5)));
+}
+function body(s,c,stage){
+ const wide=bodyWidth(s,stage);
  const x=100-Math.floor(wide/2),y=stage==='adult'?111:stage==='child'?116:120,h=176-y;
  const outline=stage==='baby'
   ?`M${x+9} ${y}H${x+wide-9}V${y+7}H${x+wide-3}V${y+15}H${x+wide}V${y+h-10}H${x+wide-3}V${y+h}H${x+3}V${y+h-10}H${x}V${y+15}H${x+3}V${y+7}H${x+9}Z`
@@ -289,11 +292,14 @@ function neckBridge(c,stage){
  const bottom=stage==='adult'?138:stage==='child'?141:144;
  return `<g class="pixel-neck">${r(92,y,16,bottom-y,c.p)}${r(93,y+2,4,bottom-y-5,shade(c.p,22))}${r(105,y+4,3,bottom-y-7,shade(c.p,-25))}</g>`;
 }
-function grownPaws(stage,c){
- if(stage==='baby')return '';
- const adult=stage==='adult',y=adult?143:149;
- const left=adult?'M61 143H68V150H75V158H69V163H61V159H56V151H59Z':'M65 149H71V154H77V161H72V165H64V161H61V155H65Z';
- return `<g class="pixel-paw-left">${shape(left,c.p)}${r(64,y+5,4,3,shade(c.p,40))}</g><g class="pixel-paw-right" transform="translate(200 0) scale(-1 1)">${shape(left,c.p)}${r(64,y+5,4,3,shade(c.p,40))}</g>`;
+function shellHands(s,c,stage){
+ const x=102-Math.floor(bodyWidth(s,stage)/2);
+ const y=stage==='child'?142:139;
+ const outline='M25 15H34V22H31V28H28V34H24V39H12V36H7V31H13V33H18V29H14V26H10V23H15V21H21V17H25Z';
+ // Espelha a Conchinha no eixo diagonal que passa pelo encaixe no tronco.
+ const art=`<g transform="matrix(0 -1 -1 0 18 29)">${shape(outline,c.p)}${r(16,23,7,3,shade(c.p,40))}${r(21,31,4,4,shade(c.p,-35))}${r(15,35,8,2,shade(c.p,-35))}</g>`;
+ const hand=`<g transform="translate(${x} ${y})"><g class="pixel-hand-joint">${art}</g></g>`;
+ return `<g class="pixel-paw-left">${hand}</g><g class="pixel-paw-right" transform="translate(200 0) scale(-1 1)">${hand}</g>`;
 }
 function feet(s,c,stage){
  const y=stage==='baby'?184:186;
@@ -419,7 +425,7 @@ export function pixelPet(s,c,o={}){
  // A boca permanece ancorada à cabeça, inclusive durante inclinação/olhar e crescimento.
  const mouthShift=typeof o.mouthOffset==='number'&&Number.isFinite(o.mouthOffset)?Math.max(-8,Math.min(8,Math.round(o.mouthOffset))):0;
  const eyesArt=eyes(s,mood,tint('eyes'));
- const bodyPart=`<g class="atelier-body">${body(s,c,stage)}<g class="pixel-outfit">${outfitArt(o.outfit,s,stage)}</g><g class="grown-paws">${grownPaws(stage,c)}</g></g>`;
+ const bodyPart=`<g class="atelier-body">${body(s,c,stage)}<g class="pixel-outfit">${outfitArt(o.outfit,s,stage)}</g>${shellHands(s,c,stage)}</g>`;
  const headPart=`<g class="atelier-head"><g class="atelier-ears">${scaled('ears',ears(s,tone('ears')),100,74)}</g>${headShape(s,c)}<g class="atelier-markings">${marks(s,c)}</g><g class="atelier-hair">${hair(s,c)}</g><g class="atelier-eyes">${scaled('eyes',eyesArt,100,88)}</g><g class="atelier-eyes-shut">${rows([[76,89,16,4],[109,89,16,4]],ink)}</g><g class="atelier-snout" transform="translate(0 -2) translate(100 108) scale(.78) translate(-100 -108)">${scaled('snout',snout(s,tone('snout'),mood),100,108)}</g><g class="atelier-mouth" transform="translate(0 ${-9+mouthShift})" data-mouth-offset="${mouthShift}">${scaled('mouth',mouthArt(s,c,mood,tint('mouth')),100,125)}</g><g class="atelier-eating-mouth">${b(91,106,18,17,'#713d4e')+r(95,117,10,4,'#e58ea2')}</g><g class="atelier-accessory">${scaled('accessory',accessory(s,tone('accessory')),100,97)}</g><g class="care-cup">${b(107,108,17,20,'#e5eff0')+r(109,116,13,3,'#76c5d3')}</g><g class="care-sponged">${b(121,89,17,15,c.a)}</g><g class="care-dirt">${r(68,101,7,7,'#80684f')+r(125,102,7,7,'#80684f')}</g><g class="care-suds">${r(68,109,11,8,'#fff')+r(125,109,11,8,'#fff')}</g></g>`;
  return `<g class="pixel-pet" shape-rendering="crispEdges"><ellipse cx="100" cy="196" rx="36" ry="3" fill="#15282a" opacity=".3"/><g class="atelier-tail">${scaled('tail',tail(s,tone('tail')),132,150)}</g><g class="atelier-wings">${scaled('wings',wings(s,tone('wings')),100,125)}</g><g class="atelier-neck">${neckBridge(c,stage)}</g>${bodyPart}<g class="atelier-feet">${feet(s,c,stage)}<g class="pixel-shoes">${shoeArt(o.shoes,stage)}</g></g><g transform="translate(0 ${headLift}) translate(100 120) scale(${headScale}) translate(-100 -120)">${headPart}</g></g>`;
 }

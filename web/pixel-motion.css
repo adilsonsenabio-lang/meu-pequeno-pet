@@ -81,3 +81,11 @@
 @keyframes pixel-eyes-idle{0%,94%,100%{opacity:1}96%{opacity:0}}
 .paused #play-art .pixel-pet *,.paused .scene-decoration .pixel-item *,.paused .album-card .pixel-item *,.paused #toy-picker .pixel-item *,.paused #activity-panel .pixel-item *{animation-play-state:paused!important}
 @media(prefers-reduced-motion:reduce){#play-art .pixel-pet *,.scene-decoration .pixel-item *,.album-card .pixel-item *,#toy-picker .pixel-item *,#activity-panel .pixel-item *{animation:none!important}}
+#play-art[data-motion="love-lean"] .pixel-paw-left .pixel-hand-joint {
+  transform-origin: 0 0;
+  animation: pixel-hand-wave 820ms ease-in-out;
+}
+@keyframes pixel-hand-wave {
+  0%, 100% { transform: rotate(0deg); }
+  42%, 60% { transform: rotate(105deg); }
+}
