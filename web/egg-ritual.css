@@ -63,13 +63,19 @@
 .egg-tap-dots circle { fill: #42365f; stroke: #fff0bf; stroke-width: 1.2; }
 .egg-tap-dots .lit { fill: #ffe384; filter: drop-shadow(0 0 2px #ffd870); }
 .egg-opening .egg-tap-dots { visibility: hidden; }
-.egg-tap-sparks circle { fill: #fff2aa; animation: hatch-tap-spark 340ms ease-out both; }
-.egg-tap-sparks circle:nth-child(3n) { fill: #f1b1ff; }
+.egg-flying-spark {
+  fill: #fff2aa;
+  stroke: #57437a;
+  stroke-width: .65;
+  animation: hatch-tap-spark 680ms cubic-bezier(.14,.68,.3,1) both;
+}
+.egg-flying-spark:nth-child(3n) { fill: #f4b0ff; animation-duration: 560ms; }
+.egg-flying-spark:nth-child(4n) { fill: #b5fff4; animation-duration: 750ms; }
 .egg-tap-sparks .egg-tap-ring {
   fill: none;
   stroke: #fff2bc;
   stroke-width: 2.4;
-  animation-name: hatch-tap-ring;
+  animation: hatch-tap-ring 340ms ease-out both;
 }
 
 [data-hatch="gather"] .egg-orbit { animation: hatch-gather 850ms ease-out both; }
@@ -94,8 +100,10 @@
   to { opacity: 1; }
 }
 @keyframes hatch-tap-spark {
-  from { opacity: 1; }
-  to { opacity: 0; transform: translate(var(--spark-x),var(--spark-y)); }
+  0% { opacity: 1; transform: scale(.65); }
+  58% { opacity: 1; transform: translate(calc(var(--spark-x)*.79),calc(var(--spark-y)*.85)) scale(1.35) rotate(42deg); }
+  78% { opacity: .75; }
+  100% { opacity: 0; transform: translate(var(--spark-x),calc(var(--spark-y) + 18px)) scale(.5) rotate(105deg); }
 }
 @keyframes hatch-tap-ring {
   from { opacity: .95; transform: scale(.35); }
@@ -130,8 +138,8 @@
   #egg { animation: none; }
   @keyframes hatch-tap-ring { from { opacity: .95; } to { opacity: 0; } }
   @keyframes hatch-tap-spark {
-    0%, 45% { opacity: 1; transform: translate(var(--spark-x),var(--spark-y)); }
-    to { opacity: 0; transform: translate(var(--spark-x),var(--spark-y)); }
+    0%, 45% { opacity: 1; transform: translate(calc(var(--spark-x)*.55),calc(var(--spark-y)*.55)); }
+    to { opacity: 0; transform: translate(calc(var(--spark-x)*.55),calc(var(--spark-y)*.55)); }
   }
   #world[data-hatch="gather"] .egg-veil,
   [data-hatch="gather"] :is(.egg-orbit,.egg-aura) { animation-duration: 420ms; }

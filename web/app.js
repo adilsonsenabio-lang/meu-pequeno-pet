@@ -330,24 +330,32 @@ function resetEggTaps(){
   $('.egg-tap-sparks').replaceChildren();
   egg.disabled=false;
 }
-function hatchTapSparks(point){
+function hatchTapSparks(point,shell){
   const layer=$('.egg-tap-sparks');
+  const origin=point.matrixTransform(shell.getCTM()).matrixTransform(layer.getCTM().inverse());
   const burst=document.createElementNS(layer.namespaceURI,'g');
-  burst.setAttribute('transform',`translate(${point.x} ${point.y})`);
+  burst.setAttribute('transform',`translate(${origin.x} ${origin.y})`);
   const ring=document.createElementNS(layer.namespaceURI,'circle');
   ring.classList.add('egg-tap-ring');
   ring.setAttribute('r',9);
   burst.append(ring);
-  for(const [x,y,r] of [[-26,-17,2],[-12,-29,1.5],[5,-31,2],[25,-16,2.3],[31,3,1.5],[-20,14,1.4],[11,22,1.6]]){
-    const spark=document.createElementNS(layer.namespaceURI,'circle');
-    spark.setAttribute('r',r);
-    spark.style.setProperty('--spark-x',`${x}px`);
+  const spread=[
+    [-57,-36,3.8],[-42,-55,2.3],[-20,-64,3],[-4,-75,2.1],[20,-64,4.2],[39,-51,2.3],
+    [58,-36,3.5],[68,-13,2.1],[55,15,2.6],[-55,12,2.4],[-66,-10,3],[35,-22,1.7]
+  ];
+  const turn=eggTaps%2===0?1:-1;
+  for(const [x,y,r] of spread){
+    const spark=document.createElementNS(layer.namespaceURI,'path');
+    spark.classList.add('egg-flying-spark');
+    spark.setAttribute('d',`M0 ${-r*1.4} ${r} 0 0 ${r*1.4} ${-r} 0Z`);
+    spark.style.setProperty('--spark-x',`${x*turn}px`);
     spark.style.setProperty('--spark-y',`${y}px`);
     burst.append(spark);
   }
   layer.append(burst);
-  burst.addEventListener('animationend',()=>burst.remove(),{once:true});
-  return burst.getAnimations({subtree:true})[0]?.finished.catch(()=>{});
+  const motion=burst.getAnimations({subtree:true});
+  void Promise.allSettled(motion.map(effect=>effect.finished)).then(()=>burst.remove());
+  return ring.getAnimations()[0]?.finished.catch(()=>{});
 }
 function showScreen(){
   resetEggTaps();
@@ -1126,8 +1134,6 @@ function bind(){
     egg.style.setProperty('--egg-crack-offset',100*(1-progress));
     $('.egg-tap-dots').children[eggTaps-1].classList.add('lit');
     egg.setAttribute('aria-label',`Abrir o ovo. ${eggTaps} de ${EGG_TAPS} toques`);
-    const fissure=$('#egg-fissure');
-    const sparks=hatchTapSparks(fissure.getPointAtLength(fissure.getTotalLength()*progress));
     const chime=440+eggTaps*31;
     sound([146+eggTaps*5],{type:'triangle',volume:.085,duration:.085});
     sound([chime,chime*1.5],{spacing:.052,volume:.062,duration:.15});
@@ -1141,6 +1147,8 @@ function bind(){
       {transform:`scale(.99,1.025) rotate(${-angle*.45}deg)`,offset:.45},
       {transform:'none'}
     ],{duration:220,easing:'ease-out'});
+    const fissure=$('#egg-fissure');
+    const sparks=hatchTapSparks(fissure.getPointAtLength(fissure.getTotalLength()*progress),shell);
     if(eggTaps<EGG_TAPS)return;
 
     const token=++flow;
