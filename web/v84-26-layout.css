@@ -12,7 +12,7 @@
 /* O pet acompanha a largura, com proporções 168×190; left é controlável
    pelos comandos de caminhada do jogo. */
 #world #pet-wrap.pet-wrap {
-  width:42.3%;
+  width:37.224%;
   height:auto;
   aspect-ratio:168 / 190;
   left:50%;
@@ -23,7 +23,7 @@
   position:absolute;
   left:50%;
   bottom:7%;
-  width:46.665%;
+  width:41.0652%;
   height:auto;
   aspect-ratio:222 / 236;
   transform:translateX(-50%);

@@ -47,9 +47,9 @@ export function montar(container,options={}){
   {id:'shell',x:.831,y:.860,size:105,phase:1100,frameMs:220,depth:'right-rock'}
  ]},
  moon:{title:'Clareira Lunar',actors:[
-  {id:'bat',kind:'fly',x:.62,y:.22,size:136,frameMs:115,bob:5,seed:1171,pxps:[72,106],roamX:[.46,.76],roamY:[.17,.25],pauseMs:[240,520],minLeg:95,zone:[.38,.13,.85,.32]},
-  {id:'wolf',kind:'ground',x:.74,y:.60,size:180,frameMs:140,bob:0,seed:1281,pxps:[50,71],roamX:[.66,.83],roamY:[.57,.64],pauseMs:[440,940],minLeg:95,zone:[.58,.43,.92,.66]},
-  {id:'cat',kind:'ground',x:.32,y:.81,size:134,frameMs:130,bob:0,seed:1391,pxps:[69,102],roamX:[.28,.43],roamY:[.76,.83],pauseMs:[360,880],minLeg:85,zone:[.21,.66,.51,.86]},
+  {id:'bat',kind:'fly',x:.62,y:.22,size:136,frameMs:115,bob:5,seed:1171,pxps:[72,106],roamX:[.30,.83],roamY:[.15,.27],pauseMs:[140,340],minLeg:280,zone:[.22,.10,.90,.34]},
+  {id:'wolf',kind:'ground',x:.74,y:.60,size:180,frameMs:140,bob:0,seed:1281,pxps:[50,71],roamX:[.36,.83],roamY:[.56,.65],pauseMs:[260,610],minLeg:245,zone:[.28,.41,.92,.68]},
+  {id:'cat',kind:'ground',x:.32,y:.81,size:134,frameMs:130,bob:0,seed:1391,pxps:[69,102],roamX:[.26,.63],roamY:[.75,.83],pauseMs:[180,480],minLeg:190,zone:[.19,.65,.71,.86]},
  ],props:[]}
 };
   function sceneAssetIds(){
@@ -207,9 +207,10 @@ function draw(){
  c.translate(0,sceneOffsetY[scene]);
  c.imageSmoothingEnabled=false;
  const w=WORLD.W,h=WORLD.H,actors=WORLDS[scene].actors;
+ const scale=ACTOR_SCALE*(scene==='sky'?1.10:1);
  if(scene==='sea'){
   const f=actors[0],p=positionFor(f);
-  const size=f.size*ACTOR_SCALE;
+  const size=f.size*scale;
   const fishX=p.x*w,fishY=p.y*h+Math.sin(clock*.0022)*f.bob;
   // Strict shoreline mask: the fish cannot appear in the meadow.
   c.save();c.beginPath();c.rect(w*.205,h*.320,w*.57,h*.147);c.clip();
@@ -219,7 +220,7 @@ function draw(){
  }
  for(const a of actors){
   if(a.kind==='water')continue;
-  const size=a.size*ACTOR_SCALE;
+  const size=a.size*scale;
   const p=positionFor(a);const px=p.x*w;
   const y=p.y*h+(a.kind==='fly'?Math.sin(clock*.0034+a.frameMs)*a.bob:0);
   if(a.kind==='ground'){

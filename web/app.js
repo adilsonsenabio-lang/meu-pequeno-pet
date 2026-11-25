@@ -101,10 +101,10 @@ let selectedDecoration=null,decorationDrag=null,suppressDecorationClick=false;
 let actionGroup=null,airTimer=null,lookTimer=null,gazeFrame=null,gazeIndex=0,flightLevel=0,jumpStreak=0;
 await hydrateNativeStorage(localStorage,[SAVE_KEY,`${SAVE_KEY}.test`,'meu-pequeno-pet.sound']);
 let soundEnabled=localStorage.getItem('meu-pequeno-pet.sound')!=='off';
-const HALLOWEEN_HOWL_INTERVAL=60_000;
-const HALLOWEEN_PREVIEW_DELAY=1_000;
-const halloweenHowlUrl=new URL('./assets/audio/uivo_lobo.mp3',import.meta.url);
-let halloweenHowlBuffer,halloweenHowlSource,halloweenHowlTimer,halloweenPreviewTimer;
+const LUNAR_HOWL_INTERVAL=20_000;
+const LUNAR_PREVIEW_DELAY=1_000;
+const lunarHowlUrl=new URL('./assets/audio/uivo_lobo.mp3',import.meta.url);
+let lunarHowlBuffer,lunarHowlSource,lunarHowlTimer,lunarPreviewTimer;
 const NEED_ALERT_INTERVAL=10_000;
 const NEED_ALERT_FILES={
   food:['comer01'],
@@ -142,33 +142,33 @@ function sound(notes=[520],{type='sine',spacing=.11,volume=.045,duration=.19}={}
     });
   }catch{}
 }
-function halloweenAudioMode(){
+function lunarAudioMode(){
   if(!soundEnabled||document.hidden)return null;
-  if(!$('#create-screen').hidden&&draft.scene==='halloween')return 'preview';
-  if(!$('#play-screen').hidden&&save&&save.phase!=='egg'&&scene==='halloween'&&area==='garden')return 'game';
+  if(!$('#create-screen').hidden&&draft.scene==='clareira_lunar')return 'preview';
+  if(!$('#play-screen').hidden&&save&&save.phase!=='egg'&&scene==='clareira_lunar'&&area==='garden')return 'game';
   return null;
 }
-function stopHalloweenHowl(){
-  const source=halloweenHowlSource;
-  halloweenHowlSource=null;
+function stopLunarHowl(){
+  const source=lunarHowlSource;
+  lunarHowlSource=null;
   if(source)source.stop();
 }
-async function playHalloweenHowl(mode){
+async function playLunarHowl(mode){
   try{
-    if(halloweenAudioMode()!==mode||!audioContext)return;
+    if(lunarAudioMode()!==mode||!audioContext)return;
     const context=audioContext;
     if(mode==='game'&&context.state!=='running')return;
     const resumed=mode==='preview'&&context.state==='suspended'?context.resume():undefined;
-    halloweenHowlBuffer??=fetch(halloweenHowlUrl).then(response=>{
-      if(!response.ok)throw new Error('Áudio do Halloween indisponível');
+    lunarHowlBuffer??=fetch(lunarHowlUrl).then(response=>{
+      if(!response.ok)throw new Error('Áudio da Clareira Lunar indisponível');
       return response.arrayBuffer();
     }).then(bytes=>context.decodeAudioData(bytes)).catch(error=>{
-      halloweenHowlBuffer=null;
+      lunarHowlBuffer=null;
       throw error;
     });
-    const [buffer]=await Promise.all([halloweenHowlBuffer,resumed]);
-    if(halloweenAudioMode()!==mode||context.state!=='running')return;
-    stopHalloweenHowl();
+    const [buffer]=await Promise.all([lunarHowlBuffer,resumed]);
+    if(lunarAudioMode()!==mode||context.state!=='running')return;
+    stopLunarHowl();
     const source=context.createBufferSource();
     const gain=context.createGain();
     source.buffer=buffer;
@@ -177,25 +177,25 @@ async function playHalloweenHowl(mode){
     source.onended=()=>{
       source.disconnect();
       gain.disconnect();
-      if(halloweenHowlSource===source)halloweenHowlSource=null;
+      if(lunarHowlSource===source)lunarHowlSource=null;
     };
     source.start();
-    halloweenHowlSource=source;
+    lunarHowlSource=source;
   }catch{}
 }
-function syncHalloweenAudio(){
-  const mode=halloweenAudioMode();
+function syncLunarAudio(){
+  const mode=lunarAudioMode();
   if(mode!=='preview'){
-    clearTimeout(halloweenPreviewTimer);
-    halloweenPreviewTimer=null;
+    clearTimeout(lunarPreviewTimer);
+    lunarPreviewTimer=null;
   }
   if(mode!=='game'){
-    clearInterval(halloweenHowlTimer);
-    halloweenHowlTimer=null;
+    clearInterval(lunarHowlTimer);
+    lunarHowlTimer=null;
   }else{
-    halloweenHowlTimer??=setInterval(()=>void playHalloweenHowl('game'),HALLOWEEN_HOWL_INTERVAL);
+    lunarHowlTimer??=setInterval(()=>void playLunarHowl('game'),LUNAR_HOWL_INTERVAL);
   }
-  if(!mode)stopHalloweenHowl();
+  if(!mode)stopLunarHowl();
 }
 function needsCanSound(){
   return soundEnabled&&!document.hidden&&save&&save.phase!=='egg'&&!$('#play-screen').hidden;
@@ -445,7 +445,7 @@ function renderArea(){
   renderDecorations();
   $('#world').classList.toggle('lamp-off',area==='bedroom'&&!lampOn);
   $('#area-map').querySelectorAll('[data-area]').forEach(button=>button.setAttribute('aria-pressed',button.dataset.area===area));
-  syncHalloweenAudio();
+  syncLunarAudio();
 }
 async function changeArea(next){
   if(!AREAS.includes(next)||!['ready','ambient'].includes(status)||next===area)return;
@@ -518,7 +518,7 @@ function showScreen(){
   if(save&&!creatingNew){renderGrowth();if(save.sleeping){setStatus('sleeping');setMotion(playArt,'sleep-rest');startSleepTimer();}else setStatus('ready');}
   else {setStatus('creating');renderCreator();}
   if(save?.phase==='egg'&&!creatingNew)say(`Dê ${EGG_TAPS} toques no ovo para conhecer seu amigo!`);
-  syncHalloweenAudio();
+  syncLunarAudio();
   syncNeedAlerts();
 }
 function drawAlbum(){
@@ -1278,13 +1278,13 @@ function bind(){
     renderCreator();
     sound([480]);
     if(key==='scene'){
-      syncHalloweenAudio();
-      if(halloweenAudioMode()==='preview'){
-        clearTimeout(halloweenPreviewTimer);
-        halloweenPreviewTimer=setTimeout(()=>{
-          halloweenPreviewTimer=null;
-          void playHalloweenHowl('preview');
-        },HALLOWEEN_PREVIEW_DELAY);
+      syncLunarAudio();
+      if(lunarAudioMode()==='preview'){
+        clearTimeout(lunarPreviewTimer);
+        lunarPreviewTimer=setTimeout(()=>{
+          lunarPreviewTimer=null;
+          void playLunarHowl('preview');
+        },LUNAR_PREVIEW_DELAY);
       }
     }
   });
@@ -1381,7 +1381,7 @@ function bind(){
   $('#parents-open').addEventListener('click',()=>{if(!['ready','ambient','creating','sleeping'].includes(status))return;if(status==='ambient')cancelAmbient();returnStatus=status;setStatus('parents');$('#pet-name').value=save?.name??'';$('#parent-message').textContent=loaded.recovered?'Um salvamento inválido foi guardado para recuperação; um novo jogo pode ser criado.':'';$('#parents-dialog').showModal();});
   $('#parents-dialog').addEventListener('close',()=>setStatus(returnStatus));
   $('#pet-name').addEventListener('change',event=>{if(!save)return;save=renamePet(save,event.target.value);write();renderGrowth();$('#parent-message').textContent='Nome salvo.';});
-  $('#sound-button').addEventListener('click',()=>{soundEnabled=!soundEnabled;AU.setMute(!soundEnabled);const value=soundEnabled?'on':'off';localStorage.setItem('meu-pequeno-pet.sound',value);void mirrorNativeValue('meu-pequeno-pet.sound',value);updateSoundButton();if(soundEnabled)sound([520]);syncHalloweenAudio();syncNeedAlerts();});
+  $('#sound-button').addEventListener('click',()=>{soundEnabled=!soundEnabled;AU.setMute(!soundEnabled);const value=soundEnabled?'on':'off';localStorage.setItem('meu-pequeno-pet.sound',value);void mirrorNativeValue('meu-pequeno-pet.sound',value);updateSoundButton();if(soundEnabled)sound([520]);syncLunarAudio();syncNeedAlerts();});
   $('#backup-button').addEventListener('click',async()=>{
     if(!save){$('#parent-message').textContent='Crie o pet antes de exportar.';return;}
     const text=exportBackup(save);
@@ -1412,7 +1412,7 @@ function bind(){
   });
   $('#evolution-close').addEventListener('click',()=>{$('#evolution').hidden=true;setStatus('ready');setMotion(playArt,'idle');});
   window.addEventListener('pagehide',checkpoint);
-  document.addEventListener('visibilitychange',syncHalloweenAudio);
+  document.addEventListener('visibilitychange',syncLunarAudio);
   document.addEventListener('visibilitychange',syncNeedAlerts);
   const unlockSceneAudio=()=>{
     if(!needsCanSound())return;
