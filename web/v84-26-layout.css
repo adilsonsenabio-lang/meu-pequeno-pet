@@ -9,14 +9,6 @@
   min-height:0;
   max-height:none;
 }
-#world.world:has(.cenario-mitico-v7),
-#create-screen .create-preview:has(.cenario-mitico-v7) {
-  box-sizing:content-box;
-  width:auto;
-  aspect-ratio:4 / 3;
-  /* O recuo interno de 10px em cada lado subtrai 20px nos dois eixos. */
-  padding-block:2.5px;
-}
 /* O pet acompanha a largura, com proporções 168×190; left é controlável
    pelos comandos de caminhada do jogo. */
 #world #pet-wrap.pet-wrap {
@@ -36,6 +28,18 @@
   height:auto;
   aspect-ratio:222 / 236;
   transform:translateX(-50%);
+}
+
+/* No Céu, a plataforma de grama termina acima das nuvens inferiores. */
+#world:has([data-v64-scene="ceu_arco_iris"]) #pet-wrap.pet-wrap,
+#world:has([data-v64-scene="ceu_arco_iris"]) #egg {
+  bottom:25%;
+}
+#world:has([data-v64-scene="ceu_arco_iris"]) .egg-veil::after {
+  bottom:23%;
+}
+#create-screen .create-preview:has([data-v64-scene="ceu_arco_iris"]) #create-art.create-art {
+  bottom:24%;
 }
 
 /* V84.27 — sombra próxima da sola do pet durante a criação.

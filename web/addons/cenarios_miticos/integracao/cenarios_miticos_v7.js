@@ -16,13 +16,14 @@ export function montar(container,options={}){
   bg.draggable=false;
   Object.assign(bg.style,{width:'100%',height:'100%',position:'absolute',inset:'0',objectFit:'contain',imageRendering:'pixelated'});
   const cnv=document.createElement('canvas');
-  cnv.width=724;cnv.height=543;
+  cnv.width=724;cnv.height=724;
   Object.assign(cnv.style,{position:'absolute',inset:'0',width:'100%',height:'100%',background:'transparent',imageRendering:'pixelated'});
   stage.append(bg,cnv);container.appendChild(stage);
   const c=cnv.getContext('2d',{alpha:true});
   if(!c)throw new Error('Canvas 2D indisponível');
-  c.scale(.5,.5);
   const WORLD={W:1448,H:1086};
+  // A arte quadrada estende os fundos V7 acima e abaixo da área original.
+  const sceneOffsetY={sky:195,sea:215};
   let scene=options.scene==='sea'||options.scene==='cthulhu_fofinho'?'sea':'sky';
   let clock=0,lastStamp=null,paused=false,rate=options.rate||1,showBounds=!!options.showBounds,destroyed=false,raf=0;
   const IMAGES={};
@@ -190,7 +191,10 @@ function waterRipples(x,y,phase){
  c.strokeStyle='rgba(39,170,229,.65)';c.beginPath();c.ellipse(x-7,y+3,32*r,5*r,0,0,Math.PI);c.stroke();c.restore();
 }
 function draw(){
- c.clearRect(0,0,WORLD.W,WORLD.H);c.imageSmoothingEnabled=false;
+ c.setTransform(.5,0,0,.5,0,0);
+ c.clearRect(0,0,WORLD.W,WORLD.W);
+ c.translate(0,sceneOffsetY[scene]);
+ c.imageSmoothingEnabled=false;
  const w=WORLD.W,h=WORLD.H,actors=WORLDS[scene].actors;
  if(scene==='sea'){
   const f=actors[0],p=positionFor(f);

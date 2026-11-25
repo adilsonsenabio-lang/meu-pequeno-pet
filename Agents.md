@@ -70,5 +70,5 @@ Jogo de bichinho virtual em português para criança de 4 anos, acessível mesmo
 - Nunca inserir novamente luminárias com fundo branco nem imagens achatadas sobre o fundo; testar 320/390/430 e versões offline, preservando saves.
 ## Complemento V7 — Céu do Arco-Íris e Cthulhu Fofinho
 
-- As duas cenas míticas usam a arte e os movimentos aprovados do pacote V7 em `web/addons/cenarios_miticos/`. O palco tem proporção 4:3 durante a criação e o jogo.
+- As duas cenas míticas usam os fundos 1:1 atualizados e os movimentos aprovados do pacote V7 em `web/addons/cenarios_miticos/`. O palco é quadrado durante a criação e o jogo.
 - Os IDs persistidos são `ceu_arco_iris` e `cthulhu_fofinho`. O tema Mar continua com o ID `sea`.
