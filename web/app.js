@@ -102,8 +102,9 @@ let actionGroup=null,airTimer=null,lookTimer=null,gazeFrame=null,gazeIndex=0,fli
 await hydrateNativeStorage(localStorage,[SAVE_KEY,`${SAVE_KEY}.test`,'meu-pequeno-pet.sound']);
 let soundEnabled=localStorage.getItem('meu-pequeno-pet.sound')!=='off';
 const HALLOWEEN_HOWL_INTERVAL=60_000;
+const HALLOWEEN_PREVIEW_DELAY=1_000;
 const halloweenHowlUrl=new URL('./assets/audio/uivo_lobo.mp3',import.meta.url);
-let halloweenHowlBuffer,halloweenHowlSource,halloweenHowlTimer;
+let halloweenHowlBuffer,halloweenHowlSource,halloweenHowlTimer,halloweenPreviewTimer;
 const loaded=loadSave(localStorage,Date.now(),ACTIVE_SAVE_KEY);
 save=loaded.save;
 // Salvamentos antigos com Nuvens continuam válidos, mas abrem no Deserto.
@@ -172,6 +173,10 @@ async function playHalloweenHowl(mode){
 }
 function syncHalloweenAudio(){
   const mode=halloweenAudioMode();
+  if(mode!=='preview'){
+    clearTimeout(halloweenPreviewTimer);
+    halloweenPreviewTimer=null;
+  }
   if(mode!=='game'){
     clearInterval(halloweenHowlTimer);
     halloweenHowlTimer=null;
@@ -1198,7 +1203,13 @@ function bind(){
     sound([480]);
     if(key==='scene'){
       syncHalloweenAudio();
-      if(draft.scene==='halloween')void playHalloweenHowl('preview');
+      if(halloweenAudioMode()==='preview'){
+        clearTimeout(halloweenPreviewTimer);
+        halloweenPreviewTimer=setTimeout(()=>{
+          halloweenPreviewTimer=null;
+          void playHalloweenHowl('preview');
+        },HALLOWEEN_PREVIEW_DELAY);
+      }
     }
   });
   $('#create-back').addEventListener('click',()=>{if(step>0){step--;renderCreator();}});
