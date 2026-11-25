@@ -1,6 +1,7 @@
 /* Meu Pequeno Pet - plugin de cenários V7. Baseado na prévia V7 aprovada.
    Não altera o pet, o save, nem o seletor de cenários automaticamente. */
 const MODULE_BASE=new URL('../',import.meta.url);
+const ACTOR_SCALE=1.15;
 const ASSET_PATHS={"sky": "ceu/cenario.webp", "sea": "cthulhu/cenario.webp", "dragon": "ceu/personagens/dragao_celeste/sheet.webp", "pegasus": "ceu/personagens/pegaso_lilas/sheet.webp", "fox": "ceu/personagens/raposa_celestial/sheet.webp", "cthulhu": "cthulhu/personagens/cthulhu_bebe/sheet.webp", "octopus": "cthulhu/personagens/polvinho_mago/sheet.webp", "fish": "cthulhu/personagens/peixe_lanterna/sheet.webp", "shell": "cthulhu/objetos/concha_perola/sheet.png", "dragon_right": "ceu/personagens/dragao_celeste/sheet_espelhado.webp"};
 const META={"dragon": {"cols": 4, "rows": 2, "cellW": 448, "cellH": 448, "bounds": [[56, 131, 414, 355], [59, 126, 407, 354], [63, 103, 409, 349], [76, 58, 407, 360], [75, 61, 410, 364], [60, 102, 408, 355], [62, 107, 411, 351], [59, 134, 416, 353]]}, "pegasus": {"cols": 4, "rows": 2, "cellW": 448, "cellH": 448, "bounds": [[43, 46, 387, 349], [36, 79, 387, 359], [31, 92, 389, 371], [30, 105, 388, 376], [29, 106, 388, 397], [29, 94, 387, 376], [30, 81, 388, 357], [37, 59, 388, 349]]}, "fox": {"cols": 4, "rows": 2, "cellW": 448, "cellH": 448, "bounds": [[48, 121, 395, 374], [39, 123, 397, 374], [38, 124, 405, 366], [28, 114, 414, 327], [32, 117, 413, 352], [35, 123, 405, 372], [42, 122, 401, 375], [47, 116, 399, 375]]}, "cthulhu": {"cols": 4, "rows": 2, "cellW": 448, "cellH": 448, "bounds": [[71, 113, 380, 375], [70, 113, 376, 375], [69, 86, 388, 355], [63, 75, 380, 328], [64, 85, 385, 347], [68, 112, 381, 376], [68, 113, 371, 377], [73, 113, 380, 377]]}, "octopus": {"cols": 4, "rows": 2, "cellW": 448, "cellH": 448, "bounds": [[70, 85, 403, 389], [82, 77, 401, 389], [83, 49, 397, 378], [77, 43, 407, 366], [80, 48, 403, 370], [75, 68, 401, 377], [76, 77, 403, 391], [76, 88, 400, 390]]}, "fish": {"cols": 4, "rows": 2, "cellW": 448, "cellH": 448, "bounds": [[51, 135, 420, 346], [47, 115, 415, 333], [59, 93, 406, 362], [35, 127, 417, 329], [43, 136, 421, 333], [33, 148, 415, 349], [46, 145, 413, 347], [51, 135, 417, 343]]}, "shell": {"cols": 8, "rows": 1, "cellW": 192, "cellH": 192, "bounds": [[10, 32, 182, 160], [10, 33, 182, 160], [10, 35, 182, 161], [10, 37, 182, 161], [10, 38, 182, 161], [10, 37, 182, 161], [9, 35, 182, 161], [9, 33, 182, 160]]}};
 export function montar(container,options={}){
@@ -198,22 +199,24 @@ function draw(){
  const w=WORLD.W,h=WORLD.H,actors=WORLDS[scene].actors;
  if(scene==='sea'){
   const f=actors[0],p=positionFor(f);
+  const size=f.size*ACTOR_SCALE;
   const fishX=p.x*w,fishY=p.y*h+Math.sin(clock*.0022)*f.bob;
   // Strict shoreline mask: the fish cannot appear in the meadow.
   c.save();c.beginPath();c.rect(w*.205,h*.320,w*.57,h*.147);c.clip();
-  drawSprite(f.id,frameFor(clock,f),fishX,fishY,f.size,p.dir);
-  waterRipples(fishX,fishY+f.size*.12,clock*.004);
+  drawSprite(f.id,frameFor(clock,f),fishX,fishY,size,p.dir);
+  waterRipples(fishX,fishY+size*.12,clock*.004);
   c.restore();
  }
  for(const a of actors){
   if(a.kind==='water')continue;
+  const size=a.size*ACTOR_SCALE;
   const p=positionFor(a);const px=p.x*w;
   const y=p.y*h+(a.kind==='fly'?Math.sin(clock*.0034+a.frameMs)*a.bob:0);
   if(a.kind==='ground'){
    // Position shadows on ground, never outside the stage.
-   c.save();c.fillStyle='rgba(34,94,79,.19)';c.beginPath();c.ellipse(px,y+2,a.size*.23,6,0,0,Math.PI*2);c.fill();c.restore();
+   c.save();c.fillStyle='rgba(34,94,79,.19)';c.beginPath();c.ellipse(px,y+2,size*.23,6,0,0,Math.PI*2);c.fill();c.restore();
   }
-  drawSprite(a.id,frameFor(clock,a),px,y,a.size,p.dir,a.kind==='ground'?'feet':'center');
+  drawSprite(a.id,frameFor(clock,a),px,y,size,p.dir,a.kind==='ground'?'feet':'center');
 
  }
  if(scene==='sea'){

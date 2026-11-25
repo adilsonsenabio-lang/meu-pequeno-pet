@@ -1,6 +1,11 @@
 /* V84.26 — única fonte de verdade para a proporção das cenas e do pet.
    Fundos nativos 320×320, molduras quadradas 1:1. Sem barras, recorte ou
    esticamento; o pet mantém sua própria camada independente do cenário. */
+#create-screen {
+  width:85%;
+  margin-inline:auto;
+  zoom:.85;
+}
 #world.world,
 #create-screen .create-preview {
   width:100%;
