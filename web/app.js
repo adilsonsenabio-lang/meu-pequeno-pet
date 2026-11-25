@@ -1,5 +1,5 @@
 import {ALBUM_LABELS,albumSprite} from './album-v73.js?v=73';
-import {sceneMarkup,sceneFill,updateSceneMarkers,prioritySceneMarkers,SCENE_KEYS,SCENE_LABELS} from './scene-v63-player.js?v=84.29';
+import {sceneMarkup,renderScene,unmountMythicScene,updateSceneMarkers,prioritySceneMarkers,SCENE_KEYS,SCENE_LABELS} from './scene-v63-player.js?v=84.29';
 import {sceneTallExtension} from './scene-details-v60.js';
 import {CUSTOM_PARTS,PART_PALETTE,MIN_PART_SCALE,MAX_PART_SCALE,MIN_MOUTH_OFFSET,MAX_MOUTH_OFFSET,mouthOffset,handPosition,partPosition,PART_POSITION_LIMITS,CARE,canPlay,MIN_ENERGY_TO_PLAY,OPTIONS,DEFAULT_APPEARANCE,ROOM_OPTIONS,MOMENTS,TOYS,AREAS,ACTIVITIES,EVENTS,nextDiscovery,noteMoment,toyAvailable,activityAvailable,createSave,hatch,advance,applyCare,beginSleep,restSleep,endSleep,noteInteraction,renamePet,lowestNeed,maybeEvolve,needStatus} from './core.js?v=74';
 import {SAVE_KEY,loadSave,persist,exportBackup,importBackup,resetSave} from './storage.js?v=59';
@@ -351,8 +351,7 @@ function renderArea(){
   const art=area==='garden'?(SCENES[scene]||SCENES.garden):AREA_SCENES[area];
   const shown=area==='garden'?scene:area;
   const stage=$('#scene-art');
-  stage.style.setProperty('--v64-scene-sky',sceneFill(shown));
-  stage.innerHTML=sceneMarkup(shown,true);
+  renderScene(stage,shown,true);
   sceneClock=performance.now();sceneWatchIndex=0;sceneLookUntil=0;
   resetGaze();
   $('#scene-life').innerHTML=''; // Os objetos V63 já estão nos 40 quadros: não duplicar pássaros/borboletas.
@@ -438,6 +437,7 @@ function showScreen(){
   $('#extras-shade').hidden=true;for(const id of ['room-picker','album','discovery','activity-panel','wardrobe-panel'])$(`#${id}`).hidden=true;
   $('#create-screen').hidden=!!save&&!creatingNew;
   $('#play-screen').hidden=!save||creatingNew;
+  unmountMythicScene($('#create-screen').hidden?$('#create-scene-art'):$('#scene-art'));
   $('#creation-cancel').hidden=!(save&&creatingNew);
   if(save&&!creatingNew){renderGrowth();if(save.sleeping){setStatus('sleeping');setMotion(playArt,'sleep-rest');startSleepTimer();}else setStatus('ready');}
   else {setStatus('creating');renderCreator();}
@@ -545,8 +545,7 @@ function renderPartPosition(key){
   $('#hand-position-y-label').textContent=y<0?`\u2191 ${-y} px`:y>0?`\u2193 ${y} px`:'Centro';
 }
 function renderCreator(){
-  $('#create-scene-art').style.setProperty('--v64-scene-sky',sceneFill(draft.scene));
-  $('#create-scene-art').innerHTML=sceneMarkup(draft.scene,'creator');
+  renderScene($('#create-scene-art'),draft.scene,'creator');
   drawPet(previewArt,draft,'baby');setMotion(previewArt,'idle');stopPetFrames(previewArt);
   saveDraft();
   const c=categories[step];const list=$('#choice-list');const previousScroll=list.dataset.category===c.key?list.scrollTop:0;list.classList.toggle('two-row-options',CUSTOM_PARTS.includes(c.key));list.dataset.category=c.key;$('#category-title').textContent=c.title;$('#category-icon use').setAttribute('href',`#i-${c.icon}`);$('#step-count').textContent=`${step+1} / ${categories.length}`;
@@ -1372,8 +1371,6 @@ async function init(){
   previewArt=$('#create-art');playArt=$('#play-art');
   // Bolhas presas ao próprio pet: independem de ele estar no centro ou caminhar.
   if(!$('#pet-bath-bubbles'))$('#pet-wrap').insertAdjacentHTML('beforeend',`<span id="pet-bath-bubbles" aria-hidden="true">${Array.from({length:13},(_,i)=>`<i style="--bubble-x:${[34,44,53,63,38,49,58,67,33,46,55,61,50][i]}%;--bubble-y:${[39,52,34,45,68,61,55,74,50,77,41,64,29][i]}%;--delay:${-(i*0.19)}s"></i>`).join('')}</span>`);
-  $('#scene-art').style.setProperty('--v64-scene-sky',sceneFill(scene));
-  $('#scene-art').innerHTML=sceneMarkup(scene,false);
   $('#test-banner').hidden=!TEST_MODE;$('#test-tools').hidden=!TEST_MODE;
   updateSoundButton();bind();showScreen();startTicks();scheduleAmbient();startSceneGazeLoop();
   if(loaded.recovered)$('#care-message').textContent='O progresso anterior não pôde ser lido. Abra a área dos responsáveis.';

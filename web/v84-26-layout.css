@@ -9,6 +9,14 @@
   min-height:0;
   max-height:none;
 }
+#world.world:has(.cenario-mitico-v7),
+#create-screen .create-preview:has(.cenario-mitico-v7) {
+  box-sizing:content-box;
+  width:auto;
+  aspect-ratio:4 / 3;
+  /* O recuo interno de 10px em cada lado subtrai 20px nos dois eixos. */
+  padding-block:2.5px;
+}
 /* O pet acompanha a largura, com proporções 168×190; left é controlável
    pelos comandos de caminhada do jogo. */
 #world #pet-wrap.pet-wrap {

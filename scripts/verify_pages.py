@@ -115,6 +115,19 @@ assert len(assets)>=40
 for uri,digest in assets:
  assert (web/uri.removeprefix('./')).is_file(),uri
  assert len(digest)==16
+mythic_root=web/'addons/cenarios_miticos'
+mythic_module=(mythic_root/'integracao/cenarios_miticos_v7.js').read_text(encoding='utf-8')
+mythic_media=json.loads(re.search(r'const ASSET_PATHS=(\{.*?\});',mythic_module).group(1))
+cached={uri for uri,_ in assets}
+for key,relative_path in mythic_media.items():
+ path=mythic_root/relative_path
+ assert './'+path.relative_to(web).as_posix() in cached
+ with Image.open(path) as image:
+  if key in ('sky','sea'):
+   assert image.size==(1448,1086),(key,image.size)
+  else:
+   assert image.size==((1536,192) if key=='shell' else (1792,896)),(key,image.size)
+   assert image.mode=='RGBA',key
 assert (web/'manifest.webmanifest').is_file()
 assert 'registerOfflineWorker' in (web/'app.js').read_text(encoding='utf-8')
-print('PASSOU: 13 cenas, moldura quadrada e pet responsivo; PWA precache:',len(assets),'arquivos; fantasma 15s')
+print('PASSOU: 13 cenas quadradas e 2 cenas míticas em 4:3; PWA precache:',len(assets),'arquivos; fantasma 15s')
