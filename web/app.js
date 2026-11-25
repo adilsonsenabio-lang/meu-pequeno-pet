@@ -105,7 +105,7 @@ const HALLOWEEN_HOWL_INTERVAL=60_000;
 const HALLOWEEN_PREVIEW_DELAY=1_000;
 const halloweenHowlUrl=new URL('./assets/audio/uivo_lobo.mp3',import.meta.url);
 let halloweenHowlBuffer,halloweenHowlSource,halloweenHowlTimer,halloweenPreviewTimer;
-const NEED_ALERT_INTERVAL=5_000;
+const NEED_ALERT_INTERVAL=10_000;
 const NEED_ALERT_FILES={
   food:['comer01'],
   water:['beber01','beber02'],
@@ -200,9 +200,10 @@ function syncHalloweenAudio(){
 function needsCanSound(){
   return soundEnabled&&!document.hidden&&save&&save.phase!=='egg'&&!$('#play-screen').hidden;
 }
-function stopNeedAlertSources(alert){
-  for(const source of alert.sources)source.stop();
-  alert.sources.clear();
+function stopNeedAlertSource(alert){
+  const source=alert.source;
+  alert.source=null;
+  if(source)source.stop();
 }
 async function playNeedAlert(need,alert){
   if(alert.loading)return;
@@ -224,27 +225,20 @@ async function playNeedAlert(need,alert){
     }
     const buffers=await needAlertBuffers.get(need);
     if(needAlerts.get(need)!==alert||!needsCanSound()||needStatus(save.needs[need]).level!==2||context.state!=='running')return;
-    stopNeedAlertSources(alert);
-    const start=context.currentTime+.025;
+    stopNeedAlertSource(alert);
+    const source=context.createBufferSource();
     const gain=context.createGain();
-    gain.gain.value=.23/buffers.length;
-    gain.connect(context.destination);
-    const sources=buffers.map(buffer=>{
-      const source=context.createBufferSource();
-      source.buffer=buffer;
-      source.connect(gain);
-      return source;
-    });
-    let remaining=sources.length;
-    for(const source of sources){
-      alert.sources.add(source);
-      source.onended=()=>{
-        alert.sources.delete(source);
-        source.disconnect();
-        if(--remaining===0)gain.disconnect();
-      };
-      source.start(start);
-    }
+    source.buffer=buffers[alert.nextClip];
+    gain.gain.value=.23;
+    source.connect(gain).connect(context.destination);
+    source.onended=()=>{
+      if(alert.source===source)alert.source=null;
+      source.disconnect();
+      gain.disconnect();
+    };
+    source.start();
+    alert.source=source;
+    alert.nextClip=(alert.nextClip+1)%buffers.length;
   }catch{}finally{
     alert.loading=false;
   }
@@ -255,14 +249,14 @@ function syncNeedAlerts(){
     const yellow=enabled&&needStatus(save.needs[need]).level===2;
     const alert=needAlerts.get(need);
     if(yellow&&!alert){
-      const next={sources:new Set(),loading:false};
+      const next={source:null,nextClip:0,loading:false};
       next.timer=setInterval(()=>void playNeedAlert(need,next),NEED_ALERT_INTERVAL);
       needAlerts.set(need,next);
       void playNeedAlert(need,next);
     }else if(!yellow&&alert){
       clearInterval(alert.timer);
       needAlerts.delete(need);
-      stopNeedAlertSources(alert);
+      stopNeedAlertSource(alert);
     }
   }
 }
