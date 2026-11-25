@@ -299,9 +299,11 @@ function renderArea(){
   $('#bed').hidden=save?.phase==='egg'||area!=='bedroom';
   $('#room-rug').hidden=save?.phase==='egg'||area!=='bedroom';
   $('#room-toy').hidden=save?.phase==='egg'||area!=='bedroom';
-  $('#area-objects').innerHTML=save?.phase==='egg'||area==='garden'?'':area==='bedroom'
+  const lamp=area==='bedroom'
     ?`<button type="button" data-object="lamp" aria-label="Acender ou apagar o abajur" aria-pressed="${lampOn}">${OBJECT_ART.lamp}</button>`
-    :`<button type="button" data-object="wave" aria-label="Acenar" ${['ready','ambient'].includes(status)?'':'disabled'}>${OBJECT_ART.wave}</button>`;
+    :'';
+  const wave=`<button type="button" data-object="wave" aria-label="Acenar" ${['ready','ambient'].includes(status)?'':'disabled'}>${OBJECT_ART.wave}</button>`;
+  $('#area-objects').innerHTML=save?.phase==='egg'?'':lamp+wave;
   renderDecorations();
   $('#world').classList.toggle('lamp-off',area==='bedroom'&&!lampOn);
   $('#area-map').querySelectorAll('[data-area]').forEach(button=>button.setAttribute('aria-pressed',button.dataset.area===area));
