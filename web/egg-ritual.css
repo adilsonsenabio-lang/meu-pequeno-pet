@@ -118,10 +118,10 @@
 [data-hatch="open"] .egg-piece-top { animation: hatch-shell-lift 520ms ease-out both; }
 [data-hatch="open"] .egg-aura { animation: hatch-inner-light 520ms ease-out both; }
 [data-hatch="born"] .egg-piece-bottom { transform-origin: 60px 123px; animation: hatch-shell-roll 780ms ease-out both; }
-[data-hatch="born"] .egg-sparks { animation: hatch-stars 1240ms ease-out both; }
-[data-hatch="daylight"] .egg-piece-bottom { opacity: 0; }
-[data-hatch="born"] #play-art { transform-origin: center 86%; animation: hatch-baby-rise 1240ms ease-out both; }
-#world[data-hatch="born"] #play-art[data-motion="wave"] .pixel-hand-joint { animation-delay: 370ms; }
+[data-hatch="born"] .egg-sparks { animation: hatch-stars 780ms ease-out both; }
+[data-hatch="greet"] .egg-sparks { animation: hatch-greeting 850ms ease-out both; }
+[data-hatch="greet"] .egg-piece-bottom, [data-hatch="daylight"] .egg-piece-bottom { opacity: 0; }
+[data-hatch="born"] #play-art { transform-origin: center 86%; animation: hatch-baby-jump 780ms both; }
 
 @keyframes hatch-nightfall { from { opacity: 0; } to { opacity: 1; } }
 @keyframes hatch-daylight { from { opacity: 1; } to { opacity: 0; } }
@@ -163,11 +163,15 @@
   30%, 58% { opacity: 1; }
   to { opacity: 0; transform: scale(1.7); }
 }
-@keyframes hatch-baby-rise {
-  from { opacity: 0; transform: translateY(22%) scale(.76); }
-  26% { opacity: 1; transform: translateY(-13%) scale(1.03,.97); }
-  39%, 100% { opacity: 1; transform: none; }
+@keyframes hatch-baby-jump {
+  0% { opacity: 0; transform: translateY(35%) scale(.55,.64); }
+  12% { opacity: 1; transform: translateY(31%) scale(.66,.52); animation-timing-function: cubic-bezier(.15,.55,.28,1); }
+  39% { opacity: 1; transform: translateY(-44%) scale(.96,1.06); animation-timing-function: cubic-bezier(.48,.06,.8,.55); }
+  73% { transform: translateY(1%) scale(1.09,.89); }
+  87% { transform: translateY(-3%) scale(.98,1.03); }
+  100% { opacity: 1; transform: none; }
 }
+@keyframes hatch-greeting { from { opacity: .64; } to { opacity: 0; } }
 
 @media (prefers-reduced-motion: reduce) {
   #egg { animation: none; }
@@ -182,6 +186,6 @@
   [data-hatch="gather"] :is(.egg-orbit,.egg-aura) { animation-duration: 420ms; }
   @keyframes hatch-gather { from { opacity: 0; } to { opacity: 1; } }
   @keyframes hatch-shell-lift { from { opacity: 1; transform: translate(-17px,-22px); } to { opacity: 0; transform: translate(-17px,-22px); } }
-  @keyframes hatch-baby-rise { from { opacity: 0; } 30%,100% { opacity: 1; } }
+  @keyframes hatch-baby-jump { from { opacity: 0; } 30%,100% { opacity: 1; } }
   [data-hatch="born"] .egg-piece-bottom, [data-hatch="born"] .egg-sparks { animation: hatch-inner-light 600ms ease-out both; }
 }

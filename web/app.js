@@ -1185,12 +1185,16 @@ function bind(){
       egg.classList.add('egg-opening');
       if(!await playHatchStage('open',$('.egg-piece-top'),'hatch-shell-lift',[330,494,659]))return;
 
-      save=hatch(save).save;
+      currentX=50;
+      $('#pet-wrap').style.left='50%';
+      save={...hatch(save).save,viewX:currentX};
       write();
       renderGrowth();
+      setMotion(playArt,'jump');
+      if(!await playHatchStage('born',playArt,'hatch-baby-jump',[392,587,784,1047]))return;
       setMotion(playArt,'wave');
       say('Nasci! Oi, amiguinho!');
-      if(!await playHatchStage('born',playArt,'hatch-baby-rise',[523,659,784,1047]))return;
+      if(!await playHatchStage('greet',$('.egg-sparks'),'hatch-greeting',[523,659,784]))return;
       if(!await playHatchStage('daylight',$('.egg-veil'),'hatch-daylight',[784,1047]))return;
     } finally {
       resetEggTaps();

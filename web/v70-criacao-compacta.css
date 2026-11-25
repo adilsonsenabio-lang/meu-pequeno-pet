@@ -47,7 +47,7 @@
 /* Os ajustes ficam logo após a segunda fileira. Mantemos os alvos de toque. */
 #create-screen .creator-adjust{margin-top:7px;padding:8px 10px 7px;}
 #create-screen .creator-adjust .size-head{font-size:12px;}
-#create-screen .creator-adjust input[type=range]{height:28px;}
+#create-screen .creator-adjust input[type=range]{height:32.2px;}
 #create-screen .creator-adjust .colors-head{margin:4px 0;font-size:12px;}
 #create-screen .creator-adjust .part-colors{gap:8px;padding:4px 4px 6px;}
 #create-screen .mouth-height-adjust{margin:4px 0 5px;padding:6px 0 1px;}

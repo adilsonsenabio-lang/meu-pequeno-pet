@@ -7,7 +7,8 @@
 .creator-adjust[hidden]{display:none!important}
 .creator-adjust .size-head{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:900}
 /* Um único controle para todas as 16 etapas: trilha centralizada, sem ocupar toda a largura. */
-.creator-adjust input[type=range]{display:block;width:78%;max-width:330px;box-sizing:border-box;margin:0 auto;height:30px;accent-color:#497c74;touch-action:none;cursor:pointer}
+.creator-adjust{--adjust-track-width:89.7%;--adjust-track-max:379.5px;}
+.creator-adjust input[type=range]{display:block;width:var(--adjust-track-width);max-width:var(--adjust-track-max);box-sizing:border-box;margin:0 auto;height:30px;accent-color:#497c74;touch-action:none;cursor:pointer}
 .creator-adjust .colors-head{font-size:13px;font-weight:900;margin:6px 0}
 .part-colors{display:flex;gap:9px;align-items:center;overflow-x:auto;padding:4px 4px 7px;overscroll-behavior-x:contain}
 .part-color{flex:0 0 34px;width:34px;height:34px;min-height:34px;border:3px solid #f9f6f0;border-radius:9px;background:var(--part-swatch,#f2d9e3);box-shadow:0 0 0 2px #918c9b;cursor:pointer;color:#3c4469;font-size:21px;font-weight:900}
