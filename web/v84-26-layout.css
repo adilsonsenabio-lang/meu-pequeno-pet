@@ -1,11 +1,6 @@
 /* V84.26 — única fonte de verdade para a proporção das cenas e do pet.
    Fundos nativos 320×320, molduras quadradas 1:1. Sem barras, recorte ou
    esticamento; o pet mantém sua própria camada independente do cenário. */
-#create-screen {
-  width:85%;
-  margin-inline:auto;
-  zoom:.85;
-}
 #world.world,
 #create-screen .create-preview {
   width:100%;
@@ -23,16 +18,18 @@
   left:50%;
   bottom:8%;
 }
-/* Na criação, o pet tem escala um pouco maior, proporção 222×236,
-   âncora no chão e centralização independente do painel de escolhas. */
+/* O pet da criação mantém proporção 222×236 e a âncora no chão. */
 #create-screen #create-art.create-art {
   position:absolute;
   left:50%;
   bottom:7%;
-  width:54.9%;
+  width:46.665%;
   height:auto;
   aspect-ratio:222 / 236;
   transform:translateX(-50%);
+}
+#create-screen #choice-list .choice-pet:not(.v64-scene-choice) {
+  scale:.85;
 }
 
 /* No Céu, a plataforma de grama termina acima das nuvens inferiores. */
