@@ -2,7 +2,9 @@
    Não altera o pet, o save, nem o seletor de cenários automaticamente. */
 const MODULE_BASE=new URL('../',import.meta.url);
 const ACTOR_SCALE=1.15;
-const ASSET_PATHS={"sky": "ceu/cenario.webp", "sea": "cthulhu/cenario.webp", "dragon": "ceu/personagens/dragao_celeste/sheet.webp", "pegasus": "ceu/personagens/pegaso_lilas/sheet.webp", "fox": "ceu/personagens/raposa_celestial/sheet.webp", "cthulhu": "cthulhu/personagens/cthulhu_bebe/sheet.webp", "octopus": "cthulhu/personagens/polvinho_mago/sheet.webp", "fish": "cthulhu/personagens/peixe_lanterna/sheet.webp", "shell": "cthulhu/objetos/concha_perola/sheet.png", "dragon_right": "ceu/personagens/dragao_celeste/sheet_espelhado.webp"};
+const MOON_ATLAS={cols:4,rows:2,cellW:448,cellH:448};
+const MOON_PIVOTS={cat:[224,383],wolf:[224,416],bat:[224,224]};
+const ASSET_PATHS={"sky": "ceu/cenario.webp", "sea": "cthulhu/cenario.webp", "dragon": "ceu/personagens/dragao_celeste/sheet.webp", "pegasus": "ceu/personagens/pegaso_lilas/sheet.webp", "fox": "ceu/personagens/raposa_celestial/sheet.webp", "cthulhu": "cthulhu/personagens/cthulhu_bebe/sheet.webp", "octopus": "cthulhu/personagens/polvinho_mago/sheet.webp", "fish": "cthulhu/personagens/peixe_lanterna/sheet.webp", "shell": "cthulhu/objetos/concha_perola/sheet.png", "dragon_right": "ceu/personagens/dragao_celeste/sheet_espelhado.webp", "moon": "clareira_lunar/cenario.webp", "cat": "clareira_lunar/gato_preto_direita.webp", "cat_left": "clareira_lunar/gato_preto_esquerda.webp", "wolf": "clareira_lunar/lobisomem_direita.webp", "wolf_left": "clareira_lunar/lobisomem_esquerda.webp", "bat": "clareira_lunar/morcego_direita.webp", "bat_left": "clareira_lunar/morcego_esquerda.webp"};
 const META={"dragon": {"cols": 4, "rows": 2, "cellW": 448, "cellH": 448, "bounds": [[56, 131, 414, 355], [59, 126, 407, 354], [63, 103, 409, 349], [76, 58, 407, 360], [75, 61, 410, 364], [60, 102, 408, 355], [62, 107, 411, 351], [59, 134, 416, 353]]}, "pegasus": {"cols": 4, "rows": 2, "cellW": 448, "cellH": 448, "bounds": [[43, 46, 387, 349], [36, 79, 387, 359], [31, 92, 389, 371], [30, 105, 388, 376], [29, 106, 388, 397], [29, 94, 387, 376], [30, 81, 388, 357], [37, 59, 388, 349]]}, "fox": {"cols": 4, "rows": 2, "cellW": 448, "cellH": 448, "bounds": [[48, 121, 395, 374], [39, 123, 397, 374], [38, 124, 405, 366], [28, 114, 414, 327], [32, 117, 413, 352], [35, 123, 405, 372], [42, 122, 401, 375], [47, 116, 399, 375]]}, "cthulhu": {"cols": 4, "rows": 2, "cellW": 448, "cellH": 448, "bounds": [[71, 113, 380, 375], [70, 113, 376, 375], [69, 86, 388, 355], [63, 75, 380, 328], [64, 85, 385, 347], [68, 112, 381, 376], [68, 113, 371, 377], [73, 113, 380, 377]]}, "octopus": {"cols": 4, "rows": 2, "cellW": 448, "cellH": 448, "bounds": [[70, 85, 403, 389], [82, 77, 401, 389], [83, 49, 397, 378], [77, 43, 407, 366], [80, 48, 403, 370], [75, 68, 401, 377], [76, 77, 403, 391], [76, 88, 400, 390]]}, "fish": {"cols": 4, "rows": 2, "cellW": 448, "cellH": 448, "bounds": [[51, 135, 420, 346], [47, 115, 415, 333], [59, 93, 406, 362], [35, 127, 417, 329], [43, 136, 421, 333], [33, 148, 415, 349], [46, 145, 413, 347], [51, 135, 417, 343]]}, "shell": {"cols": 8, "rows": 1, "cellW": 192, "cellH": 192, "bounds": [[10, 32, 182, 160], [10, 33, 182, 160], [10, 35, 182, 161], [10, 37, 182, 161], [10, 38, 182, 161], [10, 37, 182, 161], [9, 35, 182, 161], [9, 33, 182, 160]]}};
 export function montar(container,options={}){
   if(typeof container==='string')container=document.querySelector(container);
@@ -24,8 +26,9 @@ export function montar(container,options={}){
   if(!c)throw new Error('Canvas 2D indisponível');
   const WORLD={W:1448,H:1086};
   // A arte quadrada estende os fundos V7 acima e abaixo da área original.
-  const sceneOffsetY={sky:195,sea:215};
-  let scene=options.scene==='sea'||options.scene==='cthulhu_fofinho'?'sea':'sky';
+  const sceneOffsetY={sky:195,sea:215,moon:0};
+  const aliases={ceu_arco_iris:'sky',cthulhu_fofinho:'sea',clareira_lunar:'moon'};
+  let scene='sky';
   let clock=0,lastStamp=null,paused=false,rate=options.rate||1,showBounds=!!options.showBounds,destroyed=false,raf=0;
   const IMAGES={};
   const WORLDS={
@@ -42,12 +45,22 @@ export function montar(container,options={}){
  ],props:[
   {id:'shell',x:.273,y:.447,size:73,phase:380,frameMs:220,depth:'water-entrance'},
   {id:'shell',x:.831,y:.860,size:105,phase:1100,frameMs:220,depth:'right-rock'}
- ]}
+ ]},
+ moon:{title:'Clareira Lunar',actors:[
+  {id:'bat',kind:'fly',x:.62,y:.22,size:136,frameMs:115,bob:5,seed:1171,pxps:[72,106],roamX:[.46,.76],roamY:[.17,.25],pauseMs:[240,520],minLeg:95,zone:[.38,.13,.85,.32]},
+  {id:'wolf',kind:'ground',x:.74,y:.60,size:180,frameMs:140,bob:0,seed:1281,pxps:[50,71],roamX:[.66,.83],roamY:[.57,.64],pauseMs:[440,940],minLeg:95,zone:[.58,.43,.92,.66]},
+  {id:'cat',kind:'ground',x:.32,y:.81,size:134,frameMs:130,bob:0,seed:1391,pxps:[69,102],roamX:[.28,.43],roamY:[.76,.83],pauseMs:[360,880],minLeg:85,zone:[.21,.66,.51,.86]},
+ ],props:[]}
 };
+  function sceneAssetIds(){
+    const ids=new Set([...WORLDS[scene].actors,...WORLDS[scene].props].map(item=>item.id));
+    if(scene==='sky')ids.add('dragon_right');
+    if(scene==='moon')for(const id of Object.keys(MOON_PIVOTS))ids.add(id+'_left');
+    return ids;
+  }
   function updateStatus(){
     if(typeof options.onStatus==='function'){
-      const keys=[scene,...WORLDS[scene].actors.map(a=>a.id),...WORLDS[scene].props.map(p=>p.id)];
-      if(scene==='sky')keys.push('dragon_right');
+      const keys=[scene,...sceneAssetIds()];
       const ready=keys.filter(key=>{
         const image=key===scene?bg:IMAGES[key];
         return image?.complete&&image.naturalWidth>0;
@@ -56,9 +69,7 @@ export function montar(container,options={}){
     }
   }
   function loadSceneImages(){
-   const ids=new Set([...WORLDS[scene].actors,...WORLDS[scene].props].map(item=>item.id));
-   if(scene==='sky')ids.add('dragon_right');
-   for(const id of ids){
+   for(const id of sceneAssetIds()){
     if(IMAGES[id])continue;
     const pic=new Image();
     pic.onload=()=>{if(!destroyed){draw();updateStatus();}};
@@ -136,7 +147,7 @@ function advanceFluid(a,ms){
  }
 }
 function advanceMotion(ms){
- for(const world of Object.values(WORLDS))for(const a of world.actors){
+ for(const a of WORLDS[scene].actors){
   if(a.fluid){advanceFluid(a,ms);continue}
   let remaining=ms;
   // Garante determinismo inclusive quando o browser fica suspenso e retoma.
@@ -166,23 +177,22 @@ function positionFor(a){return a.motion}
 // Acompanhamento opcional para validar os limites em testes automatizados.
 function getPositions(){return {scene,actors:Object.fromEntries(Object.values(WORLDS).flatMap(w=>w.actors.map(a=>[a.id,{x:a.motion.x,y:a.motion.y,dir:a.motion.dir,moving:a.motion.moving,rangeX:a.roamX,rangeY:a.roamY}])))};}
 function frameFor(ms,item){
- const meta=META[item.id],count=meta.cols*meta.rows;
+ const meta=META[item.id]??MOON_ATLAS,count=meta.cols*meta.rows;
  return (Math.floor((ms+(item.phase||0))/item.frameMs)%count+count)%count;
 }
 function drawSprite(id,frame,x,y,width,dir=1,anchor='center'){
- const actualId=(id==='dragon'&&dir===1)?'dragon_right':id;
- const im=IMAGES[actualId],m=META[id];if(!im?.complete||!im.naturalWidth)return null;
+ const pivot=MOON_PIVOTS[id];
+ const actualId=(id==='dragon'&&dir===1)?'dragon_right':pivot&&dir<0?id+'_left':id;
+ const im=IMAGES[actualId],m=META[id]??MOON_ATLAS;if(!im?.complete||!im.naturalWidth)return;
  const count=m.cols*m.rows, f=((frame%count)+count)%count;
- const sc=width/m.cellW, b0=m.bounds[0];
- const pivotX=(id==='dragon'&&dir===1)?(m.cellW-(b0[0]+b0[2])/2):(b0[0]+b0[2])/2;
+ const sc=width/m.cellW, b0=m.bounds?.[0];
+ const pivotX=pivot?pivot[0]:(id==='dragon'&&dir===1)?(m.cellW-(b0[0]+b0[2])/2):(b0[0]+b0[2])/2;
  // The frame art is kept at its natural original scale.
  // For walking animals, frame zero foot contact establishes one constant ground baseline.
- const pivotY=anchor==='feet'?b0[3]:anchor==='bottom'?b0[3]:(b0[1]+b0[3])/2;
- c.save();c.translate(x,y);if(id!=='dragon'&&dir<0)c.scale(-1,1);
+ const pivotY=pivot?pivot[1]:anchor==='feet'||anchor==='bottom'?b0[3]:(b0[1]+b0[3])/2;
+ c.save();c.translate(x,y);if(id!=='dragon'&&!pivot&&dir<0)c.scale(-1,1);
  c.drawImage(im,(f%m.cols)*m.cellW,Math.floor(f/m.cols)*m.cellH,m.cellW,m.cellH,-pivotX*sc,-pivotY*sc,width,m.cellH*sc);
  c.restore();
- const box=m.bounds[f];
- return {x:x+((box[0]+box[2])/2-pivotX)*sc,y:y+((box[1]+box[3])/2-pivotY)*sc,w:(box[2]-box[0])*sc,h:(box[3]-box[1])*sc};
 }
 function waterRipples(x,y,phase){
  // Small, water-colored contact ripples, not a detached rectangular water tile.
@@ -216,12 +226,14 @@ function draw(){
    // Position shadows on ground, never outside the stage.
    c.save();c.fillStyle='rgba(34,94,79,.19)';c.beginPath();c.ellipse(px,y+2,size*.23,6,0,0,Math.PI*2);c.fill();c.restore();
   }
-  drawSprite(a.id,frameFor(clock,a),px,y,size,p.dir,a.kind==='ground'?'feet':'center');
+  const animationTime=scene==='moon'&&a.kind==='ground'?p.progress:clock;
+  const frame=scene==='moon'&&a.kind==='ground'&&!p.moving?0:frameFor(animationTime,a);
+  drawSprite(a.id,frame,px,y,size,p.dir,a.kind==='ground'?'feet':'center');
 
  }
  if(scene==='sea'){
   for(const prop of WORLDS.sea.props){
-   const b=drawSprite(prop.id,frameFor(clock,prop),prop.x*w,prop.y*h,prop.size,1,'bottom');
+   drawSprite(prop.id,frameFor(clock,prop),prop.x*w,prop.y*h,prop.size,1,'bottom');
 
   }
  }
@@ -246,12 +258,12 @@ function draw(){
     raf=requestAnimationFrame(tick);
   }
   function selecionar(id){
-    if(id==='ceu_arco_iris')id='sky';if(id==='cthulhu_fofinho')id='sea';
+    id=aliases[id]??id;
     if(!WORLDS[id])throw new Error('Cenário inválido: '+id);
-    scene=id;bg.src=URLS[id];loadSceneImages();draw();updateStatus();
+    scene=id;WORLD.H=scene==='moon'?1448:1086;bg.src=URLS[id];loadSceneImages();draw();updateStatus();
   }
   bg.onload=updateStatus;
-  selecionar(scene);
+  selecionar(options.scene??'sky');
   const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
   function syncMotion(){
     paused=document.hidden||reducedMotion.matches;

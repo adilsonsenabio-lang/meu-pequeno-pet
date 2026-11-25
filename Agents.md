@@ -72,3 +72,8 @@ Jogo de bichinho virtual em português para criança de 4 anos, acessível mesmo
 
 - As duas cenas míticas usam os fundos 1:1 atualizados e os movimentos aprovados do pacote V7 em `web/addons/cenarios_miticos/`. O palco é quadrado durante a criação e o jogo.
 - Os IDs persistidos são `ceu_arco_iris` e `cthulhu_fofinho`. O tema Mar continua com o ID `sea`.
+
+## Clareira Lunar
+
+- A Clareira Lunar usa o fundo quadrado e os atlas fornecidos no pacote V1. Preservar os oito quadros, os pivôs e os atlas de ida e volta.
+- Manter o gato preto e o lobisomem sobre a terra e o morcego na região superior do cenário. O ID do cenário é `clareira_lunar`.

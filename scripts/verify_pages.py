@@ -123,11 +123,11 @@ for key,relative_path in mythic_media.items():
  path=mythic_root/relative_path
  assert './'+path.relative_to(web).as_posix() in cached
  with Image.open(path) as image:
-  if key in ('sky','sea'):
+  if key in ('sky','sea','moon'):
    assert image.size==(1254,1254),(key,image.size)
   else:
    assert image.size==((1536,192) if key=='shell' else (1792,896)),(key,image.size)
    assert image.mode=='RGBA',key
 assert (web/'manifest.webmanifest').is_file()
 assert 'registerOfflineWorker' in (web/'app.js').read_text(encoding='utf-8')
-print('PASSOU: 15 cenas quadradas; PWA precache:',len(assets),'arquivos; fantasma 15s')
+print('PASSOU: 16 cenas quadradas; PWA precache:',len(assets),'arquivos; fantasma 15s')

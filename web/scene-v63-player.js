@@ -4,7 +4,8 @@ import {V63_SCENE_META} from './scene-v63-data.js?v=84.5';
 import {montar} from './addons/cenarios_miticos/integracao/cenarios_miticos_v7.js';
 const MYTHIC_SCENES={
  ceu_arco_iris:{label:'Céu do Arco-Íris',background:'ceu/cenario.webp',fill:'#859bcc'},
- cthulhu_fofinho:{label:'Cthulhu Fofinho',background:'cthulhu/cenario.webp',fill:'#335a73'}
+ cthulhu_fofinho:{label:'Cthulhu Fofinho',background:'cthulhu/cenario.webp',fill:'#335a73'},
+ clareira_lunar:{label:'Clareira Lunar',background:'clareira_lunar/cenario.webp',fill:'#242051'}
 };
 const mythicRoot=new URL('./addons/cenarios_miticos/',import.meta.url);
 const mythicStages=new WeakMap();
