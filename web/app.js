@@ -127,7 +127,7 @@ const SCENE_ACCENTS={
     ['cenario_neve_boneco_de_neve.mp3',.14,5_000]
   ]
 };
-const GAME_SCENE_LINES={
+const SCENE_VOICE_LINES={
   sea:[
     'cenario_fundo_do_mar_bob_sponja.mp3',
     'cenario_fundo_do_mar_bob_sponja_hamburguer.mp3',
@@ -313,14 +313,15 @@ async function startSceneAmbience(playback,name){
 }
 function syncSceneAmbience(){
   const key=activeAudioScene();
-  const lines=$('#play-screen').hidden?null:GAME_SCENE_LINES[key]??null;
-  if(sceneAmbience?.key===key&&sceneAmbience?.lines===lines)return;
+  const olafPreview=key==='snow'&&!$('#create-screen').hidden;
+  const lines=olafPreview||!$('#play-screen').hidden?SCENE_VOICE_LINES[key]??null:null;
+  if(sceneAmbience?.key===key&&sceneAmbience?.lines===lines&&sceneAmbience?.olafPreview===olafPreview)return;
   stopSceneAmbience();
   const name=SCENE_AMBIENCE[key];
   if(!name||audioContext?.state!=='running')return;
   const accents=(SCENE_ACCENTS[key]||[]).map(([name,level,delay,repeatDelay])=>({name,level,delay,repeatDelay}));
-  if(lines)accents.push({lines,lineIndex:0,level:.24,delay:GAME_SCENE_LINE_PAUSE,repeatDelay:GAME_SCENE_LINE_PAUSE});
-  const playback={key,lines,accents,controller:new AbortController()};
+  if(lines)accents.push({lines,lineIndex:0,level:.24,delay:olafPreview?0:GAME_SCENE_LINE_PAUSE,repeatDelay:olafPreview?3_000:GAME_SCENE_LINE_PAUSE});
+  const playback={key,lines,olafPreview,accents,controller:new AbortController()};
   sceneAmbience=playback;
   void startSceneAmbience(playback,name);
 }
