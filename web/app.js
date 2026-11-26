@@ -128,7 +128,12 @@ const SCENE_ACCENTS={
   ]
 };
 const GAME_SCENE_LINES={
-  sea:['cenario_fundo_do_mar_bob_sponja.mp3'],
+  sea:[
+    'cenario_fundo_do_mar_bob_sponja.mp3',
+    'cenario_fundo_do_mar_bob_sponja_hamburguer.mp3',
+    'cenario_fundo_do_mar_bob_sponja_bobo.mp3',
+    'cenario_fundo_do_mar_bob_sponja_lula_molusco.mp3'
+  ],
   snow:[
     'cenario_neve_olaf_brincando.mp3',
     'cenario_neve_olaf_brincando1.mp3',
@@ -138,6 +143,7 @@ const GAME_SCENE_LINES={
     'cenario_neve_olaf_fome.mp3'
   ]
 };
+const GAME_SCENE_LINE_PAUSE=6_000;
 let sceneAmbience;
 const CHRISTMAS_TRACKS=[
   ['papai_noel.mp3',.32],
@@ -313,7 +319,7 @@ function syncSceneAmbience(){
   const name=SCENE_AMBIENCE[key];
   if(!name||audioContext?.state!=='running')return;
   const accents=(SCENE_ACCENTS[key]||[]).map(([name,level,delay,repeatDelay])=>({name,level,delay,repeatDelay}));
-  if(lines)accents.push({lines,lineIndex:0,level:.24,delay:6_000,repeatDelay:key==='snow'?10_000:25_000});
+  if(lines)accents.push({lines,lineIndex:0,level:.24,delay:GAME_SCENE_LINE_PAUSE,repeatDelay:GAME_SCENE_LINE_PAUSE});
   const playback={key,lines,accents,controller:new AbortController()};
   sceneAmbience=playback;
   void startSceneAmbience(playback,name);
