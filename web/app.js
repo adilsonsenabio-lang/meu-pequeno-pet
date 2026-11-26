@@ -204,7 +204,8 @@ function stopSceneAmbience(){
   sceneAmbience=null;
   playback.controller.abort();
   clearTimeout(playback.snowTimer);
-  playback.loop?.stop();
+  clearTimeout(playback.repeatTimer);
+  playback.source?.stop();
   playback.snowSource?.stop();
 }
 async function playSnowAccent(playback){
@@ -223,12 +224,24 @@ async function playSnowAccent(playback){
     if(sceneAmbience===playback)playback.snowTimer=setTimeout(()=>void playSnowAccent(playback),20_000);
   }
 }
+function playSceneAmbience(playback,track){
+  if(sceneAmbience!==playback)return;
+  const lunar=playback.key==='clareira_lunar';
+  const source=createSceneSource(track,!lunar);
+  playback.source=source;
+  if(lunar){
+    source.addEventListener('ended',()=>{
+      playback.source=null;
+      if(sceneAmbience===playback)playback.repeatTimer=setTimeout(()=>playSceneAmbience(playback,track),5_000);
+    },{once:true});
+  }
+  source.start();
+}
 async function startSceneAmbience(playback,name){
   try{
     const track=await loadSceneTrack(`${name}.mp3`,.15,playback.controller.signal);
     if(sceneAmbience!==playback)return;
-    playback.loop=createSceneSource(track,true);
-    playback.loop.start();
+    playSceneAmbience(playback,track);
     if(playback.key==='snow')playback.snowTimer=setTimeout(()=>void playSnowAccent(playback),12_000);
   }catch(error){
     if(sceneAmbience===playback){
