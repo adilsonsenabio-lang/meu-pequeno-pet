@@ -117,6 +117,15 @@ const SCENE_AMBIENCE={
   cthulhu_fofinho:'cenario_cthullu_fofinho',
   clareira_lunar:'cenario_clareira_lunar'
 };
+const SCENE_ACCENTS={
+  night:[['cenario_noite_coruja.mp3',.17,7_000]],
+  beach:[['cenario_praia_gaivota.mp3',.11,5_000]],
+  forest:[['cenario_floresta_esquilo.mp3',.16,9_000]],
+  snow:[
+    ['cenario_neve_asvezes.mp3',.17,12_000],
+    ['cenario_neve_boneco_de_neve.mp3',.14,5_000]
+  ]
+};
 let sceneAmbience;
 const CHRISTMAS_TRACKS=[
   ['papai_noel.mp3',.32],
@@ -125,7 +134,7 @@ const CHRISTMAS_TRACKS=[
 ];
 const CHRISTMAS_INTERVAL={preview:18_000,game:60_000};
 const sleighReducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
-let christmasTracks,christmasPlayback;
+let christmasTracks,christmasPlayback,centerSantaTrack;
 const NEED_ALERT_INTERVAL=10_000;
 const NEED_ALERT_FILES={
   food:['comer01'],
@@ -207,26 +216,28 @@ function stopSceneAmbience(){
   const playback=sceneAmbience;
   sceneAmbience=null;
   playback.controller.abort();
-  clearTimeout(playback.snowTimer);
   clearTimeout(playback.repeatTimer);
   playback.source?.stop();
-  playback.snowSource?.stop();
   playback.spaceSource?.stop();
+  for(const accent of playback.accents){
+    clearTimeout(accent.timer);
+    accent.source?.stop();
+  }
 }
-async function playSnowAccent(playback){
+async function playSceneAccent(playback,accent){
   if(sceneAmbience!==playback)return;
   try{
-    playback.snowTrack??=await loadSceneTrack('cenario_neve_asvezes.mp3',.17,playback.controller.signal);
+    accent.track??=await loadSceneTrack(accent.name,accent.level,playback.controller.signal);
     if(sceneAmbience!==playback)return;
-    const source=createSceneSource(playback.snowTrack);
-    playback.snowSource=source;
+    const source=createSceneSource(accent.track);
+    accent.source=source;
     source.addEventListener('ended',()=>{
-      playback.snowSource=null;
-      if(sceneAmbience===playback)playback.snowTimer=setTimeout(()=>void playSnowAccent(playback),20_000+Math.random()*20_000);
+      accent.source=null;
+      if(sceneAmbience===playback)accent.timer=setTimeout(()=>void playSceneAccent(playback,accent),20_000+Math.random()*20_000);
     },{once:true});
     source.start();
   }catch{
-    if(sceneAmbience===playback)playback.snowTimer=setTimeout(()=>void playSnowAccent(playback),20_000);
+    if(sceneAmbience===playback)accent.timer=setTimeout(()=>void playSceneAccent(playback,accent),20_000);
   }
 }
 function playSpaceAccent(playback,track,start,offset=0){
@@ -266,7 +277,9 @@ async function startSceneAmbience(playback,name){
     const track=await loadSceneTrack(`${name}.mp3`,.15,playback.controller.signal);
     if(sceneAmbience!==playback)return;
     playSceneAmbience(playback,track);
-    if(playback.key==='snow')playback.snowTimer=setTimeout(()=>void playSnowAccent(playback),12_000);
+    for(const accent of playback.accents){
+      accent.timer=setTimeout(()=>void playSceneAccent(playback,accent),accent.delay);
+    }
     if(playback.key==='space')void startSpaceAccent(playback);
   }catch(error){
     if(sceneAmbience===playback){
@@ -281,7 +294,8 @@ function syncSceneAmbience(){
   stopSceneAmbience();
   const name=SCENE_AMBIENCE[key];
   if(!name||audioContext?.state!=='running')return;
-  const playback={key,controller:new AbortController()};
+  const accents=(SCENE_ACCENTS[key]||[]).map(([name,level,delay])=>({name,level,delay}));
+  const playback={key,accents,controller:new AbortController()};
   sceneAmbience=playback;
   void startSceneAmbience(playback,name);
 }
@@ -296,8 +310,44 @@ async function playChristmasMix(playback){
   }catch{}
 }
 function stopSleighAudio(playback){
+  cancelAnimationFrame(playback.centerFrame);
+  playback.centerFrame=null;
   playback.sleighSource?.stop();
   playback.sleighSource=null;
+}
+function loadCenterSanta(){
+  centerSantaTrack??=loadSceneTrack('cenario_natal_papai_noel.mp3',.24)
+    .catch(()=>{centerSantaTrack=null;return null;});
+  return centerSantaTrack;
+}
+async function playCenterSanta(playback,sleigh){
+  const track=await loadCenterSanta();
+  if(!track||christmasPlayback!==playback||playback.sleigh!==sleigh||audioContext.state!=='running')return;
+  playback.centerSantaSource?.stop();
+  const source=createSceneSource(track);
+  source.playbackRate.value=1.5;
+  playback.centerSantaSource=source;
+  source.addEventListener('ended',()=>{
+    if(playback.centerSantaSource===source)playback.centerSantaSource=null;
+  },{once:true});
+  source.start();
+}
+function watchSleighCenter(playback,sleigh){
+  const stage=sleigh.parentElement;
+  let previousOffset;
+  const check=()=>{
+    const bounds=stage.getBoundingClientRect();
+    const sled=sleigh.getBoundingClientRect();
+    const offset=sled.left+sled.width/2-bounds.left-bounds.width/2;
+    if(Math.abs(offset)<=1||(previousOffset!==undefined&&offset*previousOffset<0)){
+      playback.centerFrame=null;
+      void playCenterSanta(playback,sleigh);
+      return;
+    }
+    previousOffset=offset;
+    playback.centerFrame=requestAnimationFrame(check);
+  };
+  playback.centerFrame=requestAnimationFrame(check);
 }
 function observeChristmasSleigh(playback){
   const host=playback.mode==='preview'?'#create-scene-art':'#scene-art';
@@ -305,13 +355,17 @@ function observeChristmasSleigh(playback){
   if(sleigh===playback.sleigh)return;
   playback.sleighObserver?.disconnect();
   stopSleighAudio(playback);
+  playback.centerSantaSource?.stop();
   playback.sleigh=sleigh;
   if(!sleigh)return;
+  void loadCenterSanta();
   let visible=false;
   const observer=new IntersectionObserver(async entries=>{
     if(christmasPlayback!==playback||playback.sleigh!==sleigh)return;
+    const wasVisible=visible;
     visible=entries.at(-1).intersectionRatio>=.01;
     if(!visible){stopSleighAudio(playback);return;}
+    if(!wasVisible)watchSleighCenter(playback,sleigh);
     try{
       const [,track]=await loadChristmasTracks();
       if(!visible||christmasPlayback!==playback||playback.sleigh!==sleigh||playback.sleighSource||audioContext.state!=='running')return;
@@ -329,6 +383,7 @@ function syncChristmasAudio(){
     clearInterval(christmasPlayback.timer);
     christmasPlayback.sleighObserver?.disconnect();
     stopSleighAudio(christmasPlayback);
+    christmasPlayback.centerSantaSource?.stop();
     for(const source of christmasPlayback.sources)source.stop();
     christmasPlayback=null;
   }
