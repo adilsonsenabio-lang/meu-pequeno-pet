@@ -99,8 +99,12 @@ let chosenDecoration=null;
 let albumDrag=null,suppressAlbumClick=false;
 let selectedDecoration=null,decorationDrag=null,suppressDecorationClick=false;
 let actionGroup=null,airTimer=null,lookTimer=null,gazeFrame=null,gazeIndex=0,flightLevel=0,jumpStreak=0;
-await hydrateNativeStorage(localStorage,[SAVE_KEY,`${SAVE_KEY}.test`,'meu-pequeno-pet.sound']);
-let soundEnabled=localStorage.getItem('meu-pequeno-pet.sound')!=='off';
+const SOUND_KEY='meu-pequeno-pet.sound';
+const SOUND_LABELS={ambient:'Som ambiente',characters:'Personagens dos cenários',effects:'Efeitos sonoros'};
+const soundCategories=Object.keys(SOUND_LABELS);
+await hydrateNativeStorage(localStorage,[SAVE_KEY,`${SAVE_KEY}.test`,SOUND_KEY,...soundCategories.map(category=>`${SOUND_KEY}.${category}`)]);
+let soundEnabled=localStorage.getItem(SOUND_KEY)!=='off';
+const soundPreferences=Object.fromEntries(soundCategories.map(category=>[category,localStorage.getItem(`${SOUND_KEY}.${category}`)!=='off']));
 const audioFolder=new URL('./assets_audios/',import.meta.url);
 const SCENE_AMBIENCE={
   garden:'cenario_jardim',
@@ -118,12 +122,12 @@ const SCENE_AMBIENCE={
   clareira_lunar:'cenario_clareira_lunar'
 };
 const SCENE_ACCENTS={
-  sunset:[['cenario_entardecer_passaros.mp3',.22,0,12_000]],
-  night:[['cenario_noite_coruja.mp3',.28,0,8_000]],
-  beach:[['cenario_praia_gaivota.mp3',.30,0,8_000]],
+  sunset:[['cenario_entardecer_passaros.mp3',.22,0,16_000]],
+  night:[['cenario_noite_coruja.mp3',.28,0,12_000]],
+  beach:[['cenario_praia_gaivota.mp3',.30,0,12_000]],
   forest:[['cenario_floresta_esquilo.mp3',.16,9_000]],
   snow:[
-    ['cenario_neve_asvezes.mp3',.17,12_000],
+    ['cenario_neve_asvezes.mp3',.17,12_000,null,'effects'],
     ['cenario_neve_boneco_de_neve.mp3',.14,5_000]
   ]
 };
@@ -143,7 +147,7 @@ const SCENE_VOICE_LINES={
     'cenario_neve_olaf_fome.mp3'
   ]
 };
-const GAME_SCENE_LINE_PAUSE=6_000;
+const GAME_SCENE_LINE_PAUSE=10_000;
 let sceneAmbience;
 const CHRISTMAS_TRACKS=[
   ['papai_noel.mp3',.32],
@@ -153,7 +157,7 @@ const CHRISTMAS_TRACKS=[
 const CHRISTMAS_INTERVAL={preview:18_000,game:60_000};
 const sleighReducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
 let christmasTracks,christmasPlayback,centerSantaTrack;
-const NEED_ALERT_PAUSE=5_000;
+const NEED_ALERT_PAUSE=8_000;
 const NEED_ALERT_FILES={
   food:['comer01'],
   water:['beber01','beber02'],
@@ -166,6 +170,7 @@ const NEED_ALERT_FILES={
 const needAlertBuffers=new Map();
 const needAlerts=new Map();
 const sceneForeground=new Map();
+const sceneCategoryGains={};
 let sceneAudioGain,currentNeedAlert,needAlertTimer,nextNeedAlertAt=0;
 let preparingSleep=false;
 const loaded=loadSave(localStorage,Date.now(),ACTIVE_SAVE_KEY);
@@ -178,11 +183,18 @@ currentX=Math.max(20,Math.min(80,Number.isFinite(save?.viewX)?save.viewX:50));
 chosenToy=TOYS.includes(save?.playToy)?save.playToy:'ball';
 area=AREAS.includes(save?.area)?save.area:'garden';
 
+function soundAllowed(category){return soundEnabled&&soundPreferences[category];}
 function resumeGameAudio(){
   if(!audioContext){
     audioContext=new (window.AudioContext||window.webkitAudioContext)();
     sceneAudioGain=audioContext.createGain();
     sceneAudioGain.connect(audioContext.destination);
+    for(const category of soundCategories){
+      const gain=audioContext.createGain();
+      gain.gain.value=soundAllowed(category)?1:0;
+      gain.connect(sceneAudioGain);
+      sceneCategoryGains[category]=gain;
+    }
     audioContext.addEventListener('statechange',()=>{
       if(audioContext.state==='running')syncSceneAudio();
       syncNeedAlerts();
@@ -192,7 +204,7 @@ function resumeGameAudio(){
   return audioContext;
 }
 function sound(notes=[520],{type='sine',spacing=.11,volume=.045,duration=.19}={}){
-  if(!soundEnabled)return;
+  if(!soundAllowed('effects'))return;
   try{
     resumeGameAudio();
     notes.forEach((freq,i)=>{
@@ -222,7 +234,7 @@ function loadChristmasTracks(){
     .catch(error=>{christmasTracks=null;throw error;});
   return christmasTracks;
 }
-function createSceneSource({buffer,volume},loop=false,fadeOut){
+function createSceneSource({buffer,volume},{category='ambient',loop=false,fadeOut}={}){
   const source=audioContext.createBufferSource(),gain=audioContext.createGain();
   source.buffer=buffer;
   source.loop=loop;
@@ -231,12 +243,12 @@ function createSceneSource({buffer,volume},loop=false,fadeOut){
     gain.gain.setValueAtTime(volume,fadeOut.start);
     gain.gain.linearRampToValueAtTime(0,fadeOut.end);
   }
-  source.connect(gain).connect(sceneAudioGain);
+  source.connect(gain).connect(sceneCategoryGains[category]);
   source.addEventListener('ended',()=>{source.disconnect();gain.disconnect();},{once:true});
   return source;
 }
-function trackSceneForeground(source,voice){
-  sceneForeground.set(source,voice);
+function trackSceneForeground(source,category,voice=false){
+  sceneForeground.set(source,{category,voice});
   source.addEventListener('ended',()=>{
     sceneForeground.delete(source);
     scheduleNeedAlert();
@@ -257,7 +269,7 @@ function stopSceneAmbience(){
 }
 async function playSceneAccent(playback,accent){
   if(sceneAmbience!==playback)return;
-  if(accent.lines&&sceneSpeechBlocked()){
+  if(!soundAllowed(accent.category)||(accent.lines&&sceneSpeechBlocked())){
     accent.timer=setTimeout(()=>void playSceneAccent(playback,accent),1000);
     return;
   }
@@ -265,21 +277,21 @@ async function playSceneAccent(playback,accent){
     const name=accent.lines?.[accent.lineIndex]??accent.name;
     accent.track??=await loadSceneTrack(name,accent.level,playback.controller.signal);
     if(sceneAmbience!==playback)return;
-    if(sceneForeground.size||currentNeedAlert?.source||(accent.lines&&sceneSpeechBlocked())){
+    if(!soundAllowed(accent.category)||sceneForeground.size||currentNeedAlert?.source||(accent.lines&&sceneSpeechBlocked())){
       accent.timer=setTimeout(()=>void playSceneAccent(playback,accent),500);
       return;
     }
-    const source=createSceneSource(accent.track);
+    const source=createSceneSource(accent.track,{category:accent.category});
     accent.source=source;
     source.addEventListener('ended',()=>{
       accent.source=null;
-      if(accent.lines?.length>1&&!sceneSpeechBlocked()){
+      if(accent.lines?.length>1&&soundAllowed(accent.category)&&!sceneSpeechBlocked()){
         accent.lineIndex=(accent.lineIndex+1)%accent.lines.length;
         accent.track=null;
       }
-      if(sceneAmbience===playback)accent.timer=setTimeout(()=>void playSceneAccent(playback,accent),accent.repeatDelay??(20_000+Math.random()*20_000));
+      if(sceneAmbience===playback)accent.timer=setTimeout(()=>void playSceneAccent(playback,accent),accent.repeatDelay??(30_000+Math.random()*20_000));
     },{once:true});
-    trackSceneForeground(source,Boolean(accent.lines));
+    trackSceneForeground(source,accent.category,Boolean(accent.lines));
     source.start();
   }catch{
     if(sceneAmbience===playback)accent.timer=setTimeout(()=>void playSceneAccent(playback,accent),20_000);
@@ -288,7 +300,7 @@ async function playSceneAccent(playback,accent){
 function playSpaceAccent(playback,track,start,offset=0){
   if(sceneAmbience!==playback)return;
   const end=start+4;
-  const source=createSceneSource(track,true,{start:end-1,end});
+  const source=createSceneSource(track,{category:'effects',loop:true,fadeOut:{start:end-1,end}});
   playback.spaceSource=source;
   source.addEventListener('ended',()=>{
     playback.spaceSource=null;
@@ -307,9 +319,14 @@ async function startSpaceAccent(playback){
 function playSceneAmbience(playback,track){
   if(sceneAmbience!==playback)return;
   const lunar=playback.key==='clareira_lunar';
-  const source=createSceneSource(track,!lunar);
+  if(lunar&&!soundAllowed('characters')){
+    playback.repeatTimer=setTimeout(()=>playSceneAmbience(playback,track),1000);
+    return;
+  }
+  const source=createSceneSource(track,{category:lunar?'characters':'ambient',loop:!lunar});
   playback.source=source;
   if(lunar){
+    trackSceneForeground(source,'characters');
     source.addEventListener('ended',()=>{
       playback.source=null;
       if(sceneAmbience===playback)playback.repeatTimer=setTimeout(()=>playSceneAmbience(playback,track),5_000);
@@ -341,8 +358,8 @@ function syncSceneAmbience(){
   stopSceneAmbience();
   const name=SCENE_AMBIENCE[key];
   if(!name||audioContext?.state!=='running')return;
-  const accents=(SCENE_ACCENTS[key]||[]).map(([name,level,delay,repeatDelay])=>({name,level,delay,repeatDelay}));
-  if(lines)accents.push({lines,lineIndex:0,level:.24,delay:olafPreview?0:GAME_SCENE_LINE_PAUSE,repeatDelay:olafPreview?3_000:GAME_SCENE_LINE_PAUSE});
+  const accents=(SCENE_ACCENTS[key]||[]).map(([name,level,delay,repeatDelay,category='characters'])=>({name,level,delay,repeatDelay,category}));
+  if(lines)accents.push({lines,lineIndex:0,category:'characters',level:.24,delay:olafPreview?0:6_000,repeatDelay:olafPreview?3_000:GAME_SCENE_LINE_PAUSE});
   const playback={key,lines,olafPreview,accents,controller:new AbortController()};
   sceneAmbience=playback;
   void startSceneAmbience(playback,name);
@@ -353,10 +370,10 @@ async function playChristmasMix(playback){
     if(christmasPlayback!==playback||audioContext.state!=='running')return;
     for(const source of playback.sources)source.stop();
     const start=audioContext.currentTime+.02;
-    playback.sources=[createSceneSource(bell)];
-    if(!sceneSpeechBlocked()&&!currentNeedAlert?.source){
-      const voice=createSceneSource(santa);
-      trackSceneForeground(voice,true);
+    playback.sources=[createSceneSource(bell,{category:'effects'})];
+    if(soundAllowed('characters')&&!sceneSpeechBlocked()&&!currentNeedAlert?.source){
+      const voice=createSceneSource(santa,{category:'characters'});
+      trackSceneForeground(voice,'characters',true);
       playback.sources.push(voice);
     }
     for(const source of playback.sources)source.start(start);
@@ -374,12 +391,13 @@ function loadCenterSanta(){
   return centerSantaTrack;
 }
 async function playCenterSanta(playback,sleigh){
+  if(!soundAllowed('characters'))return;
   const track=await loadCenterSanta();
-  if(!track||christmasPlayback!==playback||playback.sleigh!==sleigh||audioContext.state!=='running'||sceneSpeechBlocked())return;
+  if(!track||!soundAllowed('characters')||christmasPlayback!==playback||playback.sleigh!==sleigh||audioContext.state!=='running'||sceneSpeechBlocked())return;
   playback.centerSantaSource?.stop();
-  const source=createSceneSource(track);
+  const source=createSceneSource(track,{category:'characters'});
   source.playbackRate.value=1.5;
-  trackSceneForeground(source,true);
+  trackSceneForeground(source,'characters',true);
   stopCurrentNeedAlert();
   playback.centerSantaSource=source;
   source.addEventListener('ended',()=>{
@@ -424,7 +442,7 @@ function observeChristmasSleigh(playback){
     try{
       const [,track]=await loadChristmasTracks();
       if(!visible||christmasPlayback!==playback||playback.sleigh!==sleigh||playback.sleighSource||audioContext.state!=='running')return;
-      playback.sleighSource=createSceneSource(track,true);
+      playback.sleighSource=createSceneSource(track,{category:'effects',loop:true});
       playback.sleighSource.start();
     }catch{}
   },{root:sleigh.parentElement,threshold:.01});
@@ -457,7 +475,7 @@ function sceneSpeechBlocked(){
   return (preparingSleep||save?.sleeping)&&!$('#play-screen').hidden;
 }
 function needsCanSound(){
-  return soundEnabled&&!document.hidden&&save&&save.phase!=='egg'&&!$('#play-screen').hidden&&!sceneSpeechBlocked();
+  return soundAllowed('effects')&&!document.hidden&&save&&save.phase!=='egg'&&!$('#play-screen').hidden&&!sceneSpeechBlocked();
 }
 function releaseNeedAlert(alert){
   if(currentNeedAlert!==alert)return;
@@ -533,12 +551,11 @@ function scheduleNeedAlert(){
   },Math.max(0,nextNeedAlertAt-performance.now()));
 }
 function syncNeedAlerts(){
-  if(sceneSpeechBlocked()){
-    for(const [source,voice] of sceneForeground){
-      if(voice){
-        sceneForeground.delete(source);
-        source.stop();
-      }
+  const speechBlocked=sceneSpeechBlocked();
+  for(const [source,{category,voice}] of sceneForeground){
+    if(!soundAllowed(category)||(voice&&speechBlocked)){
+      sceneForeground.delete(source);
+      source.stop();
     }
   }
   const enabled=needsCanSound()&&audioContext?.state==='running';
@@ -1674,7 +1691,16 @@ function bind(){
   $('#parents-open').addEventListener('click',()=>{if(!['ready','ambient','creating','sleeping'].includes(status))return;if(status==='ambient')cancelAmbient();returnStatus=status;setStatus('parents');$('#pet-name').value=save?.name??'';$('#parent-message').textContent=loaded.recovered?'Um salvamento inválido foi guardado para recuperação; um novo jogo pode ser criado.':'';$('#parents-dialog').showModal();});
   $('#parents-dialog').addEventListener('close',()=>setStatus(returnStatus));
   $('#pet-name').addEventListener('change',event=>{if(!save)return;save=renamePet(save,event.target.value);write();renderGrowth();$('#parent-message').textContent='Nome salvo.';});
-  $('#sound-button').addEventListener('click',()=>{soundEnabled=!soundEnabled;AU.setMute(!soundEnabled);const value=soundEnabled?'on':'off';localStorage.setItem('meu-pequeno-pet.sound',value);void mirrorNativeValue('meu-pequeno-pet.sound',value);updateSoundButton();if(soundEnabled)sound([520]);syncSceneAudio();syncNeedAlerts();});
+  $('#sound-button').addEventListener('click',()=>{
+    soundEnabled=!soundEnabled;
+    saveSoundPreference(SOUND_KEY,soundEnabled);
+    if(soundEnabled)sound([520]);
+  });
+  document.querySelectorAll('[data-sound-category]').forEach(button=>button.addEventListener('click',()=>{
+    const category=button.dataset.soundCategory;
+    soundPreferences[category]=!soundPreferences[category];
+    saveSoundPreference(`${SOUND_KEY}.${category}`,soundPreferences[category]);
+  }));
   $('#backup-button').addEventListener('click',async()=>{
     if(!save){$('#parent-message').textContent='Crie o pet antes de exportar.';return;}
     const text=exportBackup(save);
@@ -1722,9 +1748,38 @@ function bind(){
   document.addEventListener('pointerup',unlockSceneAudio,{capture:true});
   document.addEventListener('keydown',unlockSceneAudio);
   document.addEventListener('freeze',checkpoint);
-  document.addEventListener('visibilitychange',()=>{if(document.hidden)checkpoint();document.documentElement.classList.toggle('paused',document.hidden);document.querySelectorAll('svg').forEach(svg=>document.hidden?svg.pauseAnimations?.():svg.unpauseAnimations?.());if(document.hidden){Ambient.stop();AU.setMute(true);}else AU.setMute(!soundEnabled);if(document.hidden){stopSleepTimer();cancelFlow();if(tickTimer){clearInterval(tickTimer);tickTimer=null;}}else{lastTick=Date.now();if(save&&!creatingNew&&status!=='creating'&&status!=='loading')renderGrowth();startTicks();if(save?.sleeping){setStatus('sleeping');setMotion(playArt,'sleep-rest');startSleepTimer();}scheduleAmbient();if(save&&save.phase!=='egg'&&status==='ready'){const token=++flow;setStatus('ambient');setMotion(playArt,'greet');hold(1300,token).then(ok=>{if(ok){setMotion(playArt,'idle');setStatus('ready');}});}}});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)checkpoint();document.documentElement.classList.toggle('paused',document.hidden);document.querySelectorAll('svg').forEach(svg=>document.hidden?svg.pauseAnimations?.():svg.unpauseAnimations?.());if(document.hidden){Ambient.stop();AU.setMute(true);}else AU.setMute(!soundAllowed('effects'));if(document.hidden){stopSleepTimer();cancelFlow();if(tickTimer){clearInterval(tickTimer);tickTimer=null;}}else{lastTick=Date.now();if(save&&!creatingNew&&status!=='creating'&&status!=='loading')renderGrowth();startTicks();if(save?.sleeping){setStatus('sleeping');setMotion(playArt,'sleep-rest');startSleepTimer();}scheduleAmbient();if(save&&save.phase!=='egg'&&status==='ready'){const token=++flow;setStatus('ambient');setMotion(playArt,'greet');hold(1300,token).then(ok=>{if(ok){setMotion(playArt,'idle');setStatus('ready');}});}}});
 }
-function updateSoundButton(){$('#sound-button use').setAttribute('href',soundEnabled?'#i-sound':'#i-mute');$('#sound-button span').textContent=`Som: ${soundEnabled?'ligado':'desligado'}`;}
+function updateSoundButtons(){
+  const master=$('#sound-button');
+  master.setAttribute('aria-pressed',String(soundEnabled));
+  master.querySelector('use').setAttribute('href',soundEnabled?'#i-sound':'#i-mute');
+  master.querySelector('span').textContent=`Som geral · ${soundEnabled?'ligado':'desligado'}`;
+  for(const category of soundCategories){
+    const button=$(`[data-sound-category="${category}"]`);
+    if(!button)continue;
+    const enabled=soundPreferences[category];
+    button.setAttribute('aria-pressed',String(enabled));
+    button.querySelector('use').setAttribute('href',enabled?'#i-sound':'#i-mute');
+    button.querySelector('span').textContent=`${SOUND_LABELS[category]} · ${enabled?'ligado':'desligado'}`;
+  }
+}
+function saveSoundPreference(key,enabled){
+  const value=enabled?'on':'off';
+  localStorage.setItem(key,value);
+  void mirrorNativeValue(key,value);
+  AU.setMute(!soundAllowed('effects')||document.hidden);
+  for(const category of soundCategories){
+    const gain=sceneCategoryGains[category];
+    if(gain)gain.gain.value=soundAllowed(category)?1:0;
+  }
+  updateSoundButtons();
+  if(soundEnabled){
+    try{resumeGameAudio();}catch{}
+  }
+  syncSceneAudio();
+  syncNeedAlerts();
+}
 async function init(){
   $('#world').insertAdjacentHTML('afterbegin','<div id="scene-life" class="scene-life-layer" aria-hidden="true"></div>');
   $('#world').insertAdjacentHTML('beforeend','<div id="toy-picker" class="toy-picker" hidden><button type="button" data-toy="ball" aria-label="Brincar com a bola"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18" fill="#ff8e99" stroke="#1d2b5e" stroke-width="3"/><path d="M8 24h32M24 7v34" stroke="white" stroke-width="3"/></svg></button><button type="button" data-toy="bubbles" aria-label="Brincar com bolhas"><svg viewBox="0 0 48 48"><circle cx="16" cy="29" r="10" fill="#bcefff" stroke="#1d2b5e" stroke-width="2"/><circle cx="34" cy="17" r="8" fill="#bcefff" stroke="#1d2b5e" stroke-width="2"/></svg></button><button id="toy-close" type="button" aria-label="Fechar brinquedos">×</button></div><button id="bed" class="bed" type="button" aria-label="Dormir na cama" hidden><svg viewBox="0 0 100 60"><path d="M5 40Q50 60 95 40V55H5Z" fill="#b994e8" stroke="#263b70" stroke-width="4"/><path d="M5 40Q50 18 95 40Q50 58 5 40Z" fill="#e8d7ff" stroke="#263b70" stroke-width="4"/></svg></button>');
@@ -1746,12 +1801,12 @@ async function init(){
   $('#room-picker').innerHTML='<button id="room-close" class="extra-close" type="button" aria-label="Voltar">×</button><div class="room-tabs"><button data-room-tab="bed" aria-label="Escolher cama">'+item('sleep')+'</button><button data-room-tab="rug" aria-label="Escolher tapete">'+item('star')+'</button><button data-room-tab="toy" aria-label="Escolher brinquedo favorito">'+item('play')+'</button><button data-room-tab="wall" aria-label="Escolher cor do quarto">'+item('bath')+'</button></div><div id="room-options" class="room-options"></div>';
   setupActionGroups();
   document.head.insertAdjacentHTML('beforeend',`<style>${PET_CSS}</style>`);
-  AU.setMute(!soundEnabled);document.addEventListener('pointerdown',()=>AU.init(),{once:true});
+  AU.setMute(!soundAllowed('effects'));document.addEventListener('pointerdown',()=>AU.init(),{once:true});
   previewArt=$('#create-art');playArt=$('#play-art');
   // Bolhas presas ao próprio pet: independem de ele estar no centro ou caminhar.
   if(!$('#pet-bath-bubbles'))$('#pet-wrap').insertAdjacentHTML('beforeend',`<span id="pet-bath-bubbles" aria-hidden="true">${Array.from({length:13},(_,i)=>`<i style="--bubble-x:${[34,44,53,63,38,49,58,67,33,46,55,61,50][i]}%;--bubble-y:${[39,52,34,45,68,61,55,74,50,77,41,64,29][i]}%;--delay:${-(i*0.19)}s"></i>`).join('')}</span>`);
   $('#test-banner').hidden=!TEST_MODE;$('#test-tools').hidden=!TEST_MODE;
-  updateSoundButton();bind();showScreen();startTicks();scheduleAmbient();startSceneGazeLoop();
+  updateSoundButtons();bind();showScreen();startTicks();scheduleAmbient();startSceneGazeLoop();
   if(loaded.recovered)$('#care-message').textContent='O progresso anterior não pôde ser lido. Abra a área dos responsáveis.';
   // O modo offline é complementar: uma implementação parcial da API no
   // navegador não pode impedir os cuidados e brincadeiras de iniciarem.
