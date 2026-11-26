@@ -100,9 +100,15 @@ let albumDrag=null,suppressAlbumClick=false;
 let selectedDecoration=null,decorationDrag=null,suppressDecorationClick=false;
 let actionGroup=null,airTimer=null,lookTimer=null,gazeFrame=null,gazeIndex=0,flightLevel=0,jumpStreak=0;
 const SOUND_KEY='meu-pequeno-pet.sound';
-const SOUND_LABELS={ambient:'Som ambiente',characters:'Personagens dos cenários',effects:'Efeitos sonoros'};
+const SOUND_LABELS={ambient:'Som ambiente',characters:'Personagens dos cenários',effects:'Efeitos sonoros',needs:'Avisos de necessidade'};
 const soundCategories=Object.keys(SOUND_LABELS);
 await hydrateNativeStorage(localStorage,[SAVE_KEY,`${SAVE_KEY}.test`,SOUND_KEY,...soundCategories.map(category=>`${SOUND_KEY}.${category}`)]);
+const needsSoundKey=`${SOUND_KEY}.needs`;
+if(localStorage.getItem(needsSoundKey)===null){
+  const previousEffects=localStorage.getItem(`${SOUND_KEY}.effects`)??'on';
+  localStorage.setItem(needsSoundKey,previousEffects);
+  void mirrorNativeValue(needsSoundKey,previousEffects);
+}
 let soundEnabled=localStorage.getItem(SOUND_KEY)!=='off';
 const soundPreferences=Object.fromEntries(soundCategories.map(category=>[category,localStorage.getItem(`${SOUND_KEY}.${category}`)!=='off']));
 const audioFolder=new URL('./assets_audios/',import.meta.url);
@@ -170,7 +176,7 @@ const NEED_ALERT_FILES={
 const needAlertBuffers=new Map();
 const needAlerts=new Map();
 const sceneForeground=new Map();
-const sceneCategoryGains={};
+const soundCategoryGains={};
 let sceneAudioGain,currentNeedAlert,needAlertTimer,nextNeedAlertAt=0;
 let preparingSleep=false;
 const loaded=loadSave(localStorage,Date.now(),ACTIVE_SAVE_KEY);
@@ -192,8 +198,8 @@ function resumeGameAudio(){
     for(const category of soundCategories){
       const gain=audioContext.createGain();
       gain.gain.value=soundAllowed(category)?1:0;
-      gain.connect(sceneAudioGain);
-      sceneCategoryGains[category]=gain;
+      gain.connect(category==='needs'?audioContext.destination:sceneAudioGain);
+      soundCategoryGains[category]=gain;
     }
     audioContext.addEventListener('statechange',()=>{
       if(audioContext.state==='running')syncSceneAudio();
@@ -243,12 +249,12 @@ function createSceneSource({buffer,volume},{category='ambient',loop=false,fadeOu
     gain.gain.setValueAtTime(volume,fadeOut.start);
     gain.gain.linearRampToValueAtTime(0,fadeOut.end);
   }
-  source.connect(gain).connect(sceneCategoryGains[category]);
+  source.connect(gain).connect(soundCategoryGains[category]);
   source.addEventListener('ended',()=>{source.disconnect();gain.disconnect();},{once:true});
   return source;
 }
-function trackSceneForeground(source,category,voice=false){
-  sceneForeground.set(source,{category,voice});
+function trackSceneForeground(source,category){
+  sceneForeground.set(source,category);
   source.addEventListener('ended',()=>{
     sceneForeground.delete(source);
     scheduleNeedAlert();
@@ -269,7 +275,8 @@ function stopSceneAmbience(){
 }
 async function playSceneAccent(playback,accent){
   if(sceneAmbience!==playback)return;
-  if(!soundAllowed(accent.category)||(accent.lines&&sceneSpeechBlocked())){
+  const isCharacter=accent.category==='characters';
+  if(!soundAllowed(accent.category)||(isCharacter&&sceneSpeechBlocked())){
     accent.timer=setTimeout(()=>void playSceneAccent(playback,accent),1000);
     return;
   }
@@ -277,7 +284,7 @@ async function playSceneAccent(playback,accent){
     const name=accent.lines?.[accent.lineIndex]??accent.name;
     accent.track??=await loadSceneTrack(name,accent.level,playback.controller.signal);
     if(sceneAmbience!==playback)return;
-    if(!soundAllowed(accent.category)||sceneForeground.size||currentNeedAlert?.source||(accent.lines&&sceneSpeechBlocked())){
+    if(!soundAllowed(accent.category)||sceneForeground.size||currentNeedAlert?.source||(isCharacter&&sceneSpeechBlocked())){
       accent.timer=setTimeout(()=>void playSceneAccent(playback,accent),500);
       return;
     }
@@ -291,7 +298,7 @@ async function playSceneAccent(playback,accent){
       }
       if(sceneAmbience===playback)accent.timer=setTimeout(()=>void playSceneAccent(playback,accent),accent.repeatDelay??(30_000+Math.random()*20_000));
     },{once:true});
-    trackSceneForeground(source,accent.category,Boolean(accent.lines));
+    trackSceneForeground(source,accent.category);
     source.start();
   }catch{
     if(sceneAmbience===playback)accent.timer=setTimeout(()=>void playSceneAccent(playback,accent),20_000);
@@ -319,7 +326,7 @@ async function startSpaceAccent(playback){
 function playSceneAmbience(playback,track){
   if(sceneAmbience!==playback)return;
   const lunar=playback.key==='clareira_lunar';
-  if(lunar&&!soundAllowed('characters')){
+  if(lunar&&(!soundAllowed('characters')||sceneSpeechBlocked())){
     playback.repeatTimer=setTimeout(()=>playSceneAmbience(playback,track),1000);
     return;
   }
@@ -352,15 +359,24 @@ async function startSceneAmbience(playback,name){
 }
 function syncSceneAmbience(){
   const key=activeAudioScene();
-  const olafPreview=key==='snow'&&!$('#create-screen').hidden;
-  const lines=olafPreview||!$('#play-screen').hidden?SCENE_VOICE_LINES[key]??null:null;
-  if(sceneAmbience?.key===key&&sceneAmbience?.lines===lines&&sceneAmbience?.olafPreview===olafPreview)return;
+  const preview=!$('#create-screen').hidden;
+  if(sceneAmbience?.key===key&&sceneAmbience?.preview===preview)return;
   stopSceneAmbience();
   const name=SCENE_AMBIENCE[key];
   if(!name||audioContext?.state!=='running')return;
-  const accents=(SCENE_ACCENTS[key]||[]).map(([name,level,delay,repeatDelay,category='characters'])=>({name,level,delay,repeatDelay,category}));
-  if(lines)accents.push({lines,lineIndex:0,category:'characters',level:.24,delay:olafPreview?0:6_000,repeatDelay:olafPreview?3_000:GAME_SCENE_LINE_PAUSE});
-  const playback={key,lines,olafPreview,accents,controller:new AbortController()};
+  const lines=SCENE_VOICE_LINES[key];
+  const configured=(SCENE_ACCENTS[key]||[]).map(([name,level,delay,repeatDelay,category='characters'])=>({name,level,delay,repeatDelay,category}));
+  const previewCharacter=lines?null:configured.find(accent=>accent.category==='characters');
+  const accents=preview?configured.filter(accent=>accent.category!=='characters'||accent===previewCharacter):configured;
+  if(lines){
+    accents.push({
+      lines:preview?lines.slice(0,1):lines,
+      lineIndex:0,category:'characters',level:.24,
+      delay:preview?0:6_000,
+      repeatDelay:preview&&key==='snow'?3_000:GAME_SCENE_LINE_PAUSE
+    });
+  }
+  const playback={key,preview,accents,controller:new AbortController()};
   sceneAmbience=playback;
   void startSceneAmbience(playback,name);
 }
@@ -371,9 +387,9 @@ async function playChristmasMix(playback){
     for(const source of playback.sources)source.stop();
     const start=audioContext.currentTime+.02;
     playback.sources=[createSceneSource(bell,{category:'effects'})];
-    if(soundAllowed('characters')&&!sceneSpeechBlocked()&&!currentNeedAlert?.source){
+    if(playback.mode==='game'&&soundAllowed('characters')&&!sceneSpeechBlocked()&&!currentNeedAlert?.source){
       const voice=createSceneSource(santa,{category:'characters'});
-      trackSceneForeground(voice,'characters',true);
+      trackSceneForeground(voice,'characters');
       playback.sources.push(voice);
     }
     for(const source of playback.sources)source.start(start);
@@ -397,7 +413,7 @@ async function playCenterSanta(playback,sleigh){
   playback.centerSantaSource?.stop();
   const source=createSceneSource(track,{category:'characters'});
   source.playbackRate.value=1.5;
-  trackSceneForeground(source,'characters',true);
+  trackSceneForeground(source,'characters');
   stopCurrentNeedAlert();
   playback.centerSantaSource=source;
   source.addEventListener('ended',()=>{
@@ -475,7 +491,7 @@ function sceneSpeechBlocked(){
   return (preparingSleep||save?.sleeping)&&!$('#play-screen').hidden;
 }
 function needsCanSound(){
-  return soundAllowed('effects')&&!document.hidden&&save&&save.phase!=='egg'&&!$('#play-screen').hidden&&!sceneSpeechBlocked();
+  return soundAllowed('needs')&&!document.hidden&&save&&save.phase!=='egg'&&!$('#play-screen').hidden&&!sceneSpeechBlocked();
 }
 function releaseNeedAlert(alert){
   if(currentNeedAlert!==alert)return;
@@ -516,7 +532,7 @@ async function playNeedAlert(need,alert){
     const gain=context.createGain();
     source.buffer=buffers[alert.nextClip];
     gain.gain.value=.23;
-    source.connect(gain).connect(context.destination);
+    source.connect(gain).connect(soundCategoryGains.needs);
     source.onended=()=>{
       source.disconnect();
       gain.disconnect();
@@ -552,8 +568,8 @@ function scheduleNeedAlert(){
 }
 function syncNeedAlerts(){
   const speechBlocked=sceneSpeechBlocked();
-  for(const [source,{category,voice}] of sceneForeground){
-    if(!soundAllowed(category)||(voice&&speechBlocked)){
+  for(const [source,category] of sceneForeground){
+    if(!soundAllowed(category)||(category==='characters'&&speechBlocked)){
       sceneForeground.delete(source);
       source.stop();
     }
@@ -1770,7 +1786,7 @@ function saveSoundPreference(key,enabled){
   void mirrorNativeValue(key,value);
   AU.setMute(!soundAllowed('effects')||document.hidden);
   for(const category of soundCategories){
-    const gain=sceneCategoryGains[category];
+    const gain=soundCategoryGains[category];
     if(gain)gain.gain.value=soundAllowed(category)?1:0;
   }
   updateSoundButtons();
