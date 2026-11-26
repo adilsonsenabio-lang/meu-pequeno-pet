@@ -112,6 +112,7 @@ const CHRISTMAS_TRACKS=[
   ['sino_natal.mp3',.12]
 ];
 const CHRISTMAS_INTERVAL={preview:18_000,game:60_000};
+const sleighReducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
 let christmasTracks,christmasPlayback;
 const NEED_ALERT_INTERVAL=10_000;
 const NEED_ALERT_FILES={
@@ -162,51 +163,81 @@ function sceneAudioMode(key){
   return null;
 }
 const lunarAudioMode=()=>sceneAudioMode('clareira_lunar');
-async function playChristmasMix(playback){
-  const context=audioContext;
-  try{
-    christmasTracks??=Promise.all(CHRISTMAS_TRACKS.map(async ([name,level])=>{
-      const response=await fetch(new URL(name,audioFolder));
-      if(!response.ok)throw new Error(name);
-      const buffer=await context.decodeAudioData(await response.arrayBuffer());
-      let peak=0;
-      for(let channel=0;channel<buffer.numberOfChannels;channel++){
-        for(const sample of buffer.getChannelData(channel))peak=Math.max(peak,Math.abs(sample));
-      }
-      return {buffer,volume:Math.min(2,level/Math.max(peak,.001))};
-    })).catch(error=>{christmasTracks=null;throw error;});
-    const tracks=await christmasTracks;
-    if(christmasPlayback!==playback||context.state!=='running')return;
-    for(const source of playback.sources)source.stop();
-    const start=context.currentTime+.02;
-    for(const {buffer,volume} of tracks){
-      const source=context.createBufferSource(),gain=context.createGain();
-      source.buffer=buffer;
-      gain.gain.value=volume;
-      source.connect(gain).connect(context.destination);
-      source.onended=()=>{
-        playback.sources.delete(source);
-        source.disconnect();
-        gain.disconnect();
-      };
-      playback.sources.add(source);
-      source.start(start);
+function loadChristmasTracks(){
+  christmasTracks??=Promise.all(CHRISTMAS_TRACKS.map(async ([name,level])=>{
+    const response=await fetch(new URL(name,audioFolder));
+    if(!response.ok)throw new Error(name);
+    const buffer=await audioContext.decodeAudioData(await response.arrayBuffer());
+    let peak=0;
+    for(let channel=0;channel<buffer.numberOfChannels;channel++){
+      for(const sample of buffer.getChannelData(channel))peak=Math.max(peak,Math.abs(sample));
     }
+    return {buffer,volume:Math.min(2,level/Math.max(peak,.001))};
+  })).catch(error=>{christmasTracks=null;throw error;});
+  return christmasTracks;
+}
+function createChristmasSource({buffer,volume},loop=false){
+  const source=audioContext.createBufferSource(),gain=audioContext.createGain();
+  source.buffer=buffer;
+  source.loop=loop;
+  gain.gain.value=volume;
+  source.connect(gain).connect(audioContext.destination);
+  source.addEventListener('ended',()=>{source.disconnect();gain.disconnect();},{once:true});
+  return source;
+}
+async function playChristmasMix(playback){
+  try{
+    const [santa,,bell]=await loadChristmasTracks();
+    if(christmasPlayback!==playback||audioContext.state!=='running')return;
+    for(const source of playback.sources)source.stop();
+    const start=audioContext.currentTime+.02;
+    playback.sources=[createChristmasSource(santa),createChristmasSource(bell)];
+    for(const source of playback.sources)source.start(start);
   }catch{}
+}
+function stopSleighAudio(playback){
+  playback.sleighSource?.stop();
+  playback.sleighSource=null;
+}
+function observeChristmasSleigh(playback){
+  const host=playback.mode==='preview'?'#create-scene-art':'#scene-art';
+  const sleigh=sleighReducedMotion.matches?null:$(host).querySelector('.v844-sleigh');
+  if(sleigh===playback.sleigh)return;
+  playback.sleighObserver?.disconnect();
+  stopSleighAudio(playback);
+  playback.sleigh=sleigh;
+  if(!sleigh)return;
+  let visible=false;
+  const observer=new IntersectionObserver(async entries=>{
+    if(christmasPlayback!==playback||playback.sleigh!==sleigh)return;
+    visible=entries.at(-1).intersectionRatio>=.01;
+    if(!visible){stopSleighAudio(playback);return;}
+    try{
+      const [,track]=await loadChristmasTracks();
+      if(!visible||christmasPlayback!==playback||playback.sleigh!==sleigh||playback.sleighSource||audioContext.state!=='running')return;
+      playback.sleighSource=createChristmasSource(track,true);
+      playback.sleighSource.start();
+    }catch{}
+  },{root:sleigh.parentElement,threshold:.01});
+  playback.sleighObserver=observer;
+  observer.observe(sleigh);
 }
 function syncChristmasAudio(){
   const mode=sceneAudioMode('christmas');
-  if(mode===christmasPlayback?.mode)return;
+  if(mode===christmasPlayback?.mode){observeChristmasSleigh(christmasPlayback);return;}
   if(christmasPlayback){
     clearInterval(christmasPlayback.timer);
+    christmasPlayback.sleighObserver?.disconnect();
+    stopSleighAudio(christmasPlayback);
     for(const source of christmasPlayback.sources)source.stop();
     christmasPlayback=null;
   }
   if(!mode||audioContext?.state!=='running')return;
-  const playback={mode,sources:new Set()};
+  const playback={mode,sources:[],sleigh:null};
   christmasPlayback=playback;
   void playChristmasMix(playback);
   playback.timer=setInterval(()=>void playChristmasMix(playback),CHRISTMAS_INTERVAL[mode]);
+  observeChristmasSleigh(playback);
 }
 function stopLunarHowl(){
   const source=lunarHowlSource;
@@ -684,6 +715,7 @@ function renderPartPosition(key){
 }
 function renderCreator(){
   renderScene($('#create-scene-art'),draft.scene,'creator');
+  syncChristmasAudio();
   drawPet(previewArt,draft,'baby');setMotion(previewArt,'idle');stopPetFrames(previewArt);
   saveDraft();
   const c=categories[step];const list=$('#choice-list');const previousScroll=list.dataset.category===c.key?list.scrollTop:0;list.classList.toggle('two-row-options',CUSTOM_PARTS.includes(c.key));list.dataset.category=c.key;$('#category-title').textContent=c.title;$('#category-icon use').setAttribute('href',`#i-${c.icon}`);$('#step-count').textContent=`${step+1} / ${categories.length}`;
@@ -1474,6 +1506,7 @@ function bind(){
   $('#evolution-close').addEventListener('click',()=>{$('#evolution').hidden=true;setStatus('ready');setMotion(playArt,'idle');});
   window.addEventListener('pagehide',checkpoint);
   document.addEventListener('visibilitychange',syncSceneAudio);
+  sleighReducedMotion.addEventListener('change',syncChristmasAudio);
   document.addEventListener('visibilitychange',syncNeedAlerts);
   const unlockSceneAudio=()=>{
     if(!needsCanSound()&&!sceneAudioMode('christmas'))return;
