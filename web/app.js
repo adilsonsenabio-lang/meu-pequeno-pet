@@ -101,11 +101,23 @@ let selectedDecoration=null,decorationDrag=null,suppressDecorationClick=false;
 let actionGroup=null,airTimer=null,lookTimer=null,gazeFrame=null,gazeIndex=0,flightLevel=0,jumpStreak=0;
 await hydrateNativeStorage(localStorage,[SAVE_KEY,`${SAVE_KEY}.test`,'meu-pequeno-pet.sound']);
 let soundEnabled=localStorage.getItem('meu-pequeno-pet.sound')!=='off';
-const LUNAR_HOWL_INTERVAL=20_000;
-const LUNAR_PREVIEW_DELAY=1_000;
 const audioFolder=new URL('./assets_audios/',import.meta.url);
-const lunarHowlUrl=new URL('uivo_lobo.mp3',audioFolder);
-let lunarHowlBuffer,lunarHowlSource,lunarHowlTimer,lunarPreviewTimer;
+const SCENE_AMBIENCE={
+  garden:'cenario_jardim',
+  sunset:'cenario_entardecer',
+  night:'cenario_noite',
+  beach:'cenario_praia',
+  desert:'cenario_deserto',
+  forest:'cenario_floresta',
+  snow:'cenario_neve_continuo',
+  space:'cenario_espaco',
+  sea:'cenario_fundo_do_mar',
+  halloween:'cenario_halloween',
+  ceu_arco_iris:'cenario_arco_iris',
+  cthulhu_fofinho:'cenario_cthullu_fofinho',
+  clareira_lunar:'cenario_clareira_lunar'
+};
+let sceneAmbience;
 const CHRISTMAS_TRACKS=[
   ['papai_noel.mp3',.32],
   ['treno_ceu.mp3',.20],
@@ -140,7 +152,7 @@ function resumeGameAudio(){
   if(!audioContext){
     audioContext=new (window.AudioContext||window.webkitAudioContext)();
     audioContext.addEventListener('statechange',()=>{
-      if(audioContext.state==='running')syncChristmasAudio();
+      if(audioContext.state==='running')syncSceneAudio();
     });
   }
   if(audioContext.state==='suspended')void audioContext.resume().catch(()=>{});
@@ -156,27 +168,28 @@ function sound(notes=[520],{type='sine',spacing=.11,volume=.045,duration=.19}={}
     });
   }catch{}
 }
-function sceneAudioMode(key){
+function activeAudioScene(){
   if(!soundEnabled||document.hidden)return null;
-  if(!$('#create-screen').hidden&&draft.scene===key)return 'preview';
-  if(!$('#play-screen').hidden&&save&&scene===key&&area==='garden'&&(key==='christmas'||save.phase!=='egg'))return 'game';
+  if(!$('#create-screen').hidden)return draft.scene;
+  if(!$('#play-screen').hidden&&save&&area==='garden')return scene;
   return null;
 }
-const lunarAudioMode=()=>sceneAudioMode('clareira_lunar');
+async function loadSceneTrack(name,level,signal){
+  const response=await fetch(new URL(name,audioFolder),{signal});
+  if(!response.ok)throw new Error(name);
+  const buffer=await audioContext.decodeAudioData(await response.arrayBuffer());
+  let peak=0;
+  for(let channel=0;channel<buffer.numberOfChannels;channel++){
+    for(const sample of buffer.getChannelData(channel))peak=Math.max(peak,Math.abs(sample));
+  }
+  return {buffer,volume:Math.min(2,level/Math.max(peak,.001))};
+}
 function loadChristmasTracks(){
-  christmasTracks??=Promise.all(CHRISTMAS_TRACKS.map(async ([name,level])=>{
-    const response=await fetch(new URL(name,audioFolder));
-    if(!response.ok)throw new Error(name);
-    const buffer=await audioContext.decodeAudioData(await response.arrayBuffer());
-    let peak=0;
-    for(let channel=0;channel<buffer.numberOfChannels;channel++){
-      for(const sample of buffer.getChannelData(channel))peak=Math.max(peak,Math.abs(sample));
-    }
-    return {buffer,volume:Math.min(2,level/Math.max(peak,.001))};
-  })).catch(error=>{christmasTracks=null;throw error;});
+  christmasTracks??=Promise.all(CHRISTMAS_TRACKS.map(([name,level])=>loadSceneTrack(name,level)))
+    .catch(error=>{christmasTracks=null;throw error;});
   return christmasTracks;
 }
-function createChristmasSource({buffer,volume},loop=false){
+function createSceneSource({buffer,volume},loop=false){
   const source=audioContext.createBufferSource(),gain=audioContext.createGain();
   source.buffer=buffer;
   source.loop=loop;
@@ -185,13 +198,62 @@ function createChristmasSource({buffer,volume},loop=false){
   source.addEventListener('ended',()=>{source.disconnect();gain.disconnect();},{once:true});
   return source;
 }
+function stopSceneAmbience(){
+  if(!sceneAmbience)return;
+  const playback=sceneAmbience;
+  sceneAmbience=null;
+  playback.controller.abort();
+  clearTimeout(playback.snowTimer);
+  playback.loop?.stop();
+  playback.snowSource?.stop();
+}
+async function playSnowAccent(playback){
+  if(sceneAmbience!==playback)return;
+  try{
+    playback.snowTrack??=await loadSceneTrack('cenario_neve_asvezes.mp3',.17,playback.controller.signal);
+    if(sceneAmbience!==playback)return;
+    const source=createSceneSource(playback.snowTrack);
+    playback.snowSource=source;
+    source.addEventListener('ended',()=>{
+      playback.snowSource=null;
+      if(sceneAmbience===playback)playback.snowTimer=setTimeout(()=>void playSnowAccent(playback),20_000+Math.random()*20_000);
+    },{once:true});
+    source.start();
+  }catch{
+    if(sceneAmbience===playback)playback.snowTimer=setTimeout(()=>void playSnowAccent(playback),20_000);
+  }
+}
+async function startSceneAmbience(playback,name){
+  try{
+    const track=await loadSceneTrack(`${name}.mp3`,.15,playback.controller.signal);
+    if(sceneAmbience!==playback)return;
+    playback.loop=createSceneSource(track,true);
+    playback.loop.start();
+    if(playback.key==='snow')playback.snowTimer=setTimeout(()=>void playSnowAccent(playback),12_000);
+  }catch(error){
+    if(sceneAmbience===playback){
+      stopSceneAmbience();
+      console.warn('Som ambiente indisponível:',name,error);
+    }
+  }
+}
+function syncSceneAmbience(){
+  const key=activeAudioScene();
+  if(sceneAmbience?.key===key)return;
+  stopSceneAmbience();
+  const name=SCENE_AMBIENCE[key];
+  if(!name||audioContext?.state!=='running')return;
+  const playback={key,controller:new AbortController()};
+  sceneAmbience=playback;
+  void startSceneAmbience(playback,name);
+}
 async function playChristmasMix(playback){
   try{
     const [santa,,bell]=await loadChristmasTracks();
     if(christmasPlayback!==playback||audioContext.state!=='running')return;
     for(const source of playback.sources)source.stop();
     const start=audioContext.currentTime+.02;
-    playback.sources=[createChristmasSource(santa),createChristmasSource(bell)];
+    playback.sources=[createSceneSource(santa),createSceneSource(bell)];
     for(const source of playback.sources)source.start(start);
   }catch{}
 }
@@ -215,7 +277,7 @@ function observeChristmasSleigh(playback){
     try{
       const [,track]=await loadChristmasTracks();
       if(!visible||christmasPlayback!==playback||playback.sleigh!==sleigh||playback.sleighSource||audioContext.state!=='running')return;
-      playback.sleighSource=createChristmasSource(track,true);
+      playback.sleighSource=createSceneSource(track,true);
       playback.sleighSource.start();
     }catch{}
   },{root:sleigh.parentElement,threshold:.01});
@@ -223,7 +285,7 @@ function observeChristmasSleigh(playback){
   observer.observe(sleigh);
 }
 function syncChristmasAudio(){
-  const mode=sceneAudioMode('christmas');
+  const mode=activeAudioScene()==='christmas'?($('#create-screen').hidden?'game':'preview'):null;
   if(mode===christmasPlayback?.mode){observeChristmasSleigh(christmasPlayback);return;}
   if(christmasPlayback){
     clearInterval(christmasPlayback.timer);
@@ -239,55 +301,9 @@ function syncChristmasAudio(){
   playback.timer=setInterval(()=>void playChristmasMix(playback),CHRISTMAS_INTERVAL[mode]);
   observeChristmasSleigh(playback);
 }
-function stopLunarHowl(){
-  const source=lunarHowlSource;
-  lunarHowlSource=null;
-  if(source)source.stop();
-}
-async function playLunarHowl(mode){
-  try{
-    if(lunarAudioMode()!==mode||!audioContext)return;
-    const context=audioContext;
-    if(mode==='game'&&context.state!=='running')return;
-    const resumed=mode==='preview'&&context.state==='suspended'?context.resume():undefined;
-    lunarHowlBuffer??=fetch(lunarHowlUrl).then(response=>{
-      if(!response.ok)throw new Error('Áudio da Clareira Lunar indisponível');
-      return response.arrayBuffer();
-    }).then(bytes=>context.decodeAudioData(bytes)).catch(error=>{
-      lunarHowlBuffer=null;
-      throw error;
-    });
-    const [buffer]=await Promise.all([lunarHowlBuffer,resumed]);
-    if(lunarAudioMode()!==mode||context.state!=='running')return;
-    stopLunarHowl();
-    const source=context.createBufferSource();
-    const gain=context.createGain();
-    source.buffer=buffer;
-    gain.gain.value=.42;
-    source.connect(gain).connect(context.destination);
-    source.onended=()=>{
-      source.disconnect();
-      gain.disconnect();
-      if(lunarHowlSource===source)lunarHowlSource=null;
-    };
-    source.start();
-    lunarHowlSource=source;
-  }catch{}
-}
 function syncSceneAudio(){
   syncChristmasAudio();
-  const mode=lunarAudioMode();
-  if(mode!=='preview'){
-    clearTimeout(lunarPreviewTimer);
-    lunarPreviewTimer=null;
-  }
-  if(mode!=='game'){
-    clearInterval(lunarHowlTimer);
-    lunarHowlTimer=null;
-  }else{
-    lunarHowlTimer??=setInterval(()=>void playLunarHowl('game'),LUNAR_HOWL_INTERVAL);
-  }
-  if(!mode)stopLunarHowl();
+  syncSceneAmbience();
 }
 function needsCanSound(){
   return soundEnabled&&!document.hidden&&save&&save.phase!=='egg'&&!$('#play-screen').hidden;
@@ -1370,16 +1386,7 @@ function bind(){
     draft[key]=button.dataset.choice;
     renderCreator();
     sound([480]);
-    if(key==='scene'){
-      syncSceneAudio();
-      if(lunarAudioMode()==='preview'){
-        clearTimeout(lunarPreviewTimer);
-        lunarPreviewTimer=setTimeout(()=>{
-          lunarPreviewTimer=null;
-          void playLunarHowl('preview');
-        },LUNAR_PREVIEW_DELAY);
-      }
-    }
+    if(key==='scene')syncSceneAudio();
   });
   $('#create-back').addEventListener('click',()=>{if(step>0){step--;renderCreator();}});
   $('#creation-cancel').addEventListener('click',()=>{if(!save)return;clearCreatorSession(localStorage,DRAFT_KEY);creatingNew=false;const url=new URL(location.href);url.searchParams.delete('criar');history.replaceState(null,'',url);showScreen();});
@@ -1509,7 +1516,8 @@ function bind(){
   sleighReducedMotion.addEventListener('change',syncChristmasAudio);
   document.addEventListener('visibilitychange',syncNeedAlerts);
   const unlockSceneAudio=()=>{
-    if(!needsCanSound()&&!sceneAudioMode('christmas'))return;
+    const currentScene=activeAudioScene();
+    if(!needsCanSound()&&currentScene!=='christmas'&&!SCENE_AMBIENCE[currentScene])return;
     const syncAudio=()=>{syncSceneAudio();syncNeedAlerts();};
     try{
       const context=resumeGameAudio();
