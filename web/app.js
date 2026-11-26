@@ -127,6 +127,17 @@ const SCENE_ACCENTS={
     ['cenario_neve_boneco_de_neve.mp3',.14,5_000]
   ]
 };
+const GAME_SCENE_LINES={
+  sea:['cenario_fundo_do_mar_bob_sponja.mp3'],
+  snow:[
+    'cenario_neve_olaf_brincando.mp3',
+    'cenario_neve_olaf_brincando1.mp3',
+    'cenario_neve_olaf_brincando2.mp3',
+    'cenario_neve_olaf_brincando3.mp3',
+    'cenario_neve_olaf_brincando4.mp3',
+    'cenario_neve_olaf_fome.mp3'
+  ]
+};
 let sceneAmbience;
 const CHRISTMAS_TRACKS=[
   ['papai_noel.mp3',.32],
@@ -228,12 +239,17 @@ function stopSceneAmbience(){
 async function playSceneAccent(playback,accent){
   if(sceneAmbience!==playback)return;
   try{
-    accent.track??=await loadSceneTrack(accent.name,accent.level,playback.controller.signal);
+    const name=accent.lines?.[accent.lineIndex]??accent.name;
+    accent.track??=await loadSceneTrack(name,accent.level,playback.controller.signal);
     if(sceneAmbience!==playback)return;
     const source=createSceneSource(accent.track);
     accent.source=source;
     source.addEventListener('ended',()=>{
       accent.source=null;
+      if(accent.lines?.length>1){
+        accent.lineIndex=(accent.lineIndex+1)%accent.lines.length;
+        accent.track=null;
+      }
       if(sceneAmbience===playback)accent.timer=setTimeout(()=>void playSceneAccent(playback,accent),accent.repeatDelay??(20_000+Math.random()*20_000));
     },{once:true});
     source.start();
@@ -291,12 +307,14 @@ async function startSceneAmbience(playback,name){
 }
 function syncSceneAmbience(){
   const key=activeAudioScene();
-  if(sceneAmbience?.key===key)return;
+  const lines=$('#play-screen').hidden?null:GAME_SCENE_LINES[key]??null;
+  if(sceneAmbience?.key===key&&sceneAmbience?.lines===lines)return;
   stopSceneAmbience();
   const name=SCENE_AMBIENCE[key];
   if(!name||audioContext?.state!=='running')return;
   const accents=(SCENE_ACCENTS[key]||[]).map(([name,level,delay,repeatDelay])=>({name,level,delay,repeatDelay}));
-  const playback={key,accents,controller:new AbortController()};
+  if(lines)accents.push({lines,lineIndex:0,level:.24,delay:6_000,repeatDelay:key==='snow'?10_000:25_000});
+  const playback={key,lines,accents,controller:new AbortController()};
   sceneAmbience=playback;
   void startSceneAmbience(playback,name);
 }
