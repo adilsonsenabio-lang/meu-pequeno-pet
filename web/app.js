@@ -118,8 +118,9 @@ const SCENE_AMBIENCE={
   clareira_lunar:'cenario_clareira_lunar'
 };
 const SCENE_ACCENTS={
-  night:[['cenario_noite_coruja.mp3',.17,7_000]],
-  beach:[['cenario_praia_gaivota.mp3',.11,5_000]],
+  sunset:[['cenario_entardecer_passaros.mp3',.22,0,12_000]],
+  night:[['cenario_noite_coruja.mp3',.28,0,8_000]],
+  beach:[['cenario_praia_gaivota.mp3',.30,0,8_000]],
   forest:[['cenario_floresta_esquilo.mp3',.16,9_000]],
   snow:[
     ['cenario_neve_asvezes.mp3',.17,12_000],
@@ -233,7 +234,7 @@ async function playSceneAccent(playback,accent){
     accent.source=source;
     source.addEventListener('ended',()=>{
       accent.source=null;
-      if(sceneAmbience===playback)accent.timer=setTimeout(()=>void playSceneAccent(playback,accent),20_000+Math.random()*20_000);
+      if(sceneAmbience===playback)accent.timer=setTimeout(()=>void playSceneAccent(playback,accent),accent.repeatDelay??(20_000+Math.random()*20_000));
     },{once:true});
     source.start();
   }catch{
@@ -294,7 +295,7 @@ function syncSceneAmbience(){
   stopSceneAmbience();
   const name=SCENE_AMBIENCE[key];
   if(!name||audioContext?.state!=='running')return;
-  const accents=(SCENE_ACCENTS[key]||[]).map(([name,level,delay])=>({name,level,delay}));
+  const accents=(SCENE_ACCENTS[key]||[]).map(([name,level,delay,repeatDelay])=>({name,level,delay,repeatDelay}));
   const playback={key,accents,controller:new AbortController()};
   sceneAmbience=playback;
   void startSceneAmbience(playback,name);
