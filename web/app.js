@@ -153,7 +153,7 @@ const CHRISTMAS_TRACKS=[
 const CHRISTMAS_INTERVAL={preview:18_000,game:60_000};
 const sleighReducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
 let christmasTracks,christmasPlayback,centerSantaTrack;
-const NEED_ALERT_INTERVAL=10_000;
+const NEED_ALERT_PAUSE=5_000;
 const NEED_ALERT_FILES={
   food:['comer01'],
   water:['beber01','beber02'],
@@ -165,6 +165,9 @@ const NEED_ALERT_FILES={
 };
 const needAlertBuffers=new Map();
 const needAlerts=new Map();
+const sceneForeground=new Map();
+let sceneAudioGain,currentNeedAlert,needAlertTimer,nextNeedAlertAt=0;
+let preparingSleep=false;
 const loaded=loadSave(localStorage,Date.now(),ACTIVE_SAVE_KEY);
 save=loaded.save;
 // Salvamentos antigos com Nuvens continuam válidos, mas abrem no Deserto.
@@ -178,8 +181,11 @@ area=AREAS.includes(save?.area)?save.area:'garden';
 function resumeGameAudio(){
   if(!audioContext){
     audioContext=new (window.AudioContext||window.webkitAudioContext)();
+    sceneAudioGain=audioContext.createGain();
+    sceneAudioGain.connect(audioContext.destination);
     audioContext.addEventListener('statechange',()=>{
       if(audioContext.state==='running')syncSceneAudio();
+      syncNeedAlerts();
     });
   }
   if(audioContext.state==='suspended')void audioContext.resume().catch(()=>{});
@@ -225,9 +231,16 @@ function createSceneSource({buffer,volume},loop=false,fadeOut){
     gain.gain.setValueAtTime(volume,fadeOut.start);
     gain.gain.linearRampToValueAtTime(0,fadeOut.end);
   }
-  source.connect(gain).connect(audioContext.destination);
+  source.connect(gain).connect(sceneAudioGain);
   source.addEventListener('ended',()=>{source.disconnect();gain.disconnect();},{once:true});
   return source;
+}
+function trackSceneForeground(source,voice){
+  sceneForeground.set(source,voice);
+  source.addEventListener('ended',()=>{
+    sceneForeground.delete(source);
+    scheduleNeedAlert();
+  },{once:true});
 }
 function stopSceneAmbience(){
   if(!sceneAmbience)return;
@@ -244,20 +257,29 @@ function stopSceneAmbience(){
 }
 async function playSceneAccent(playback,accent){
   if(sceneAmbience!==playback)return;
+  if(accent.lines&&sceneSpeechBlocked()){
+    accent.timer=setTimeout(()=>void playSceneAccent(playback,accent),1000);
+    return;
+  }
   try{
     const name=accent.lines?.[accent.lineIndex]??accent.name;
     accent.track??=await loadSceneTrack(name,accent.level,playback.controller.signal);
     if(sceneAmbience!==playback)return;
+    if(sceneForeground.size||currentNeedAlert?.source||(accent.lines&&sceneSpeechBlocked())){
+      accent.timer=setTimeout(()=>void playSceneAccent(playback,accent),500);
+      return;
+    }
     const source=createSceneSource(accent.track);
     accent.source=source;
     source.addEventListener('ended',()=>{
       accent.source=null;
-      if(accent.lines?.length>1){
+      if(accent.lines?.length>1&&!sceneSpeechBlocked()){
         accent.lineIndex=(accent.lineIndex+1)%accent.lines.length;
         accent.track=null;
       }
       if(sceneAmbience===playback)accent.timer=setTimeout(()=>void playSceneAccent(playback,accent),accent.repeatDelay??(20_000+Math.random()*20_000));
     },{once:true});
+    trackSceneForeground(source,Boolean(accent.lines));
     source.start();
   }catch{
     if(sceneAmbience===playback)accent.timer=setTimeout(()=>void playSceneAccent(playback,accent),20_000);
@@ -331,7 +353,12 @@ async function playChristmasMix(playback){
     if(christmasPlayback!==playback||audioContext.state!=='running')return;
     for(const source of playback.sources)source.stop();
     const start=audioContext.currentTime+.02;
-    playback.sources=[createSceneSource(santa),createSceneSource(bell)];
+    playback.sources=[createSceneSource(bell)];
+    if(!sceneSpeechBlocked()&&!currentNeedAlert?.source){
+      const voice=createSceneSource(santa);
+      trackSceneForeground(voice,true);
+      playback.sources.push(voice);
+    }
     for(const source of playback.sources)source.start(start);
   }catch{}
 }
@@ -348,10 +375,12 @@ function loadCenterSanta(){
 }
 async function playCenterSanta(playback,sleigh){
   const track=await loadCenterSanta();
-  if(!track||christmasPlayback!==playback||playback.sleigh!==sleigh||audioContext.state!=='running')return;
+  if(!track||christmasPlayback!==playback||playback.sleigh!==sleigh||audioContext.state!=='running'||sceneSpeechBlocked())return;
   playback.centerSantaSource?.stop();
   const source=createSceneSource(track);
   source.playbackRate.value=1.5;
+  trackSceneForeground(source,true);
+  stopCurrentNeedAlert();
   playback.centerSantaSource=source;
   source.addEventListener('ended',()=>{
     if(playback.centerSantaSource===source)playback.centerSantaSource=null;
@@ -424,17 +453,30 @@ function syncSceneAudio(){
   syncChristmasAudio();
   syncSceneAmbience();
 }
-function needsCanSound(){
-  return soundEnabled&&!document.hidden&&save&&save.phase!=='egg'&&!$('#play-screen').hidden;
+function sceneSpeechBlocked(){
+  return (preparingSleep||save?.sleeping)&&!$('#play-screen').hidden;
 }
-function stopNeedAlertSource(alert){
-  const source=alert.source;
+function needsCanSound(){
+  return soundEnabled&&!document.hidden&&save&&save.phase!=='egg'&&!$('#play-screen').hidden&&!sceneSpeechBlocked();
+}
+function releaseNeedAlert(alert){
+  if(currentNeedAlert!==alert)return;
+  currentNeedAlert=null;
+  if(!alert.source)return;
   alert.source=null;
-  if(source)source.stop();
+  nextNeedAlertAt=performance.now()+NEED_ALERT_PAUSE;
+  if(sceneAudioGain){
+    sceneAudioGain.gain.cancelScheduledValues(audioContext.currentTime);
+    sceneAudioGain.gain.setValueAtTime(1,audioContext.currentTime);
+  }
+}
+function stopCurrentNeedAlert(){
+  if(!currentNeedAlert)return;
+  const source=currentNeedAlert.source;
+  releaseNeedAlert(currentNeedAlert);
+  source?.stop();
 }
 async function playNeedAlert(need,alert){
-  if(alert.loading)return;
-  alert.loading=true;
   try{
     const context=audioContext;
     if(!context||context.state!=='running')return;
@@ -451,41 +493,69 @@ async function playNeedAlert(need,alert){
       }));
     }
     const buffers=await needAlertBuffers.get(need);
-    if(needAlerts.get(need)!==alert||!needsCanSound()||needStatus(save.needs[need]).level!==2||context.state!=='running')return;
-    stopNeedAlertSource(alert);
+    if(currentNeedAlert!==alert||needAlerts.get(need)!==alert||!needsCanSound()||needStatus(save.needs[need]).level!==2||context.state!=='running'||sceneForeground.size)return;
     const source=context.createBufferSource();
     const gain=context.createGain();
     source.buffer=buffers[alert.nextClip];
     gain.gain.value=.23;
     source.connect(gain).connect(context.destination);
     source.onended=()=>{
-      if(alert.source===source)alert.source=null;
       source.disconnect();
       gain.disconnect();
+      if(alert.source!==source)return;
+      alert.nextClip=(alert.nextClip+1)%buffers.length;
+      releaseNeedAlert(alert);
+      scheduleNeedAlert();
     };
-    source.start();
     alert.source=source;
-    alert.nextClip=(alert.nextClip+1)%buffers.length;
-  }catch{}finally{
-    alert.loading=false;
+    if(sceneAudioGain)sceneAudioGain.gain.setValueAtTime(0,context.currentTime);
+    source.start();
+  }catch{
+    if(currentNeedAlert===alert){
+      releaseNeedAlert(alert);
+      nextNeedAlertAt=performance.now()+NEED_ALERT_PAUSE;
+    }
+  }finally{
+    if(currentNeedAlert===alert&&!alert.source)releaseNeedAlert(alert);
+    scheduleNeedAlert();
   }
 }
+function scheduleNeedAlert(){
+  if(needAlertTimer||currentNeedAlert||sceneForeground.size||!needAlerts.size||!needsCanSound()||audioContext?.state!=='running')return;
+  needAlertTimer=setTimeout(()=>{
+    needAlertTimer=null;
+    if(currentNeedAlert||sceneForeground.size||!needAlerts.size||!needsCanSound()||audioContext?.state!=='running')return;
+    const [need,alert]=needAlerts.entries().next().value;
+    needAlerts.delete(need);
+    needAlerts.set(need,alert);
+    currentNeedAlert=alert;
+    void playNeedAlert(need,alert);
+  },Math.max(0,nextNeedAlertAt-performance.now()));
+}
 function syncNeedAlerts(){
-  const enabled=needsCanSound()&&audioContext?.state==='running';
-  for(const need of Object.keys(NEED_ALERT_FILES)){
-    const yellow=enabled&&needStatus(save.needs[need]).level===2;
-    const alert=needAlerts.get(need);
-    if(yellow&&!alert){
-      const next={source:null,nextClip:0,loading:false};
-      next.timer=setInterval(()=>void playNeedAlert(need,next),NEED_ALERT_INTERVAL);
-      needAlerts.set(need,next);
-      void playNeedAlert(need,next);
-    }else if(!yellow&&alert){
-      clearInterval(alert.timer);
-      needAlerts.delete(need);
-      stopNeedAlertSource(alert);
+  if(sceneSpeechBlocked()){
+    for(const [source,voice] of sceneForeground){
+      if(voice){
+        sceneForeground.delete(source);
+        source.stop();
+      }
     }
   }
+  const enabled=needsCanSound()&&audioContext?.state==='running';
+  for(const need of Object.keys(NEED_ALERT_FILES)){
+    const alert=needAlerts.get(need);
+    if(enabled&&needStatus(save.needs[need]).level===2){
+      if(!alert)needAlerts.set(need,{source:null,nextClip:0});
+    }else if(alert){
+      needAlerts.delete(need);
+      if(currentNeedAlert===alert)stopCurrentNeedAlert();
+    }
+  }
+  if(!needAlerts.size){
+    clearTimeout(needAlertTimer);
+    needAlertTimer=null;
+  }
+  scheduleNeedAlert();
 }
 function write(){if(save)try{persist(save,localStorage,ACTIVE_SAVE_KEY);}catch(e){const el=$('#parent-message');if(el)el.textContent='Não foi possível salvar neste aparelho. Faça um backup.';}}
 function saveDraft(){if(!save||creatingNew)try{saveCreatorSession(localStorage,DRAFT_KEY,draft,step,creatingNew);}catch(e){console.warn('Não foi possível salvar criação',e);}}
@@ -1049,8 +1119,12 @@ function reactToUpperTap(x){
 async function doCare(type){
   if(type==='play'&&!canPlay(save)){explainLowEnergy();updatePlayAvailability();return;}
   if(type==='sleep'&&status==='sleeping'){await wakePet();return;}
+  const startingSleep=type==='sleep'&&['ready','ambient'].includes(status)&&save?.phase!=='egg';
+  if(startingSleep){preparingSleep=true;syncNeedAlerts();}
   try{await runCare(type);}catch(error){
     console.error('Cuidado interrompido:',error);cancelFlow();say('Vamos tentar outra vez.');
+  }finally{
+    if(startingSleep){preparingSleep=false;syncNeedAlerts();}
   }
 }
 async function runCare(type){
