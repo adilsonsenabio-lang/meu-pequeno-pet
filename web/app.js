@@ -110,7 +110,7 @@ const SCENE_AMBIENCE={
   desert:'cenario_deserto',
   forest:'cenario_floresta',
   snow:'cenario_neve_continuo',
-  space:'cenario_espaco',
+  space:'cenario_espaco_principal',
   sea:'cenario_fundo_do_mar',
   halloween:'cenario_halloween',
   ceu_arco_iris:'cenario_arco_iris',
@@ -189,11 +189,15 @@ function loadChristmasTracks(){
     .catch(error=>{christmasTracks=null;throw error;});
   return christmasTracks;
 }
-function createSceneSource({buffer,volume},loop=false){
+function createSceneSource({buffer,volume},loop=false,fadeOut){
   const source=audioContext.createBufferSource(),gain=audioContext.createGain();
   source.buffer=buffer;
   source.loop=loop;
   gain.gain.value=volume;
+  if(fadeOut){
+    gain.gain.setValueAtTime(volume,fadeOut.start);
+    gain.gain.linearRampToValueAtTime(0,fadeOut.end);
+  }
   source.connect(gain).connect(audioContext.destination);
   source.addEventListener('ended',()=>{source.disconnect();gain.disconnect();},{once:true});
   return source;
@@ -207,6 +211,7 @@ function stopSceneAmbience(){
   clearTimeout(playback.repeatTimer);
   playback.source?.stop();
   playback.snowSource?.stop();
+  playback.spaceSource?.stop();
 }
 async function playSnowAccent(playback){
   if(sceneAmbience!==playback)return;
@@ -222,6 +227,25 @@ async function playSnowAccent(playback){
     source.start();
   }catch{
     if(sceneAmbience===playback)playback.snowTimer=setTimeout(()=>void playSnowAccent(playback),20_000);
+  }
+}
+function playSpaceAccent(playback,track,start,offset=0){
+  if(sceneAmbience!==playback)return;
+  const end=start+4;
+  const source=createSceneSource(track,true,{start:end-1,end});
+  playback.spaceSource=source;
+  source.addEventListener('ended',()=>{
+    playback.spaceSource=null;
+    playSpaceAccent(playback,track,end+4,(offset+4)%track.buffer.duration);
+  },{once:true});
+  source.start(start,offset,4);
+}
+async function startSpaceAccent(playback){
+  try{
+    const track=await loadSceneTrack('cenario_espaco_secundario.mp3',.055,playback.controller.signal);
+    playSpaceAccent(playback,track,audioContext.currentTime);
+  }catch(error){
+    if(sceneAmbience===playback)console.warn('Som secundário do Espaço indisponível:',error);
   }
 }
 function playSceneAmbience(playback,track){
@@ -243,6 +267,7 @@ async function startSceneAmbience(playback,name){
     if(sceneAmbience!==playback)return;
     playSceneAmbience(playback,track);
     if(playback.key==='snow')playback.snowTimer=setTimeout(()=>void playSnowAccent(playback),12_000);
+    if(playback.key==='space')void startSpaceAccent(playback);
   }catch(error){
     if(sceneAmbience===playback){
       stopSceneAmbience();
