@@ -103,8 +103,16 @@ await hydrateNativeStorage(localStorage,[SAVE_KEY,`${SAVE_KEY}.test`,'meu-pequen
 let soundEnabled=localStorage.getItem('meu-pequeno-pet.sound')!=='off';
 const LUNAR_HOWL_INTERVAL=20_000;
 const LUNAR_PREVIEW_DELAY=1_000;
-const lunarHowlUrl=new URL('./assets/audio/uivo_lobo.mp3',import.meta.url);
+const audioFolder=new URL('./assets_audios/',import.meta.url);
+const lunarHowlUrl=new URL('uivo_lobo.mp3',audioFolder);
 let lunarHowlBuffer,lunarHowlSource,lunarHowlTimer,lunarPreviewTimer;
+const CHRISTMAS_TRACKS=[
+  ['papai_noel.mp3',.32],
+  ['treno_ceu.mp3',.20],
+  ['sino_natal.mp3',.12]
+];
+const CHRISTMAS_INTERVAL={preview:18_000,game:60_000};
+let christmasTracks,christmasPlayback;
 const NEED_ALERT_INTERVAL=10_000;
 const NEED_ALERT_FILES={
   food:['comer01'],
@@ -128,7 +136,12 @@ chosenToy=TOYS.includes(save?.playToy)?save.playToy:'ball';
 area=AREAS.includes(save?.area)?save.area:'garden';
 
 function resumeGameAudio(){
-  audioContext??=new (window.AudioContext||window.webkitAudioContext)();
+  if(!audioContext){
+    audioContext=new (window.AudioContext||window.webkitAudioContext)();
+    audioContext.addEventListener('statechange',()=>{
+      if(audioContext.state==='running')syncChristmasAudio();
+    });
+  }
   if(audioContext.state==='suspended')void audioContext.resume().catch(()=>{});
   return audioContext;
 }
@@ -142,11 +155,58 @@ function sound(notes=[520],{type='sine',spacing=.11,volume=.045,duration=.19}={}
     });
   }catch{}
 }
-function lunarAudioMode(){
+function sceneAudioMode(key){
   if(!soundEnabled||document.hidden)return null;
-  if(!$('#create-screen').hidden&&draft.scene==='clareira_lunar')return 'preview';
-  if(!$('#play-screen').hidden&&save&&save.phase!=='egg'&&scene==='clareira_lunar'&&area==='garden')return 'game';
+  if(!$('#create-screen').hidden&&draft.scene===key)return 'preview';
+  if(!$('#play-screen').hidden&&save&&scene===key&&area==='garden'&&(key==='christmas'||save.phase!=='egg'))return 'game';
   return null;
+}
+const lunarAudioMode=()=>sceneAudioMode('clareira_lunar');
+async function playChristmasMix(playback){
+  const context=audioContext;
+  try{
+    christmasTracks??=Promise.all(CHRISTMAS_TRACKS.map(async ([name,level])=>{
+      const response=await fetch(new URL(name,audioFolder));
+      if(!response.ok)throw new Error(name);
+      const buffer=await context.decodeAudioData(await response.arrayBuffer());
+      let peak=0;
+      for(let channel=0;channel<buffer.numberOfChannels;channel++){
+        for(const sample of buffer.getChannelData(channel))peak=Math.max(peak,Math.abs(sample));
+      }
+      return {buffer,volume:Math.min(2,level/Math.max(peak,.001))};
+    })).catch(error=>{christmasTracks=null;throw error;});
+    const tracks=await christmasTracks;
+    if(christmasPlayback!==playback||context.state!=='running')return;
+    for(const source of playback.sources)source.stop();
+    const start=context.currentTime+.02;
+    for(const {buffer,volume} of tracks){
+      const source=context.createBufferSource(),gain=context.createGain();
+      source.buffer=buffer;
+      gain.gain.value=volume;
+      source.connect(gain).connect(context.destination);
+      source.onended=()=>{
+        playback.sources.delete(source);
+        source.disconnect();
+        gain.disconnect();
+      };
+      playback.sources.add(source);
+      source.start(start);
+    }
+  }catch{}
+}
+function syncChristmasAudio(){
+  const mode=sceneAudioMode('christmas');
+  if(mode===christmasPlayback?.mode)return;
+  if(christmasPlayback){
+    clearInterval(christmasPlayback.timer);
+    for(const source of christmasPlayback.sources)source.stop();
+    christmasPlayback=null;
+  }
+  if(!mode||audioContext?.state!=='running')return;
+  const playback={mode,sources:new Set()};
+  christmasPlayback=playback;
+  void playChristmasMix(playback);
+  playback.timer=setInterval(()=>void playChristmasMix(playback),CHRISTMAS_INTERVAL[mode]);
 }
 function stopLunarHowl(){
   const source=lunarHowlSource;
@@ -183,7 +243,8 @@ async function playLunarHowl(mode){
     lunarHowlSource=source;
   }catch{}
 }
-function syncLunarAudio(){
+function syncSceneAudio(){
+  syncChristmasAudio();
   const mode=lunarAudioMode();
   if(mode!=='preview'){
     clearTimeout(lunarPreviewTimer);
@@ -213,7 +274,7 @@ async function playNeedAlert(need,alert){
     if(!context||context.state!=='running')return;
     if(!needAlertBuffers.has(need)){
       const files=NEED_ALERT_FILES[need].map(async name=>{
-        const url=new URL(`./assets/audio/needs/${name}.mp3`,import.meta.url);
+        const url=new URL(`${name}.mp3`,audioFolder);
         const response=await fetch(url);
         if(!response.ok)throw new Error(`Áudio indisponível: ${name}`);
         return context.decodeAudioData(await response.arrayBuffer());
@@ -445,7 +506,7 @@ function renderArea(){
   renderDecorations();
   $('#world').classList.toggle('lamp-off',area==='bedroom'&&!lampOn);
   $('#area-map').querySelectorAll('[data-area]').forEach(button=>button.setAttribute('aria-pressed',button.dataset.area===area));
-  syncLunarAudio();
+  syncSceneAudio();
 }
 async function changeArea(next){
   if(!AREAS.includes(next)||!['ready','ambient'].includes(status)||next===area)return;
@@ -518,7 +579,7 @@ function showScreen(){
   if(save&&!creatingNew){renderGrowth();if(save.sleeping){setStatus('sleeping');setMotion(playArt,'sleep-rest');startSleepTimer();}else setStatus('ready');}
   else {setStatus('creating');renderCreator();}
   if(save?.phase==='egg'&&!creatingNew)say(`Dê ${EGG_TAPS} toques no ovo para conhecer seu amigo!`);
-  syncLunarAudio();
+  syncSceneAudio();
   syncNeedAlerts();
 }
 function drawAlbum(){
@@ -1278,7 +1339,7 @@ function bind(){
     renderCreator();
     sound([480]);
     if(key==='scene'){
-      syncLunarAudio();
+      syncSceneAudio();
       if(lunarAudioMode()==='preview'){
         clearTimeout(lunarPreviewTimer);
         lunarPreviewTimer=setTimeout(()=>{
@@ -1381,7 +1442,7 @@ function bind(){
   $('#parents-open').addEventListener('click',()=>{if(!['ready','ambient','creating','sleeping'].includes(status))return;if(status==='ambient')cancelAmbient();returnStatus=status;setStatus('parents');$('#pet-name').value=save?.name??'';$('#parent-message').textContent=loaded.recovered?'Um salvamento inválido foi guardado para recuperação; um novo jogo pode ser criado.':'';$('#parents-dialog').showModal();});
   $('#parents-dialog').addEventListener('close',()=>setStatus(returnStatus));
   $('#pet-name').addEventListener('change',event=>{if(!save)return;save=renamePet(save,event.target.value);write();renderGrowth();$('#parent-message').textContent='Nome salvo.';});
-  $('#sound-button').addEventListener('click',()=>{soundEnabled=!soundEnabled;AU.setMute(!soundEnabled);const value=soundEnabled?'on':'off';localStorage.setItem('meu-pequeno-pet.sound',value);void mirrorNativeValue('meu-pequeno-pet.sound',value);updateSoundButton();if(soundEnabled)sound([520]);syncLunarAudio();syncNeedAlerts();});
+  $('#sound-button').addEventListener('click',()=>{soundEnabled=!soundEnabled;AU.setMute(!soundEnabled);const value=soundEnabled?'on':'off';localStorage.setItem('meu-pequeno-pet.sound',value);void mirrorNativeValue('meu-pequeno-pet.sound',value);updateSoundButton();if(soundEnabled)sound([520]);syncSceneAudio();syncNeedAlerts();});
   $('#backup-button').addEventListener('click',async()=>{
     if(!save){$('#parent-message').textContent='Crie o pet antes de exportar.';return;}
     const text=exportBackup(save);
@@ -1412,17 +1473,19 @@ function bind(){
   });
   $('#evolution-close').addEventListener('click',()=>{$('#evolution').hidden=true;setStatus('ready');setMotion(playArt,'idle');});
   window.addEventListener('pagehide',checkpoint);
-  document.addEventListener('visibilitychange',syncLunarAudio);
+  document.addEventListener('visibilitychange',syncSceneAudio);
   document.addEventListener('visibilitychange',syncNeedAlerts);
   const unlockSceneAudio=()=>{
-    if(!needsCanSound())return;
+    if(!needsCanSound()&&!sceneAudioMode('christmas'))return;
+    const syncAudio=()=>{syncSceneAudio();syncNeedAlerts();};
     try{
       const context=resumeGameAudio();
-      if(context.state==='running')syncNeedAlerts();
-      else void context.resume().then(syncNeedAlerts).catch(()=>{});
+      if(context.state==='running')syncAudio();
+      else void context.resume().then(syncAudio).catch(()=>{});
     }catch{}
   };
   document.addEventListener('pointerdown',unlockSceneAudio);
+  document.addEventListener('pointerup',unlockSceneAudio,{capture:true});
   document.addEventListener('keydown',unlockSceneAudio);
   document.addEventListener('freeze',checkpoint);
   document.addEventListener('visibilitychange',()=>{if(document.hidden)checkpoint();document.documentElement.classList.toggle('paused',document.hidden);document.querySelectorAll('svg').forEach(svg=>document.hidden?svg.pauseAnimations?.():svg.unpauseAnimations?.());if(document.hidden){Ambient.stop();AU.setMute(true);}else AU.setMute(!soundEnabled);if(document.hidden){stopSleepTimer();cancelFlow();if(tickTimer){clearInterval(tickTimer);tickTimer=null;}}else{lastTick=Date.now();if(save&&!creatingNew&&status!=='creating'&&status!=='loading')renderGrowth();startTicks();if(save?.sleeping){setStatus('sleeping');setMotion(playArt,'sleep-rest');startSleepTimer();}scheduleAmbient();if(save&&save.phase!=='egg'&&status==='ready'){const token=++flow;setStatus('ambient');setMotion(playArt,'greet');hold(1300,token).then(ok=>{if(ok){setMotion(playArt,'idle');setStatus('ready');}});}}});
