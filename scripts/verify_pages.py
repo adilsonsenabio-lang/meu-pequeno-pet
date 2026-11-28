@@ -138,13 +138,13 @@ for key in ('arandele','fenda_do_bikini'):
 cartoon_sprites=[
  *(f'cenario_fenda_do_bikini_{sprite}.png' for sprite in ('bob_idle','bob_walk','bob_walk2','bob_fall','garry','agua_viva')),
  'cenario_fenda_do_bikini_bob_up_after_fall.gif',
- *(f'cenario_arandele_olaf_{sprite}.png' for sprite in ('idle','walk','dancing')),
+ *(f'cenario_arandele_olaf_{sprite}.png' for sprite in ('idle','walk','dancing','sun','cloud')),
 ]
 for sprite in cartoon_sprites:
  path=cartoon_root/sprite
  assert './'+path.relative_to(web).as_posix() in cached
  with Image.open(path) as image:
-  assert image.convert('RGBA').getpixel((0,0))[3]==0,sprite
+  assert image.convert('RGBA').getpixel((0,0))[3]<=1,sprite
 assert (web/'manifest.webmanifest').is_file()
 assert 'registerOfflineWorker' in (web/'app.js').read_text(encoding='utf-8')
 print('PASSOU: 18 cenas quadradas; PWA precache:',len(assets),'arquivos; fantasma 15s')

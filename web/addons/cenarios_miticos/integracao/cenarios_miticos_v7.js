@@ -33,9 +33,9 @@ export function montar(container,options={}){
   const IMAGES={};
   const WORLDS={
  sky:{title:'Céu do Arco-Íris',actors:[
-  {id:'dragon',kind:'fly',x:.265,y:.245,size:172,frameMs:148,bob:3,seed:511,pxps:[53,85],roamX:[.19,.345],roamY:[.205,.29],pauseMs:[260,800],minLeg:65,zone:[.07,.035,.385,.345]},
-  {id:'pegasus',kind:'fly',fluid:true,flowTau:.39,x:.690,y:.245,size:165,frameMs:110,bob:2,seed:621,pxps:[49,64],roamX:[.625,.76],roamY:[.195,.29],pauseMs:[0,0],minLeg:75,zone:[.515,.04,.840,.345]},
-  {id:'fox',kind:'ground',x:.525,y:.643,size:156,frameMs:135,bob:0,seed:731,pxps:[61,99],roamX:[.365,.695],roamY:[.615,.665],pauseMs:[420,1450],minLeg:90,zone:[.285,.465,.780,.710]},
+  {id:'dragon',kind:'fly',x:.265,y:.145,size:172,frameMs:148,bob:3,seed:511,pxps:[53,85],roamX:[.12,.85],roamY:[.025,.185],pauseMs:[260,800],minLeg:260,zone:[.045,-.045,.925,.27]},
+  {id:'pegasus',kind:'fly',fluid:true,flowTau:.39,x:.690,y:.34,size:165,frameMs:110,bob:2,seed:621,pxps:[49,64],roamX:[.19,.88],roamY:[.31,.46],pauseMs:[0,0],minLeg:248,zone:[.115,.225,.955,.55]},
+  {id:'fox',kind:'ground',x:.525,y:.643,size:156,frameMs:135,bob:0,seed:731,pxps:[61,99],roamX:[.205,.815],roamY:[.58,.755],pauseMs:[420,1450],minLeg:178,zone:[.14,.465,.88,.76]},
  ],props:[]},
  sea:{title:'Cthulhu fofinho',actors:[
   // A faixa mais restrita abaixo garante todo o corpo do peixe NA ÁGUA.

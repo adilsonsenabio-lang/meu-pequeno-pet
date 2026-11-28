@@ -153,7 +153,7 @@ const SCENE_VOICE_LINES={
   ]
 };
 const GAME_SCENE_LINE_PAUSE=10_000;
-const OLAF_PREVIEW_LINE_PAUSE=3_000;
+const PREVIEW_SCENE_LINE_PAUSE=8_000;
 let sceneAmbience;
 const CHRISTMAS_TRACKS=[
   ['papai_noel.mp3',.32],
@@ -284,7 +284,7 @@ async function playSceneAccent(playback,accent){
     const name=accent.lines?.[accent.lineIndex]??accent.name;
     accent.track??=await loadSceneTrack(name,accent.level,playback.controller.signal);
     if(sceneAmbience!==playback)return;
-    if(!soundAllowed(accent.category)||sceneForeground.size||currentNeedAlert?.source||(isCharacter&&sceneSpeechBlocked())){
+    if(!soundAllowed(accent.category)||sceneForeground.size||currentNeedAlert||(isCharacter&&sceneSpeechBlocked())){
       accent.timer=setTimeout(()=>void playSceneAccent(playback,accent),500);
       return;
     }
@@ -380,7 +380,7 @@ function syncSceneAmbience(){
       lines,
       lineIndex:0,category:'characters',level:.24,
       delay:preview?0:6_000,
-      repeatDelay:preview&&key==='arandele'?OLAF_PREVIEW_LINE_PAUSE:GAME_SCENE_LINE_PAUSE
+      repeatDelay:preview?PREVIEW_SCENE_LINE_PAUSE:GAME_SCENE_LINE_PAUSE
     });
   }
   const playback={key,preview,accents,controller:new AbortController()};
