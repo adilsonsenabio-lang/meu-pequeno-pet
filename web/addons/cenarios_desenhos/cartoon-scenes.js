@@ -225,12 +225,16 @@ const olafSun = [
   ...olafWeatherRow([0,155,313,472,628,786,942,1101,1259,1426,1619], 520, 927, 902)
 ];
 const olafCloud = [
-  ...olafWeatherRow([0,172,350,531,707,882,1059,1233,1408,1580,1774], 39, 407, 393).reverse(),
+  ...olafWeatherRow([0,172,350,531,707,882,1059,1233,1408,1580,1774], 39, 407, 393),
   ...olafWeatherRow([0,179,365,523,711,882,1061,1240,1412,1587,1774], 482, 849, 841)
 ];
 const OLAF_SCALE = 1.1;
 const OLAF_WEATHER_FRAME_MS = 155;
-const OLAF_WEATHER_DURATION = (olafSun.length + olafCloud.length) * OLAF_WEATHER_FRAME_MS;
+const OLAF_WEATHER_PAUSE = 25_000;
+const olafWeather = {
+  sun: [...olafSun, ...olafSun.slice(0, -1).reverse()],
+  cloud: olafCloud
+};
 
 export function mountArandele(stage) {
   const canvas = document.createElement('canvas');
@@ -242,14 +246,13 @@ export function mountArandele(stage) {
   const ctx = canvas.getContext('2d');
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   let frame, lastTick, lastPaint = -Infinity, age = 0, angle = 0.58, speech;
-  let strollAge = 0, nextWeather = 11_000, weatherStart;
+  let strollAge = 0, nextWeatherAt = 11_000, nextWeather = 'sun', weather;
 
   function olafPose() {
     if (motion.matches) return [images.idle, olafIdle[0], .084, 1];
-    if (weatherStart !== undefined) {
-      const beat = Math.floor((age - weatherStart) / OLAF_WEATHER_FRAME_MS);
-      if (beat < olafSun.length) return [images.sun, olafSun[beat], .163, 1];
-      return [images.cloud, olafCloud[beat - olafSun.length], .163, 1];
+    if (weather) {
+      const beat = Math.floor((age - weather.start) / OLAF_WEATHER_FRAME_MS);
+      return [images[weather.name], olafWeather[weather.name][beat], .163, 1];
     }
     if (speech) {
       const beat = Math.floor((age - speech.start) / 135) % 14;
@@ -288,16 +291,18 @@ export function mountArandele(stage) {
     const delta = Math.min(80, now - (lastTick ?? now));
     lastTick = now;
     age += delta;
-    if (weatherStart !== undefined && age - weatherStart >= OLAF_WEATHER_DURATION) {
-      weatherStart = undefined;
-      nextWeather = age + 25_000;
+    if (weather && age - weather.start >= olafWeather[weather.name].length * OLAF_WEATHER_FRAME_MS) {
+      weather = undefined;
+      nextWeatherAt = age + OLAF_WEATHER_PAUSE;
       strollAge = 0;
     }
     // Let a line finish before starting the weather sequence. If another
     // starts during the sequence, finish the recovery before dancing again.
-    if (!speech && age >= nextWeather && weatherStart === undefined &&
-        images.sun.naturalWidth && images.cloud.naturalWidth) weatherStart = age;
-    if (!speech && weatherStart === undefined) {
+    if (!speech && !weather && age >= nextWeatherAt && images[nextWeather].naturalWidth) {
+      weather = {name: nextWeather, start: age};
+      nextWeather = nextWeather === 'sun' ? 'cloud' : 'sun';
+    }
+    if (!speech && !weather) {
       strollAge += delta;
       if (strollAge % 8100 >= 2100) angle = followSand(angle, delta / 1000, 10, 82, 30);
     }
