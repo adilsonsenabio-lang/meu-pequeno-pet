@@ -1,0 +1,10 @@
+Como utilizaria no cenário
+Comportamento	Frequência sugerida
+Caminhar pelo cenário	50%
+Ficar parado	25%
+Brincar e gesticular	15%
+Passos mais animados	10%
+
+Ele caminharia pela areia, pararia ocasionalmente, faria uma expressão divertida e continuaria andando em direção aleatória, sempre respeitando os limites do cenário.
+
+Não utilizaria inicialmente as animações de combate, deformação exagerada ou ataques giratórios. Quero preservar o clima tranquilo, divertido e infantil do nosso jogo.

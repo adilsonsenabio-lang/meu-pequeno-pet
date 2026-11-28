@@ -128,6 +128,18 @@ for key,relative_path in mythic_media.items():
   else:
    assert image.size==((1536,192) if key=='shell' else (1792,896)),(key,image.size)
    assert image.mode=='RGBA',key
+cartoon_root=web/'addons/cenarios_desenhos'
+assert './addons/cenarios_desenhos/cartoon-scenes.js' in cached
+for key in ('arandele','fenda_do_bikini'):
+ path=cartoon_root/f'cenario_{key}.png'
+ assert './'+path.relative_to(web).as_posix() in cached
+ with Image.open(path) as image:
+  assert image.width==image.height,(key,image.size)
+for sprite in ('bob_idle','bob_walk','bob_walk2','garry','agua_viva'):
+ path=cartoon_root/f'cenario_fenda_do_bikini_{sprite}.png'
+ assert './'+path.relative_to(web).as_posix() in cached
+ with Image.open(path) as image:
+  assert image.convert('RGBA').getpixel((0,0))[3]==0,sprite
 assert (web/'manifest.webmanifest').is_file()
 assert 'registerOfflineWorker' in (web/'app.js').read_text(encoding='utf-8')
-print('PASSOU: 16 cenas quadradas; PWA precache:',len(assets),'arquivos; fantasma 15s')
+print('PASSOU: 18 cenas quadradas; PWA precache:',len(assets),'arquivos; fantasma 15s')

@@ -1,5 +1,5 @@
 import {ALBUM_LABELS,albumSprite} from './album-v73.js?v=73';
-import {sceneMarkup,renderScene,unmountMythicScene,updateSceneMarkers,prioritySceneMarkers,SCENE_KEYS,SCENE_LABELS} from './scene-v63-player.js?v=84.29';
+import {sceneMarkup,renderScene,unmountScene,startBikiniSpeech,updateSceneMarkers,prioritySceneMarkers,SCENE_KEYS,SCENE_LABELS} from './scene-v63-player.js?v=84.29';
 import {sceneTallExtension} from './scene-details-v60.js';
 import {CUSTOM_PARTS,PART_PALETTE,MIN_PART_SCALE,MAX_PART_SCALE,MIN_MOUTH_OFFSET,MAX_MOUTH_OFFSET,mouthOffset,handPosition,partPosition,PART_POSITION_LIMITS,CARE,canPlay,MIN_ENERGY_TO_PLAY,OPTIONS,DEFAULT_APPEARANCE,ROOM_OPTIONS,MOMENTS,TOYS,AREAS,ACTIVITIES,EVENTS,nextDiscovery,noteMoment,toyAvailable,activityAvailable,createSave,hatch,advance,applyCare,beginSleep,restSleep,endSleep,noteInteraction,renamePet,lowestNeed,maybeEvolve,needStatus} from './core.js?v=74';
 import {SAVE_KEY,loadSave,persist,exportBackup,importBackup,resetSave} from './storage.js?v=59';
@@ -138,13 +138,13 @@ const SCENE_ACCENTS={
   ]
 };
 const SCENE_VOICE_LINES={
-  sea:[
+  fenda_do_bikini:[
     'cenario_fundo_do_mar_bob_sponja.mp3',
     'cenario_fundo_do_mar_bob_sponja_hamburguer.mp3',
     'cenario_fundo_do_mar_bob_sponja_bobo.mp3',
     'cenario_fundo_do_mar_bob_sponja_lula_molusco.mp3'
   ],
-  snow:[
+  arandele:[
     'cenario_neve_olaf_brincando.mp3',
     'cenario_neve_olaf_brincando1.mp3',
     'cenario_neve_olaf_brincando2.mp3',
@@ -300,6 +300,10 @@ async function playSceneAccent(playback,accent){
     },{once:true});
     trackSceneForeground(source,accent.category);
     source.start();
+    if(playback.key==='fenda_do_bikini'&&isCharacter){
+      const stopGesture=startBikiniSpeech($(playback.preview?'#create-scene-art':'#scene-art'));
+      if(stopGesture)source.addEventListener('ended',stopGesture,{once:true});
+    }
   }catch{
     if(sceneAmbience===playback)accent.timer=setTimeout(()=>void playSceneAccent(playback,accent),20_000);
   }
@@ -346,9 +350,7 @@ async function startSceneAmbience(playback,name){
     const track=await loadSceneTrack(`${name}.mp3`,.15,playback.controller.signal);
     if(sceneAmbience!==playback)return;
     playSceneAmbience(playback,track);
-    for(const accent of playback.accents){
-      accent.timer=setTimeout(()=>void playSceneAccent(playback,accent),accent.delay);
-    }
+    scheduleSceneAccents(playback);
     if(playback.key==='space')void startSpaceAccent(playback);
   }catch(error){
     if(sceneAmbience===playback){
@@ -357,14 +359,19 @@ async function startSceneAmbience(playback,name){
     }
   }
 }
+function scheduleSceneAccents(playback){
+  for(const accent of playback.accents){
+    accent.timer=setTimeout(()=>void playSceneAccent(playback,accent),accent.delay);
+  }
+}
 function syncSceneAmbience(){
   const key=activeAudioScene();
   const preview=!$('#create-screen').hidden;
   if(sceneAmbience?.key===key&&sceneAmbience?.preview===preview)return;
   stopSceneAmbience();
   const name=SCENE_AMBIENCE[key];
-  if(!name||audioContext?.state!=='running')return;
   const lines=SCENE_VOICE_LINES[key];
+  if((!name&&!lines)||audioContext?.state!=='running')return;
   const configured=(SCENE_ACCENTS[key]||[]).map(([name,level,delay,repeatDelay,category='characters'])=>({name,level,delay,repeatDelay,category}));
   const previewCharacter=lines?null:configured.find(accent=>accent.category==='characters');
   const accents=preview?configured.filter(accent=>accent.category!=='characters'||accent===previewCharacter):configured;
@@ -373,12 +380,13 @@ function syncSceneAmbience(){
       lines:preview?lines.slice(0,1):lines,
       lineIndex:0,category:'characters',level:.24,
       delay:preview?0:6_000,
-      repeatDelay:preview&&key==='snow'?3_000:GAME_SCENE_LINE_PAUSE
+      repeatDelay:preview&&key==='arandele'?3_000:GAME_SCENE_LINE_PAUSE
     });
   }
   const playback={key,preview,accents,controller:new AbortController()};
   sceneAmbience=playback;
-  void startSceneAmbience(playback,name);
+  if(name)void startSceneAmbience(playback,name);
+  else scheduleSceneAccents(playback);
 }
 async function playChristmasMix(playback){
   try{
@@ -843,7 +851,7 @@ function showScreen(){
   $('#extras-shade').hidden=true;for(const id of ['room-picker','album','discovery','activity-panel','wardrobe-panel'])$(`#${id}`).hidden=true;
   $('#create-screen').hidden=!!save&&!creatingNew;
   $('#play-screen').hidden=!save||creatingNew;
-  unmountMythicScene($('#create-screen').hidden?$('#create-scene-art'):$('#scene-art'));
+  unmountScene($('#create-screen').hidden?$('#create-scene-art'):$('#scene-art'));
   $('#creation-cancel').hidden=!(save&&creatingNew);
   if(save&&!creatingNew){renderGrowth();if(save.sleeping){setStatus('sleeping');setMotion(playArt,'sleep-rest');startSleepTimer();}else setStatus('ready');}
   else {setStatus('creating');renderCreator();}
@@ -1752,7 +1760,7 @@ function bind(){
   document.addEventListener('visibilitychange',syncNeedAlerts);
   const unlockSceneAudio=()=>{
     const currentScene=activeAudioScene();
-    if(!needsCanSound()&&currentScene!=='christmas'&&!SCENE_AMBIENCE[currentScene])return;
+    if(!needsCanSound()&&currentScene!=='christmas'&&!SCENE_AMBIENCE[currentScene]&&!SCENE_VOICE_LINES[currentScene])return;
     const syncAudio=()=>{syncSceneAudio();syncNeedAlerts();};
     try{
       const context=resumeGameAudio();

@@ -34,7 +34,7 @@ export const OPTIONS={
   accessory:['star','crown','halo','bow','party','glasses','flower','bell','sunglasses','none']
 };
 export const DEFAULT_APPEARANCE={color:'pink',outfit:'none',shoes:'none',tail:'dragon',wings:'none',body:'round',hands:'shell',feet:'claws',ears:'horns',head:'round',markings:'plain',hair:'none',eyes:'big',snout:'dragon',mouth:'smile',accessory:'star'};
-export const SCENES=['garden','sunset','night','beach','desert','clouds','forest','snow','space','sea','halloween','christmas','ceu_arco_iris','cthulhu_fofinho','clareira_lunar'];
+export const SCENES=['garden','sunset','night','beach','desert','clouds','forest','snow','space','sea','halloween','christmas','ceu_arco_iris','cthulhu_fofinho','clareira_lunar','fenda_do_bikini','arandele'];
 export const ROOM_OPTIONS={bed:['cloud','leaf','moon'],rug:['sun','flower','rainbow'],toy:['ball','bubbles','kite','drum','car','rattle','book','plush','surprise','instrument'],wall:['lavender','mint','peach']};
 export const MOMENTS=['birth','food','water','bath','play','young','adult','bedroom','kitchen','butterfly','ball','bubbles','decor','kite','drum','car','rattle','book','plush','surprise','instrument','flowers','stars','sequence','dance','paint','tidy','race','faces','rain','rainbow','night','snow','gift','party','costume'];
 export const DISCOVERIES=['leafBed','flowerRug','youngPlay','adultGreeting','youngToys','adultToys','newRoom'];
