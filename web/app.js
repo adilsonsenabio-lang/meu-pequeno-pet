@@ -1,5 +1,5 @@
 import {ALBUM_LABELS,albumSprite} from './album-v73.js?v=73';
-import {sceneMarkup,renderScene,unmountScene,startBikiniSpeech,updateSceneMarkers,prioritySceneMarkers,SCENE_KEYS,SCENE_LABELS} from './scene-v63-player.js?v=84.29';
+import {sceneMarkup,renderScene,unmountScene,startSceneSpeech,updateSceneMarkers,prioritySceneMarkers,SCENE_KEYS,SCENE_LABELS} from './scene-v63-player.js?v=84.29';
 import {sceneTallExtension} from './scene-details-v60.js';
 import {CUSTOM_PARTS,PART_PALETTE,MIN_PART_SCALE,MAX_PART_SCALE,MIN_MOUTH_OFFSET,MAX_MOUTH_OFFSET,mouthOffset,handPosition,partPosition,PART_POSITION_LIMITS,CARE,canPlay,MIN_ENERGY_TO_PLAY,OPTIONS,DEFAULT_APPEARANCE,ROOM_OPTIONS,MOMENTS,TOYS,AREAS,ACTIVITIES,EVENTS,nextDiscovery,noteMoment,toyAvailable,activityAvailable,createSave,hatch,advance,applyCare,beginSleep,restSleep,endSleep,noteInteraction,renamePet,lowestNeed,maybeEvolve,needStatus} from './core.js?v=74';
 import {SAVE_KEY,loadSave,persist,exportBackup,importBackup,resetSave} from './storage.js?v=59';
@@ -133,8 +133,7 @@ const SCENE_ACCENTS={
   beach:[['cenario_praia_gaivota.mp3',.30,0,12_000]],
   forest:[['cenario_floresta_esquilo.mp3',.16,9_000]],
   snow:[
-    ['cenario_neve_asvezes.mp3',.17,12_000,null,'effects'],
-    ['cenario_neve_boneco_de_neve.mp3',.14,5_000]
+    ['cenario_neve_asvezes.mp3',.17,12_000,null,'effects']
   ]
 };
 const SCENE_VOICE_LINES={
@@ -300,8 +299,8 @@ async function playSceneAccent(playback,accent){
     },{once:true});
     trackSceneForeground(source,accent.category);
     source.start();
-    if(playback.key==='fenda_do_bikini'&&isCharacter){
-      const stopGesture=startBikiniSpeech($(playback.preview?'#create-scene-art':'#scene-art'));
+    if(isCharacter){
+      const stopGesture=startSceneSpeech($(playback.preview?'#create-scene-art':'#scene-art'),playback.key);
       if(stopGesture)source.addEventListener('ended',stopGesture,{once:true});
     }
   }catch{

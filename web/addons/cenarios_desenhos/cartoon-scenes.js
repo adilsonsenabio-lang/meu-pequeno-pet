@@ -58,6 +58,17 @@ function sandPosition(angle, radiusX, radiusY) {
   };
 }
 
+function drawPose(ctx, image, rect, x, floor, scale, direction = 1) {
+  if (!image.complete || !image.naturalWidth) return;
+  const [sx, sy, sw, sh, pivotX = sw / 2] = rect;
+  const width = Math.round(sw * scale), height = Math.round(sh * scale);
+  ctx.save();
+  ctx.translate(Math.round(x), Math.round(floor));
+  ctx.scale(direction, 1);
+  ctx.drawImage(image, sx, sy, sw, sh, -Math.round(pivotX * scale), -height, width, height);
+  ctx.restore();
+}
+
 export function mountBikiniBottom(stage) {
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = 320;
@@ -98,18 +109,6 @@ export function mountBikiniBottom(stage) {
     return action === stumble || action === getUp;
   }
 
-  function drawPose(name, rect, x, floor, scale, direction = 1) {
-    const image = images[name];
-    if (!ctx || !image.complete || !image.naturalWidth) return;
-    const [sx, sy, sw, sh, pivotX = sw / 2] = rect;
-    const width = Math.round(sw * scale), height = Math.round(sh * scale);
-    ctx.save();
-    ctx.translate(Math.round(x), Math.round(floor));
-    ctx.scale(direction, 1);
-    ctx.drawImage(image, sx, sy, sw, sh, -Math.round(pivotX * scale), -height, width, height);
-    ctx.restore();
-  }
-
   function paint() {
     if (!ctx) return;
     const time = elapsed;
@@ -117,9 +116,9 @@ export function mountBikiniBottom(stage) {
     ctx.imageSmoothingEnabled = false;
     const jellyPose = jelly[Math.floor(time / 300) % jelly.length];
     const drift = time / 19_000;
-    drawPose('agua_viva', jellyPose, 159 - 123 * Math.cos(drift),
+    drawPose(ctx, images.agua_viva, jellyPose, 159 - 123 * Math.cos(drift),
       76 + 18 * Math.sin(drift) + 3 * Math.sin(time / 2900), .105);
-    drawPose('agua_viva', jelly[(Math.floor(time / 340) + 4) % jelly.length],
+    drawPose(ctx, images.agua_viva, jelly[(Math.floor(time / 340) + 4) % jelly.length],
       159 + 121 * Math.cos(time / 23_000), 52 + 13 * Math.sin(time / 23_000) + 2 * Math.sin(time / 3500), .082);
 
     const bob = sandPosition(bobAngle, 105, 45);
@@ -139,7 +138,7 @@ export function mountBikiniBottom(stage) {
       ctx.beginPath();
       ctx.ellipse(Math.round(actor.x), Math.round(actor.floor), actor.shadow, 2, 0, 0, 2 * Math.PI);
       ctx.fill();
-      drawPose(actor.sheet, actor.pose, actor.x, actor.floor, actor.scale, actor.direction);
+      drawPose(ctx, images[actor.sheet], actor.pose, actor.x, actor.floor, actor.scale, actor.direction);
     }
   }
 
@@ -181,6 +180,91 @@ export function mountBikiniBottom(stage) {
   return {
     speak() {
       const line = {start: elapsed};
+      speech = line;
+      paint();
+      return () => { if (speech === line) speech = undefined; };
+    },
+    destruir() {
+      motion.removeEventListener('change', syncMotion);
+      cancelAnimationFrame(frame);
+      for (const image of Object.values(images)) image.onload = null;
+      canvas.remove();
+    }
+  };
+}
+
+// The supplied sheets have different cell sizes. Keep a common ground line
+// within each strip so Olaf's steps and dance keep their original lift.
+const olafIdle = [[23,110,240,508],[295,110,233,508],[1101,110,235,508],
+  [1375,110,235,508],[1647,110,236,508],[1921,110,236,508]];
+const olafWalk = [[40,138,231,449],[310,138,233,449],[582,138,233,449],[853,138,234,449],
+  [1126,138,233,449],[1396,138,233,449],[1668,138,231,449],[1933,138,232,449]];
+const olafDance = [[16,125,149,282],[182,125,147,282],[336,125,153,282],[497,125,161,282],
+  [667,125,159,282],[827,125,157,282],[992,125,146,282],[1155,125,145,282]];
+
+export function mountArandele(stage) {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 320;
+  canvas.className = 'v64-scene-frame';
+  canvas.style.cssText = 'position:absolute;inset:0';
+  canvas.setAttribute('aria-hidden', 'true');
+  stage.append(canvas);
+  const ctx = canvas.getContext('2d');
+  const motion = matchMedia('(prefers-reduced-motion: reduce)');
+  let frame, lastTick, lastPaint = -Infinity, age = 0, angle = 0.58, speech;
+
+  function paint() {
+    if (!ctx) return;
+    const x = 158 + 82 * Math.cos(angle), floor = 219 + 30 * Math.sin(angle);
+    const step = age % 8100;
+    const walking = !motion.matches && !speech && step >= 2100;
+    const dancing = !motion.matches && speech;
+    const danceBeat = dancing ? Math.floor((age - speech.start) / 135) % 14 : 0;
+    const pose = dancing ? olafDance[Math.min(danceBeat,14-danceBeat)]
+      : walking ? olafWalk[Math.floor((step - 2100) / 150) % olafWalk.length]
+      : olafIdle[Math.floor(step / 350) % olafIdle.length];
+    const image = dancing ? images.dancing : walking ? images.walk : images.idle;
+    ctx.clearRect(0, 0, 320, 320);
+    if (!image.complete || !image.naturalWidth) return;
+    ctx.imageSmoothingEnabled = false;
+    ctx.fillStyle = 'rgba(48, 71, 27, .24)';
+    ctx.beginPath();
+    ctx.ellipse(Math.round(x), Math.round(floor), 9, 2, 0, 0, 2 * Math.PI);
+    ctx.fill();
+    drawPose(ctx, image, pose, x, floor, dancing ? .15 : walking ? .094 : .084, walking && Math.sin(angle) > 0 ? -1 : 1);
+  }
+
+  const images = Object.fromEntries(['idle', 'walk', 'dancing'].map(name => {
+    const image = new Image();
+    image.onload = paint;
+    image.src = asset(`cenario_arandele_olaf_${name}.png`);
+    return [name, image];
+  }));
+
+  function tick(now) {
+    const delta = Math.min(80, now - (lastTick ?? now));
+    lastTick = now;
+    age += delta;
+    if (!speech && age % 8100 >= 2100) angle = followSand(angle, delta / 1000, 10, 82, 30);
+    if (now - lastPaint >= 32) {
+      paint();
+      lastPaint = now;
+    }
+    frame = requestAnimationFrame(tick);
+  }
+
+  function syncMotion() {
+    cancelAnimationFrame(frame);
+    lastTick = undefined;
+    if (motion.matches) paint();
+    else frame = requestAnimationFrame(tick);
+  }
+
+  motion.addEventListener('change', syncMotion);
+  syncMotion();
+  return {
+    speak() {
+      const line = {start: age};
       speech = line;
       paint();
       return () => { if (speech === line) speech = undefined; };

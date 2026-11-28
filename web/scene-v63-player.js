@@ -2,7 +2,7 @@
 import {V63_SCENE_MEDIA} from './scene-assets-v63.js?v=84.5';
 import {V63_SCENE_META} from './scene-v63-data.js?v=84.5';
 import {montar} from './addons/cenarios_miticos/integracao/cenarios_miticos_v7.js';
-import {CARTOON_SCENES,mountBikiniBottom} from './addons/cenarios_desenhos/cartoon-scenes.js';
+import {CARTOON_SCENES,mountBikiniBottom,mountArandele} from './addons/cenarios_desenhos/cartoon-scenes.js';
 const MYTHIC_SCENES={
  ceu_arco_iris:{label:'Céu do Arco-Íris',background:'ceu/cenario.webp',fill:'#859bcc'},
  cthulhu_fofinho:{label:'Cthulhu Fofinho',background:'cthulhu/cenario.webp',fill:'#335a73'},
@@ -10,7 +10,7 @@ const MYTHIC_SCENES={
 };
 const mythicRoot=new URL('./addons/cenarios_miticos/',import.meta.url);
 const animatedStages=new WeakMap();
-const BIKINI_SCENE='fenda_do_bikini';
+const cartoonPlayers={fenda_do_bikini:mountBikiniBottom,arandele:mountArandele};
 export const SCENE_KEYS=[...Object.keys(V63_SCENE_MEDIA).filter(key=>!['bedroom','kitchen'].includes(key)),...Object.keys(MYTHIC_SCENES),...Object.keys(CARTOON_SCENES)];
 export const SCENE_LABELS={
  ...Object.fromEntries(Object.entries(V63_SCENE_META).map(([key,scene])=>[key,scene.title])),
@@ -89,9 +89,9 @@ export function sceneMarkup(scene,animated=false){
  return `<div class="v64-scene-stage" data-v64-scene="${scene}" style="--v64-sky:${SKY[scene]}"><img class="v64-scene-frame" src="${picture}" draggable="false" alt="" decoding="async" loading="${animated==='preview'?'lazy':'eager'}">${adjustedOverlay}${lanternHalo}${lanternOverlay}${nodes}</div>`;
 }
 export function sceneFill(scene){return MYTHIC_SCENES[scene]?.fill??CARTOON_SCENES[scene]?.fill??SKY[normalize(scene)];}
-export function startBikiniSpeech(host){
+export function startSceneSpeech(host,scene){
  const mounted=animatedStages.get(host);
- return mounted?.scene===BIKINI_SCENE?mounted.player.speak():undefined;
+ return mounted?.scene===scene?mounted.player.speak?.():undefined;
 }
 export function unmountScene(host){
  animatedStages.get(host)?.player.destruir();
@@ -102,8 +102,8 @@ export function renderScene(host,scene,mode){
  unmountScene(host);
  host.style.setProperty('--v64-scene-sky',sceneFill(scene));
  host.innerHTML=sceneMarkup(scene,mode);
- if(scene===BIKINI_SCENE){
-  animatedStages.set(host,{scene,player:mountBikiniBottom(host.firstElementChild)});
+ if(Object.hasOwn(cartoonPlayers,scene)){
+  animatedStages.set(host,{scene,player:cartoonPlayers[scene](host.firstElementChild)});
   return;
  }
  if(!Object.hasOwn(MYTHIC_SCENES,scene))return;
