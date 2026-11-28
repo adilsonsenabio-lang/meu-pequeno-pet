@@ -153,6 +153,7 @@ const SCENE_VOICE_LINES={
   ]
 };
 const GAME_SCENE_LINE_PAUSE=10_000;
+const OLAF_PREVIEW_LINE_PAUSE=3_000;
 let sceneAmbience;
 const CHRISTMAS_TRACKS=[
   ['papai_noel.mp3',.32],
@@ -376,10 +377,10 @@ function syncSceneAmbience(){
   const accents=preview?configured.filter(accent=>accent.category!=='characters'||accent===previewCharacter):configured;
   if(lines){
     accents.push({
-      lines:preview?lines.slice(0,1):lines,
+      lines,
       lineIndex:0,category:'characters',level:.24,
       delay:preview?0:6_000,
-      repeatDelay:preview&&key==='arandele'?3_000:GAME_SCENE_LINE_PAUSE
+      repeatDelay:preview&&key==='arandele'?OLAF_PREVIEW_LINE_PAUSE:GAME_SCENE_LINE_PAUSE
     });
   }
   const playback={key,preview,accents,controller:new AbortController()};
